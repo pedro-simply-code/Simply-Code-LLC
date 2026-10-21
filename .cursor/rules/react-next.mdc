@@ -1,0 +1,20 @@
+---
+description: Next.js App Router and React patterns for this repo
+globs: "src/**/*.{tsx,ts}"
+alwaysApply: false
+---
+
+# App Router
+
+- Server Components by default; `"use client"` only when needed (forms, hooks, theme).
+- API routes under `src/app/api/`.
+- Protected UI: `/dashboard` (+ `/dashboard/admin` for `role === admin`); middleware in `src/middleware.ts`.
+
+# Hydration
+
+- `next-themes`: no theme-dependent markup until client mount (`theme-toggle.tsx` pattern).
+- `useSearchParams()`: wrap consumer in `<Suspense>` on the page (see login page).
+
+# UI
+
+Add shadcn components via CLI; keep primitives in `src/components/ui/`.

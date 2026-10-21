@@ -1,0 +1,19 @@
+---
+description: SimplyCode boiler stack, paths, and agent workflow
+alwaysApply: true
+---
+
+# Stack
+
+Next.js App Router, React 19, Auth.js v5 (JWT), Drizzle + Neon (`DATABASE_URL` pooled), Zod env in `src/env.js`, shadcn + Tailwind 4, TanStack Query, pnpm, Node 24.
+
+# Editing
+
+- Minimize diff; match existing `~/` imports and file layout.
+- DB: `src/server/db/schema.ts` + `env.DB_TABLE_PREFIX` for all table names.
+- Auth: `src/lib/auth.config.ts` / `src/lib/auth.ts`; credentials use argon2 in `src/server/auth/password.ts`.
+- Prefer `pnpm check` before finishing non-trivial TS changes.
+
+# New apps from boiler
+
+Set unique `DB_TABLE_PREFIX`, run `pnpm db:push`, never commit `.env`.

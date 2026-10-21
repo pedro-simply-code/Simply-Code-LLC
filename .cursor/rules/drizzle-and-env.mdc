@@ -1,0 +1,16 @@
+---
+description: Drizzle schema, migrations, and environment variables
+globs: "{src/server/db/**,drizzle/**,drizzle.config.ts,src/env.js,.env.example}"
+alwaysApply: false
+---
+
+# DB_TABLE_PREFIX
+
+Runtime table names are `${DB_TABLE_PREFIX}_*`. `drizzle.config.ts` uses `tablesFilter: [`${prefix}_*`]`.
+
+- **New app / prefix change:** use `pnpm db:push` unless generating fresh migrations with `.env` already set.
+- Committed SQL in `drizzle/*.sql` may use an old sample prefix; do not assume it matches the current app.
+
+# Env (build-time)
+
+`next.config.ts` imports `src/env.js`. Vercel must define `DATABASE_URL`, `DB_TABLE_PREFIX`, `AUTH_SECRET` (and `AUTH_URL` for production auth). Neon integration vars like `cc_POSTGRES_URL` are not read unless copied into `DATABASE_URL`.
