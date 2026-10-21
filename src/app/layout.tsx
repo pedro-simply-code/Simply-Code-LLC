@@ -4,11 +4,11 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { Providers } from "~/providers/providers";
 import "~/styles/globals.css";
-import { env } from "~/env";
 
 export const metadata: Metadata = {
-  title: env.NEXT_PUBLIC_APP_NAME,
-  description: "Next.js + Auth.js + Drizzle boilerplate",
+  title: "Simply Code — Web Development Agency",
+  description:
+    "Web development agency specializing in UX design, custom Next.js platforms and WordPress solutions.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

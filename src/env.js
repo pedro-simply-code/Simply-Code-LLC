@@ -16,7 +16,7 @@ export const env = createEnv({
     UPLOADTHING_TOKEN: z.string().min(1).optional(),
   },
   client: {
-    NEXT_PUBLIC_APP_NAME: z.string().default("SimplyCode"),
+    NEXT_PUBLIC_APP_NAME: z.string().default("Simply Code"),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,

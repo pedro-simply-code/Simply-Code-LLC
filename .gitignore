@@ -31,3 +31,13 @@ next-env.d.ts
 
 # drizzle
 drizzle/meta
+
+# opencode
+opencode.json
+.opencode/
+
+# vscode
+.vscode/
+
+# assets
+public/work/*
