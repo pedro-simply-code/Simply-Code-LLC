@@ -6,10 +6,11 @@ const { auth } = NextAuth(authConfig);
 
 const authPages = ["/login", "/register"];
 
-export default auth((req) => {
+export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
 
+  // Signed-in users have no reason to see the auth screens.
   if (authPages.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL("/dashboard", req.url));

@@ -1,7 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LoginForm } from "~/app/(auth)/login/login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Sign in",
+  robots: { index: false, follow: false },
+};
 
 export default function LoginPage() {
   return (

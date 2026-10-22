@@ -1,6 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { RegisterForm } from "~/app/(auth)/register/register-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Create account",
+  robots: { index: false, follow: false },
+};
 
 export default function RegisterPage() {
   return (

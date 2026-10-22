@@ -1,7 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ThemeToggle } from "~/components/theme-toggle";
 import { SignOutButton } from "~/components/sign-out-button";
 import { auth } from "~/lib/auth";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  robots: { index: false, follow: false },
+};
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();

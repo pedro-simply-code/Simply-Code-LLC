@@ -83,6 +83,11 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+
+  :focus-visible {
+    outline: 2px solid #b8770a;
+    outline-offset: 3px;
+  }
 }
 
 /* Landing page scan line (see the build terminal section). */
