@@ -33,13 +33,14 @@ import {
   notifyProjectClients,
   notifyUsers,
   sendProjectEmail,
+  withProjectEntity,
 } from "~/server/notifications";
 import {
   getPortalProject,
   getProjectById,
   isUuid,
-  markAllNotificationsReadForUser,
 } from "~/server/studio/queries";
+import { markAllNotificationsReadForUser } from "~/server/notifications";
 import { getInviteByToken } from "~/server/invites";
 import { sendEmail } from "~/server/email/sendEmail";
 
@@ -220,12 +221,16 @@ function revalidateProject(projectId: string, slug?: string) {
 }
 
 async function notifyProjectCompleted(projectId: string, title: string) {
-  await notifyProjectClients(projectId, {
-    type: "project",
-    title: `Project completed: ${title}`,
-    body: "Your project has been marked completed. You can now leave a review in the portal.",
-    href: `/portal/projects/${projectId}`,
-  });
+  await notifyProjectClients(
+    projectId,
+    withProjectEntity(projectId, {
+      type: "project",
+      title: `Project completed: ${title}`,
+      body: "Your project has been marked completed. You can now leave a review in the portal.",
+      href: `/portal/projects/${projectId}`,
+      projectTitle: title,
+    }),
+  );
 }
 
 export async function createProject(formData: FormData) {
@@ -293,7 +298,7 @@ export async function createProject(formData: FormData) {
 
     await notifyUsers(
       [...new Set(assignments.map((assignment) => assignment.userId))],
-      {
+      withProjectEntity(created.id, {
         type: "project",
         title: `Assigned to ${created.title}`,
         body:
@@ -301,7 +306,8 @@ export async function createProject(formData: FormData) {
             ? "You are the project lead."
             : "You were added as a developer.",
         href: `/studio/projects/${created.id}`,
-      },
+        projectTitle: created.title,
+      }),
     );
   }
 
@@ -314,7 +320,7 @@ export async function createProject(formData: FormData) {
   }
 
   revalidateProject(created.id, slug);
-  redirect(`/studio/projects/${created.id}?tab=edit`);
+  redirect(`/studio/projects/${created.id}?tab=edit&saved=1`);
 }
 
 export async function updateProject(formData: FormData) {
@@ -377,7 +383,7 @@ export async function updateProject(formData: FormData) {
 
   revalidateProject(projectId, updated?.slug);
   revalidatePath(`/work/${existing.slug}`);
-  redirect(`/studio/projects/${projectId}?tab=edit`);
+  redirect(`/studio/projects/${projectId}?tab=edit&saved=1`);
 }
 
 export async function assignProjectMember(formData: FormData) {
@@ -435,18 +441,22 @@ export async function assignProjectMember(formData: FormData) {
     );
   }
 
-  await notifyUsers([userId], {
-    type: "project",
-    title:
-      projectRole === "lead"
-        ? `You now lead ${title}`
-        : `You were added to ${title}`,
-    body:
-      projectRole === "lead"
-        ? "You have full control of this project and receive its email."
-        : "You are assigned as a developer on this project.",
-    href: `/studio/projects/${projectId}`,
-  });
+  await notifyUsers(
+    [userId],
+    withProjectEntity(projectId, {
+      type: "project",
+      title:
+        projectRole === "lead"
+          ? `You now lead ${title}`
+          : `You were added to ${title}`,
+      body:
+        projectRole === "lead"
+          ? "You have full control of this project and receive its email."
+          : "You are assigned as a developer on this project.",
+      href: `/studio/projects/${projectId}`,
+      projectTitle: title,
+    }),
+  );
 
   if (projectRole === "lead" && target.email) {
     try {
@@ -521,12 +531,16 @@ export async function setProjectLead(formData: FormData) {
     .where(eq(users.id, userId))
     .limit(1);
 
-  await notifyUsers([userId], {
-    type: "project",
-    title: `You now lead ${title}`,
-    body: "You have full control of this project and receive its email.",
-    href: `/studio/projects/${projectId}`,
-  });
+  await notifyUsers(
+    [userId],
+    withProjectEntity(projectId, {
+      type: "project",
+      title: `You now lead ${title}`,
+      body: "You have full control of this project and receive its email.",
+      href: `/studio/projects/${projectId}`,
+      projectTitle: title,
+    }),
+  );
 
   if (target?.email) {
     try {
@@ -574,12 +588,17 @@ export async function createProjectUpdate(formData: FormData) {
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, projectId));
 
   if (text(formData, "visibility") !== "internal") {
-    await notifyProjectClients(projectId, {
-      type: "project",
-      title: `New update on ${await projectTitle(projectId)}`,
-      body: title,
-      href: `/portal/projects/${projectId}`,
-    });
+    const name = await projectTitle(projectId);
+    await notifyProjectClients(
+      projectId,
+      withProjectEntity(projectId, {
+        type: "project",
+        title: `New update on ${name}`,
+        body: title,
+        href: `/portal/projects/${projectId}`,
+        projectTitle: name,
+      }),
+    );
   }
 
   revalidateProject(projectId);
@@ -620,27 +639,29 @@ export async function createTechnology(formData: FormData) {
 export async function assignUserTechnology(formData: FormData) {
   await requireFounder();
   const userId = text(formData, "userId");
-  const technologyId = text(formData, "technologyId");
-  const level = text(formData, "level") || "practicing";
-  if (!isUuid(userId) || !isUuid(technologyId)) redirect("/studio/technologies");
+  const technologyIds = formData
+    .getAll("technologyIds")
+    .map((value) => String(value))
+    .filter((id) => isUuid(id));
+  const returnTo = text(formData, "returnTo") || "/studio/technologies";
+  if (!isUuid(userId) || technologyIds.length === 0) redirect(returnTo);
 
   await db
     .insert(userTechnologies)
-    .values({ userId, technologyId, level })
-    .onConflictDoUpdate({
-      target: [userTechnologies.userId, userTechnologies.technologyId],
-      set: { level },
-    });
+    .values(technologyIds.map((technologyId) => ({ userId, technologyId })))
+    .onConflictDoNothing();
 
   revalidatePath("/studio/technologies");
-  revalidatePath(`/studio/team`);
-  redirect("/studio/technologies");
+  revalidatePath("/about");
+  revalidatePath("/studio/team");
+  redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}updated=1`);
 }
 
 export async function removeUserTechnology(formData: FormData) {
   await requireFounder();
   const userId = text(formData, "userId");
   const technologyId = text(formData, "technologyId");
+  const returnTo = text(formData, "returnTo") || "/studio/technologies";
   await db
     .delete(userTechnologies)
     .where(
@@ -650,7 +671,9 @@ export async function removeUserTechnology(formData: FormData) {
       ),
     );
   revalidatePath("/studio/technologies");
-  redirect("/studio/technologies");
+  revalidatePath("/about");
+  revalidatePath("/studio/team");
+  redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}updated=1`);
 }
 
 export async function createTeamMember(formData: FormData) {
@@ -699,16 +722,22 @@ export async function createTeamMember(formData: FormData) {
   }
 
   revalidatePath("/studio/team");
+  revalidatePath("/about");
   redirect(emailFailed ? "/studio/team?error=email" : "/studio/team?invited=1");
 }
 
 export async function updateUserRole(formData: FormData) {
+  return updateTeamMember(formData);
+}
+
+export async function updateTeamMember(formData: FormData) {
   const session = await requireFounder();
   const userId = text(formData, "userId");
   const role = text(formData, "role");
+  const returnTo = text(formData, "returnTo") || "/studio/team";
   const allowed: UserRole[] = ["founder", "lead", "developer", "client"];
-  if (!isUuid(userId) || !allowed.includes(role as UserRole)) redirect("/studio/team");
-  if (userId === session.user.id) redirect("/studio/team?error=self");
+  if (!isUuid(userId) || !allowed.includes(role as UserRole)) redirect(returnTo);
+  if (userId === session.user.id) redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=self`);
 
   if (role !== "founder") {
     const founders = await db
@@ -716,13 +745,37 @@ export async function updateUserRole(formData: FormData) {
       .from(users)
       .where(inArray(users.role, ["founder", "admin"]));
     if (founders.length <= 1 && founders.some((founder) => founder.id === userId)) {
-      redirect("/studio/team?error=last-founder");
+      redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=last-founder`);
     }
   }
 
-  await db.update(users).set({ role: role as UserRole }).where(eq(users.id, userId));
+  const title = text(formData, "title") || null;
+
+  await db
+    .update(users)
+    .set({
+      role: role as UserRole,
+      title,
+    })
+    .where(eq(users.id, userId));
+
   revalidatePath("/studio/team");
-  redirect("/studio/team");
+  revalidatePath("/about");
+  redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}updated=1`);
+}
+
+export async function setTeamMemberShowOnAbout(formData: FormData) {
+  await requireFounder();
+  const userId = text(formData, "userId");
+  const returnTo = text(formData, "returnTo") || "/studio/team";
+  const showOnAbout = text(formData, "showOnAbout") === "1";
+  if (!isUuid(userId)) redirect(returnTo);
+
+  await db.update(users).set({ showOnAbout }).where(eq(users.id, userId));
+
+  revalidatePath("/studio/team");
+  revalidatePath("/about");
+  redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}updated=1`);
 }
 
 export async function createReview(formData: FormData) {
@@ -787,28 +840,52 @@ export async function createClient(formData: FormData) {
     slug = `${root}-${attempt}`;
   }
 
-  await db.insert(clients).values({
-    name,
-    slug,
-    contactEmail: text(formData, "contactEmail") || null,
-  });
+  const [created] = await db
+    .insert(clients)
+    .values({
+      name,
+      slug,
+      contactEmail: text(formData, "contactEmail") || null,
+    })
+    .returning({ id: clients.id });
 
   revalidatePath("/studio/clients");
-  redirect("/studio/clients");
+  redirect(created ? `/studio/clients/${created.id}?created=1` : "/studio/clients");
+}
+
+export async function updateClient(formData: FormData) {
+  await requireFounder();
+  const clientId = text(formData, "clientId");
+  const returnTo = text(formData, "returnTo") || `/studio/clients/${clientId}`;
+  const name = text(formData, "name");
+  if (!isUuid(clientId) || !name) redirect(returnTo);
+
+  await db
+    .update(clients)
+    .set({
+      name,
+      contactEmail: text(formData, "contactEmail") || null,
+    })
+    .where(eq(clients.id, clientId));
+
+  revalidatePath("/studio/clients");
+  revalidatePath(`/studio/clients/${clientId}`);
+  redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}saved=1`);
 }
 
 export async function addClientMember(formData: FormData) {
   const session = await requireFounder();
   const clientId = text(formData, "clientId");
+  const returnTo = text(formData, "returnTo") || `/studio/clients/${clientId}`;
   const parsed = clientInviteSchema.safeParse({ email: text(formData, "email") });
-  if (!isUuid(clientId) || !parsed.success) redirect("/studio/clients?error=member");
+  if (!isUuid(clientId) || !parsed.success) redirect(`${returnTo}?error=member`);
 
   const [client] = await db
     .select({ name: clients.name })
     .from(clients)
     .where(eq(clients.id, clientId))
     .limit(1);
-  if (!client) redirect("/studio/clients?error=member");
+  if (!client) redirect(`${returnTo}?error=member`);
 
   const email = parsed.data.email.toLowerCase();
   const [user] = await db
@@ -848,7 +925,10 @@ export async function addClientMember(formData: FormData) {
     }
 
     revalidatePath("/studio/clients");
-    redirect(emailFailed ? "/studio/clients?error=email" : "/studio/clients?invited=1");
+    revalidatePath(`/studio/clients/${clientId}`);
+    redirect(
+      emailFailed ? `${returnTo}?error=email` : `${returnTo}?invited=1`,
+    );
   }
 
   await db
@@ -856,12 +936,13 @@ export async function addClientMember(formData: FormData) {
     .values({ clientId, userId: user.id, role: "member" })
     .onConflictDoNothing();
 
-  if (checked(formData, "makeClient") && !isFounder(user.role)) {
+  if (!isFounder(user.role)) {
     await db.update(users).set({ role: "client" }).where(eq(users.id, user.id));
   }
 
   revalidatePath("/studio/clients");
-  redirect("/studio/clients");
+  revalidatePath(`/studio/clients/${clientId}`);
+  redirect(`${returnTo}?saved=1`);
 }
 
 /**
@@ -923,6 +1004,11 @@ export async function acceptInvite(formData: FormData) {
       .onConflictDoNothing();
   }
 
+  if (invite.role === "client") {
+    const { backfillClientInboxForPortalUser } = await import("~/server/messages/inbox");
+    await backfillClientInboxForPortalUser(account.id, email);
+  }
+
   await db
     .update(invites)
     .set({ acceptedAt: verifiedAt })
@@ -930,6 +1016,7 @@ export async function acceptInvite(formData: FormData) {
 
   revalidatePath("/studio/team");
   revalidatePath("/studio/clients");
+  revalidatePath("/about");
   redirect(`/login?email=${encodeURIComponent(email)}&invited=1`);
 }
 
@@ -969,12 +1056,16 @@ export async function createPortalRequest(formData: FormData) {
       : "normal",
   });
 
-  await notifyProject(projectId, {
-    type: "request",
-    title: `New client request: ${title}`,
-    body: text(formData, "description").slice(0, 200),
-    href: `/studio/projects/${projectId}`,
-  });
+  await notifyProject(
+    projectId,
+    withProjectEntity(projectId, {
+      type: "request",
+      title: `New client request: ${title}`,
+      body: text(formData, "description").slice(0, 200),
+      href: `/studio/projects/${projectId}?tab=requests`,
+      projectTitle: project.project.title,
+    }),
+  );
 
   await sendProjectEmail(
     projectId,
@@ -1029,15 +1120,20 @@ export async function setProjectRequestStatus(formData: FormData) {
     .where(and(eq(projectRequests.id, requestId), eq(projectRequests.projectId, projectId)));
 
   if (request.status !== status && resolved) {
-    await notifyProjectClients(projectId, {
-      type: "request",
-      title:
-        status === "completed"
-          ? `Request completed: ${request.title}`
-          : `Request rejected: ${request.title}`,
-      body: status === "completed" ? "Your request has been completed." : resolutionNote,
-      href: `/portal/projects/${projectId}`,
-    });
+    const name = await projectTitle(projectId);
+    await notifyProjectClients(
+      projectId,
+      withProjectEntity(projectId, {
+        type: "request",
+        title:
+          status === "completed"
+            ? `Request completed: ${request.title}`
+            : `Request rejected: ${request.title}`,
+        body: status === "completed" ? "Your request has been completed." : resolutionNote,
+        href: `/portal/projects/${projectId}`,
+        projectTitle: name,
+      }),
+    );
     revalidatePath("/portal/notifications");
   }
 

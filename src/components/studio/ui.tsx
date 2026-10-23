@@ -1,26 +1,35 @@
 import type { ComponentProps, ReactNode } from "react";
+import { appEmptyState, appInput, appPanel } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
-export const inputClass =
-  "w-full border border-[#15130f]/20 bg-white px-3 py-2 text-sm text-[#15130f] outline-none transition-colors placeholder:text-[#9a9488] focus:border-[#b8770a]";
+export const inputClass = appInput;
 
 export function StudioHeader({
   title,
   description,
+  descriptionClassName,
   actions,
 }: {
   title: string;
   description?: string;
+  descriptionClassName?: string;
   actions?: ReactNode;
 }) {
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-      <div>
+      <div className="min-w-0 flex-1">
         <h1 className="text-[clamp(1.8rem,3vw,2.6rem)] leading-none font-black tracking-[-0.03em] uppercase">
           {title}
         </h1>
         {description ? (
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#57524a]">{description}</p>
+          <p
+            className={cn(
+              "mt-3 max-w-2xl text-sm leading-relaxed text-[#57524a]",
+              descriptionClassName,
+            )}
+          >
+            {description}
+          </p>
         ) : null}
       </div>
       {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
@@ -40,7 +49,7 @@ export function StudioCard({
   className?: string;
 }) {
   return (
-    <section className={cn("border border-[#15130f]/12 bg-white p-5", className)}>
+    <section className={cn(appPanel, "p-5", className)}>
       {title ? (
         <div className="mb-4">
           <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">{title}</h2>
@@ -92,5 +101,5 @@ export function StudioSelect(props: ComponentProps<"select">) {
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {
-  return <p className="border border-dashed border-[#15130f]/20 p-6 text-sm text-[#6f6a60]">{children}</p>;
+  return <p className={appEmptyState}>{children}</p>;
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { TestimonialsCarousel } from "~/components/testimonials-carousel";
+import { appPanelHover, appPanelMuted } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 import { TESTIMONIALS, type Testimonial } from "~/content/testimonials";
 
 const OUTCOMES = [
@@ -36,11 +38,11 @@ export function ClientProof({
   return (
     <section
       id="reviews"
-      className="border-b border-[#15130f]/10 bg-white py-20 lg:py-24"
+      className="border-b border-[#15130f]/10 bg-sc-section py-20 lg:py-24"
     >
       <div className="mx-auto max-w-[1400px] px-6">
         <div className="mb-14 max-w-2xl">
-          <p className="text-[11px] font-bold tracking-[0.24em] text-[#b8770a] uppercase">
+          <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
             {hasQuotes ? "Client Feedback" : "Client Outcomes"}
           </p>
           <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
@@ -61,9 +63,9 @@ export function ClientProof({
               <Link
                 key={outcome.label}
                 href={outcome.href}
-                className="group flex flex-col border border-[#15130f]/12 bg-[#f7f4ee] p-8 transition-colors hover:border-[#f0a500]"
+                className={cn(appPanelMuted, appPanelHover, "group flex flex-col p-8")}
               >
-                <p className="text-[42px] leading-none font-black tracking-[-0.03em] text-[#b8770a]">
+                <p className="text-[42px] leading-none font-black tracking-[-0.03em] text-sc-accent">
                   {outcome.value}
                 </p>
                 <p className="mt-4 text-[11px] font-bold tracking-[0.18em] text-[#15130f] uppercase">
@@ -72,7 +74,7 @@ export function ClientProof({
                 <p className="mt-3 flex-1 text-[14px] leading-relaxed text-[#57524a]">
                   {outcome.body}
                 </p>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase transition-colors group-hover:text-[#b8770a]">
+                <span className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase transition-colors group-hover:text-sc-accent">
                   View case study <ArrowUpRight className="size-3" />
                 </span>
               </Link>

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ProfileForm } from "~/components/profile/profile-form";
-import { RefreshSessionAfterSave } from "~/components/profile/refresh-session-after-save";
+import { ProfileStatusBanner } from "~/components/profile/profile-status-banner";
 import { StudioHeader } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
 import { isTeam } from "~/lib/roles";
@@ -13,36 +13,23 @@ export default async function PortalProfilePage({
 }: {
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
+  const params = await searchParams;
+  const statusCode = params.saved === "1" ? "saved" : params.error ?? null;
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/portal/profile");
   if (isTeam(session.user.role)) redirect("/studio/profile");
 
-  const { saved, error } = await searchParams;
   const user = await getUserProfile(session.user.id);
   if (!user) redirect("/portal");
 
   return (
-    <div>
-      <RefreshSessionAfterSave saved={saved === "1"} />
+    <div className="flex w-full min-h-0 flex-col">
       <StudioHeader
         title="Your profile"
-        description="Update your display name and profile photo."
+        description="Your name, photo, and how the Simply Code team can reach you."
+        descriptionClassName="max-w-none"
       />
-      {error === "name" ? (
-        <p className="mb-6 border border-[#9a3b2e]/25 bg-[#fdf1ef] px-4 py-3 text-sm text-[#9a3b2e]">
-          Name is required.
-        </p>
-      ) : null}
-      {error === "avatar-upload" ? (
-        <p className="mb-6 border border-[#9a3b2e]/25 bg-[#fdf1ef] px-4 py-3 text-sm text-[#9a3b2e]">
-          The photo could not be saved. Try again or use a smaller file.
-        </p>
-      ) : null}
-      {saved === "1" ? (
-        <p className="mb-6 border border-[#2e7d32]/25 bg-[#e8f5e9] px-4 py-3 text-sm text-[#2e7d32]">
-          Profile saved.
-        </p>
-      ) : null}
+      <ProfileStatusBanner code={statusCode} />
       <ProfileForm user={user} showAboutFields={false} />
     </div>
   );

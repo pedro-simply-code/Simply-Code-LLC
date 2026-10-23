@@ -118,19 +118,19 @@ export type ResolvedUserAvatar =
   | { ok: false; reason: "upload-failed" };
 
 export async function resolveUserAvatarFromForm(
-  formData: FormData,
+  _formData: FormData,
   existing: string | null,
   imageField: string,
 ): Promise<ResolvedUserAvatar> {
-  const avatarFile = formData.get("avatarFile");
-  if (avatarFile instanceof File && avatarFile.size > 0) {
-    const uploaded = await uploadUserAvatarFile(avatarFile);
-    if (!uploaded) return { ok: false, reason: "upload-failed" };
-    await replaceStoredUpload(existing, uploaded, "user-avatar");
-    return { ok: true, image: uploaded };
-  }
-
   const image = projectImageFromForm(imageField, existing);
   await replaceStoredUpload(existing, image, "user-avatar");
   return { ok: true, image };
+}
+
+/** Client-uploaded avatar pending save — only removes UploadThing-hosted files. */
+export async function discardUploadThingImageUrl(
+  url: string,
+  logTag = "user-avatar",
+): Promise<void> {
+  await deleteUploadThingFile(url, logTag);
 }

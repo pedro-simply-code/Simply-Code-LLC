@@ -4,10 +4,20 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
-import { homePathForRole, isTeam } from "~/lib/roles";
+import { normalizeOptionalUrl } from "~/lib/profile";
+import { homePathForRole, isFounder, isTeam } from "~/lib/roles";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
-import { resolveUserAvatarFromForm } from "~/server/uploadthing-storage";
+import {
+  discardUploadThingImageUrl,
+  resolveUserAvatarFromForm,
+} from "~/server/uploadthing-storage";
+
+export async function discardPendingAvatarUpload(url: string) {
+  const session = await auth();
+  if (!session?.user?.id) return;
+  await discardUploadThingImageUrl(url, "user-avatar");
+}
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -20,8 +30,9 @@ function skillList(formData: FormData, key: string): string[] {
     .filter(Boolean);
 }
 
-function checked(formData: FormData, key: string): boolean {
-  return formData.get(key) === "on" || formData.get(key) === "true";
+function checkbox(formData: FormData, key: string): boolean {
+  const value = formData.get(key);
+  return value === "on" || value === "true" || value === "1";
 }
 
 export async function updateUserProfile(formData: FormData) {
@@ -43,14 +54,38 @@ export async function updateUserProfile(formData: FormData) {
   if (!resolvedImage.ok) redirect(`${profilePath}?error=avatar-upload`);
 
   const teamMember = isTeam(session.user.role);
+  const phone = text(formData, "phone") || null;
+  const timezone = text(formData, "timezone") || null;
+  const bio = text(formData, "bio") || null;
+
+  const linkedinRaw = teamMember ? text(formData, "linkedinUrl") : "";
+  const githubRaw = teamMember ? text(formData, "githubUrl") : "";
+  const portfolioRaw = teamMember ? text(formData, "portfolioUrl") : "";
+
+  const linkedinUrl = linkedinRaw ? normalizeOptionalUrl(linkedinRaw) : null;
+  const githubUrl = githubRaw ? normalizeOptionalUrl(githubRaw) : null;
+  const portfolioUrl = portfolioRaw ? normalizeOptionalUrl(portfolioRaw) : null;
+
+  if (linkedinRaw && !linkedinUrl) redirect(`${profilePath}?error=url`);
+  if (githubRaw && !githubUrl) redirect(`${profilePath}?error=url`);
+  if (portfolioRaw && !portfolioUrl) redirect(`${profilePath}?error=url`);
 
   await db
     .update(users)
     .set({
       name,
+      phone,
+      timezone,
+      bio,
       title: teamMember ? text(formData, "title") || null : existing.title,
       profileSkills: teamMember ? skillList(formData, "profileSkills") : existing.profileSkills,
-      showOnAbout: teamMember ? checked(formData, "showOnAbout") : false,
+      showOnAbout:
+        teamMember && isFounder(session.user.role)
+          ? checkbox(formData, "showOnAbout")
+          : existing.showOnAbout,
+      linkedinUrl: teamMember ? linkedinUrl : existing.linkedinUrl,
+      githubUrl: teamMember ? githubUrl : existing.githubUrl,
+      portfolioUrl: teamMember ? portfolioUrl : existing.portfolioUrl,
       image: resolvedImage.image,
     })
     .where(eq(users.id, session.user.id));

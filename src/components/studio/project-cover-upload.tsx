@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
-import { toast } from "sonner";
+import { appToast } from "~/lib/app-toast";
 
 function assignFileToInput(input: HTMLInputElement | null, file: File | null) {
   if (!input) return;
@@ -38,11 +38,11 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
 
   const applyFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose a PNG, JPG, or WebP image.");
+      appToast.error("Please choose a PNG, JPG, or WebP image.");
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      toast.error("Image must be 8MB or smaller.");
+      appToast.error("Image must be 8MB or smaller.");
       return;
     }
 
@@ -82,7 +82,7 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
       />
 
       <div
-        className="relative aspect-[1000/560] overflow-hidden border border-[#15130f]/15 bg-[#f7f4ee]"
+        className="relative aspect-[1000/560] overflow-hidden rounded-lg bg-sc-section-alt shadow-[inset_0_1px_2px_rgba(21,19,15,0.06),0_1px_3px_rgba(21,19,15,0.05)]"
         onDragOver={(event) => {
           event.preventDefault();
           event.dataTransfer.dropEffect = "copy";
@@ -115,7 +115,7 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-[#b8770a]"
+          className="rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
         >
           {previewSrc ? "Choose another image" : "Choose image"}
         </button>
@@ -123,13 +123,13 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
           <button
             type="button"
             onClick={removeCover}
-            className="border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#9a3b2e] hover:text-[#9a3b2e]"
+            className="rounded-md bg-white px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase shadow-[0_1px_2px_rgba(21,19,15,0.08)] hover:text-[#9a3b2e] hover:shadow-[0_2px_8px_rgba(154,59,46,0.12)]"
           >
             Remove cover
           </button>
         ) : null}
         {hasPendingFile ? (
-          <span className="text-[10px] font-bold tracking-[0.1em] text-[#b8770a] uppercase">
+          <span className="text-[10px] font-bold tracking-[0.1em] text-sc-accent uppercase">
             Unsaved
           </span>
         ) : savedUrl ? (

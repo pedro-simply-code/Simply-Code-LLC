@@ -3,6 +3,8 @@ import type { UserRole } from "~/server/db/schema";
 import { MultiSelect } from "~/components/studio/multi-select";
 import { ProjectCoverUpload } from "~/components/studio/project-cover-upload";
 import { Field, StudioCard, StudioInput, StudioSelect, StudioTextarea } from "~/components/studio/ui";
+import { studioProjectPanel, studioProjectPanelMuted } from "~/lib/studio-project-surface";
+import { cn } from "~/lib/utils";
 
 type Person = { id: string; name: string | null; email: string | null; role: UserRole };
 type Technology = { id: string; name: string; category: string };
@@ -31,19 +33,20 @@ export function ProjectForm({
 }) {
   const isEdit = Boolean(project);
   const submitLabel = isEdit ? "Save changes" : "Create project";
+  const cardSurface = studioProjectPanel;
 
   return (
     <form action={action} className="space-y-6">
       {project ? <input type="hidden" name="projectId" value={project.id} /> : null}
 
-      <section className="border border-[#15130f]/12 bg-white p-5 md:p-6">
+      <section className={cn(studioProjectPanel, "p-5 md:p-6")}>
         <Field label="Title">
           <StudioInput
             name="title"
             defaultValue={project?.title}
             required
             placeholder="Project name"
-            className="border-0 border-b border-[#15130f]/20 px-0 py-2 text-2xl font-bold tracking-tight focus:border-[#b8770a]"
+            className="border-0 border-b border-[#15130f]/20 px-0 py-2 text-2xl font-bold tracking-tight focus:border-sc-accent"
           />
         </Field>
 
@@ -70,11 +73,14 @@ export function ProjectForm({
       </section>
 
       <div
-        className="sticky top-20 z-10 -mx-1 flex flex-wrap items-center justify-end gap-3 border-b border-[#15130f]/10 bg-[#f7f4ee]/95 px-1 py-3 backdrop-blur-sm"
+        className={cn(
+          studioProjectPanelMuted,
+          "sticky top-20 z-10 -mx-1 flex flex-wrap items-center justify-end gap-3 px-3 py-3 backdrop-blur-sm",
+        )}
       >
         <button
           type="submit"
-          className="inline-flex items-center justify-center bg-[#15130f] px-5 py-2.5 text-[10px] font-bold tracking-[0.16em] text-white uppercase hover:bg-[#b8770a]"
+          className="inline-flex items-center justify-center rounded-md bg-[#15130f] px-5 py-2.5 text-[10px] font-bold tracking-[0.16em] text-white uppercase hover:bg-sc-accent"
         >
           {submitLabel}
         </button>
@@ -85,6 +91,7 @@ export function ProjectForm({
           <StudioCard
             title="About this project"
             description="Shown on the work grid, project page, and search previews."
+            className={cardSurface}
           >
             <Field label="Summary">
               <StudioTextarea
@@ -97,7 +104,7 @@ export function ProjectForm({
           </StudioCard>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <StudioCard title="Stack">
+            <StudioCard title="Stack" className={cardSurface}>
               <Field as="div" label="Technologies" hint="Search and select.">
                 <MultiSelect
                   name="technologyIds"
@@ -115,7 +122,7 @@ export function ProjectForm({
               </Field>
             </StudioCard>
 
-            <StudioCard title="Client">
+            <StudioCard title="Client" className={cardSurface}>
               <div className="grid gap-4">
                 <Field label="Client name">
                   <StudioInput name="clientName" defaultValue={project?.clientName} />
@@ -135,7 +142,11 @@ export function ProjectForm({
           </div>
 
           {!isEdit && canChooseLead ? (
-            <StudioCard title="Team" description="Assign a lead and developers for the new project.">
+            <StudioCard
+              title="Team"
+              description="Assign a lead and developers for the new project."
+              className={cardSurface}
+            >
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Project lead" hint="Receives project email and controls the project.">
                   <StudioSelect name="leadId" defaultValue={leadId ?? ""}>
@@ -168,11 +179,11 @@ export function ProjectForm({
         </div>
 
         <aside className="space-y-5 self-start lg:sticky lg:top-36">
-          <StudioCard title="Cover">
+          <StudioCard title="Cover" className={cardSurface}>
             <ProjectCoverUpload defaultUrl={project?.image} />
           </StudioCard>
 
-          <StudioCard title="Publishing">
+          <StudioCard title="Publishing" className={cardSurface}>
             <div className="grid gap-3">
               <Field label="Status">
                 <StudioSelect name="status" defaultValue={project?.status ?? "draft"}>

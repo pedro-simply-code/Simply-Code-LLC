@@ -1,150 +1,144 @@
 import Link from "next/link";
 import { auth } from "~/lib/auth";
-import {
-  canCreateProjects,
-  canManageReviews,
-  isFounder,
-  roleLabel,
-} from "~/lib/roles";
+import { canCreateProjects, isFounder, roleLabel } from "~/lib/roles";
 import { getStudioOverview } from "~/server/studio/queries";
-import { EmptyState, StudioCard, StudioHeader } from "~/components/studio/ui";
+import { getSiteSettings } from "~/server/site-settings/queries";
+import { StudioRecentProjects } from "~/components/studio/studio-recent-projects";
+import { StudioRolesHelpDialog } from "~/components/studio/studio-roles-help-dialog";
+import { StudioOverviewColumn } from "~/components/studio/studio-overview-column";
+import {
+  StudioOverviewQuickLinks,
+  StudioOverviewRequests,
+  StudioOverviewStats,
+  StudioOverviewUpdates,
+} from "~/components/studio/studio-overview-panels";
+import { STUDIO_OVERVIEW_PREVIEW_SIZE } from "~/lib/studio-pagination";
+import { parseStudioView } from "~/lib/studio-view";
+import { StudioHeader } from "~/components/studio/ui";
+import { appAccentButtonLg } from "~/lib/surface";
 
 export const dynamic = "force-dynamic";
 
-export default async function StudioPage() {
+export default async function StudioPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const { view: viewParam } = await searchParams;
+  const view = parseStudioView(viewParam);
   const session = await auth();
-  const founder = isFounder(session?.user.role);
-  const canCreate = canCreateProjects(session?.user.role);
-  const overview = await getStudioOverview(founder ? undefined : session?.user.id);
-  const reviewer = canManageReviews(session?.user.role);
+  const userId = session?.user.id;
+  if (!userId) {
+    return null;
+  }
 
-  const stats = [
-    { label: "Projects", value: overview.projectCount, href: "/studio/projects" },
-    { label: "Published", value: overview.publishedCount, href: "/work" },
-    ...(founder
-      ? [
-          { label: "Team", value: overview.teamCount, href: "/studio/team" },
-          { label: "Clients", value: overview.clientCount, href: "/studio/clients" },
-          { label: "Technologies", value: overview.technologyCount, href: "/studio/technologies" },
-        ]
-      : []),
-    ...(reviewer
-      ? [
-          {
-            label: "Reviews to approve",
-            value: overview.pendingReviewCount,
-            href: "/studio/reviews",
-          },
-        ]
-      : []),
+  const founder = isFounder(session.user.role);
+  const canCreate = canCreateProjects(session.user.role);
+  const [overview, siteSettings] = await Promise.all([
+    getStudioOverview({
+      projectViewerId: founder ? undefined : userId,
+      userId,
+      founder,
+    }),
+    founder ? getSiteSettings() : Promise.resolve(null),
+  ]);
+
+  const recentPreview = overview.recentProjects.slice(0, STUDIO_OVERVIEW_PREVIEW_SIZE);
+  const recentTotal = overview.recentProjects.length;
+  const projectStatusStats = [
+    { label: "Draft", value: overview.draftCount, href: "/studio/projects" },
+    { label: "Published", value: overview.publishedCount, href: "/studio/projects" },
+    { label: "Completed", value: overview.completedCount, href: "/studio/projects" },
   ];
+
+  const founderStats = founder
+    ? [
+        { label: "Team", value: overview.teamCount, href: "/studio/team" },
+        { label: "Clients", value: overview.clientCount, href: "/studio/clients" },
+        { label: "Technologies", value: overview.technologyCount, href: "/studio/technologies" },
+      ]
+    : [];
 
   return (
     <div>
       <StudioHeader
         title="Studio overview"
-        description={`Signed in as ${session?.user.name ?? session?.user.email} · ${roleLabel(session?.user.role)}`}
+        description={`Signed in as ${session.user.name ?? session.user.email} · ${roleLabel(session.user.role)}`}
         actions={
-          canCreate ? (
-            <Link
-              href="/studio/projects/new"
-              className="inline-flex items-center bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-[#b8770a]"
-            >
-              New project
-            </Link>
-          ) : null
+          <div className="flex flex-wrap items-center gap-2">
+            <StudioRolesHelpDialog />
+            {canCreate ? (
+              <Link
+                href="/studio/projects/new"
+                className="inline-flex items-center rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+              >
+                New project
+              </Link>
+            ) : null}
+          </div>
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {stats.map((stat) => (
-          <Link
-            key={stat.label}
-            href={stat.href}
-            className="border border-[#15130f]/12 bg-white p-5 transition-colors hover:border-[#f0a500]"
-          >
-            <p className="text-[32px] leading-none font-black tracking-[-0.03em] text-[#b8770a]">
-              {stat.value}
-            </p>
-            <p className="mt-2 text-[10px] font-bold tracking-[0.16em] text-[#57524a] uppercase">
-              {stat.label}
-            </p>
-          </Link>
-        ))}
+      <StudioOverviewQuickLinks
+        maintenanceMode={siteSettings?.maintenanceMode ?? false}
+        unreadNotificationCount={overview.unreadNotificationCount}
+        showSiteSettings={founder}
+      />
+
+      <div className="space-y-3">
+        <StudioOverviewStats stats={projectStatusStats} view={view} />
+        {founderStats.length > 0 ? (
+          <StudioOverviewStats stats={founderStats} view={view} />
+        ) : null}
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <StudioCard
+      <div className="mt-8">
+        <div className="grid gap-6 lg:grid-cols-3 lg:items-stretch">
+        <StudioOverviewColumn
           title="Recent projects"
           description={
             canCreate
               ? "Publishing here updates the public work pages."
               : "Projects assigned to you, most recently updated first."
           }
-        >
-          {overview.recentProjects.length === 0 ? (
-            <EmptyState>
-              {canCreate
-                ? "No projects yet. Import the existing portfolio or create the first project."
-                : "No projects have been assigned to you yet."}
-            </EmptyState>
-          ) : (
-            <ul className="divide-y divide-[#15130f]/10">
-              {overview.recentProjects.map((project) => (
-                <li key={project.id} className="flex items-center justify-between gap-4 py-3">
-                  <div>
-                    <Link
-                      href={`/studio/projects/${project.id}`}
-                      className="text-sm font-semibold hover:text-[#b8770a]"
-                    >
-                      {project.title}
-                    </Link>
-                    <p className="mt-0.5 text-[11px] text-[#6f6a60]">
-                      {project.stackLabel || "No stack"} · {project.status}
-                    </p>
-                  </div>
-                  <span className="text-[10px] font-bold tracking-[0.12em] text-[#9a9488] uppercase">
-                    {new Date(project.updatedAt).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {canCreate ? (
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                href="/studio/projects/new"
-                className="inline-flex items-center border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.14em] uppercase hover:border-[#b8770a]"
-              >
-                Create project
+          footer={
+            canCreate ? (
+              <div className="flex flex-wrap gap-2">
+                <Link href="/studio/projects" className={appAccentButtonLg}>
+                  All projects
+                </Link>
+                <Link href="/studio/projects/new" className={appAccentButtonLg}>
+                  Create project
+                </Link>
+              </div>
+            ) : (
+              <Link href="/studio/projects" className={appAccentButtonLg}>
+                All projects
               </Link>
-            </div>
-          ) : null}
-        </StudioCard>
-
-        <StudioCard
-          title="How routing works"
-          description="Roles inherit downwards: founder → lead → developer."
+            )
+          }
         >
-          <ul className="space-y-3 text-sm leading-relaxed text-[#57524a]">
-            <li>
-              <strong className="text-[#15130f]">Founder</strong> manages team, technologies,
-              clients, projects and reviews.
-            </li>
-            <li>
-              <strong className="text-[#15130f]">Lead</strong> only sees assigned projects. They can
-              edit projects they lead and add developers, but cannot create projects or manage
-              reviews.
-            </li>
-            <li>
-              <strong className="text-[#15130f]">Developer</strong> sees their assigned projects but
-              project email goes to the lead or founder.
-            </li>
-            <li>
-              <strong className="text-[#15130f]">Client</strong> uses the portal only.
-            </li>
-          </ul>
-        </StudioCard>
+          <StudioRecentProjects
+            projects={recentPreview}
+            view={view}
+            compact
+            emptyMessage={
+              recentTotal === 0
+                ? canCreate
+                  ? "No projects yet. Create the first project from the button above."
+                  : "No projects have been assigned to you yet."
+                : undefined
+            }
+          />
+        </StudioOverviewColumn>
+
+        <StudioOverviewRequests
+          items={overview.overviewRequests}
+          openCount={overview.openRequestCount}
+          view={view}
+        />
+        <StudioOverviewUpdates items={overview.overviewUpdates} view={view} />
+        </div>
       </div>
     </div>
   );

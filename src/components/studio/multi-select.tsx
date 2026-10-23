@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { appDropdown, appInput } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 export type MultiSelectOption = {
@@ -73,7 +74,10 @@ export function MultiSelect({
             aria-label={ariaLabel}
             aria-expanded={open}
             aria-controls={listId}
-            className="flex w-full items-center justify-between gap-3 border border-[#15130f]/20 bg-white px-3 py-2 text-left text-sm text-[#15130f] transition-colors outline-none hover:border-[#b8770a] focus-visible:border-[#b8770a]"
+            className={cn(
+              appInput,
+              "flex items-center justify-between gap-3 py-2 text-left hover:ring-sc-accent/35",
+            )}
           >
             <span
               className={cn(
@@ -91,9 +95,12 @@ export function MultiSelect({
         <PopoverContent
           id={listId}
           align="start"
-          className="w-[var(--radix-popover-trigger-width)] border-[#15130f]/15 bg-white p-0 text-[#15130f]"
+          className={cn(
+            appDropdown,
+            "w-[var(--radix-popover-trigger-width)] p-0 text-[#15130f]",
+          )}
         >
-          <Command className="bg-white text-[#15130f] [&_[cmdk-input]]:text-[#15130f] [&_[cmdk-input]]:placeholder:text-[#9a9488]">
+          <Command className="bg-sc-section text-[#15130f] [&_[cmdk-input]]:text-[#15130f] [&_[cmdk-input]]:placeholder:text-[#9a9488]">
             <CommandInput placeholder={searchPlaceholder} className="text-[#15130f]" />
             <CommandList>
               <CommandEmpty className="text-[#6f6a60]">{emptyText}</CommandEmpty>
@@ -107,12 +114,12 @@ export function MultiSelect({
                         .filter(Boolean)
                         .join(" ")}
                       onSelect={() => toggle(option.value)}
-                      className="cursor-pointer text-[#15130f] data-[selected=true]:bg-[#f7f4ee] data-[selected=true]:text-[#15130f] aria-selected:bg-[#f7f4ee] aria-selected:text-[#15130f]"
+                      className="cursor-pointer text-[#15130f] data-[selected=true]:bg-sc-section-alt data-[selected=true]:text-[#15130f] aria-selected:bg-sc-section-alt aria-selected:text-[#15130f]"
                     >
                       <span
                         className={cn(
-                          "flex size-4 shrink-0 items-center justify-center border border-[#15130f]/25",
-                          active && "border-[#15130f] bg-[#15130f] text-white",
+                          "flex size-4 shrink-0 items-center justify-center rounded-sm shadow-[inset_0_1px_2px_rgba(21,19,15,0.08)] ring-1 ring-[#15130f]/20",
+                          active && "bg-[#15130f] text-white ring-[#15130f]",
                         )}
                       >
                         {active ? <Check className="size-3" /> : null}

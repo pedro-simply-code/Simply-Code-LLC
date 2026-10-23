@@ -2,167 +2,115 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { Bell, CheckCheck } from "lucide-react";
-import {
-  NOTIFICATIONS_CHANGED_EVENT,
-  type NotificationItem,
-  emitNotificationsChanged,
-  markNotificationRead,
-} from "~/lib/notifications-client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Bell } from "lucide-react";
+import { NotificationRowContent } from "~/components/notifications/notification-row";
+import { useNotificationsBell } from "~/hooks/use-notifications";
+import type { NotificationContext } from "~/lib/notifications-api";
+import type { NotificationDTO } from "~/server/notifications/types";
+import { appDropdown, appIconButton } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 export function NotificationBell({
+  context = "studio",
   viewAllHref = "/studio/notifications",
 }: {
+  context?: NotificationContext;
   viewAllHref?: string;
 }) {
   const router = useRouter();
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [unread, setUnread] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-
-  const load = useCallback(async () => {
-    try {
-      const res = await fetch("/api/notifications", { cache: "no-store" });
-      if (!res.ok) return;
-      const data = (await res.json()) as { items: NotificationItem[]; unread: number };
-      setItems(data.items);
-      setUnread(data.unread);
-    } catch {
-      // A transient polling failure should not break the studio shell.
-    }
-  }, []);
+  const feed = useNotificationsBell(context);
 
   useEffect(() => {
-    const initial = window.setTimeout(() => void load(), 0);
-    const timer = window.setInterval(() => void load(), 10_000);
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    const onPointerDown = (event: MouseEvent) => {
+      if (!panelRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onPointerDown);
     return () => {
-      window.clearTimeout(initial);
-      window.clearInterval(timer);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onPointerDown);
     };
-  }, [load]);
-
-  useEffect(() => {
-    const onChanged = (event: Event) => {
-      const detail = (event as CustomEvent<{ unread: number; id?: string }>).detail;
-      if (detail?.unread !== undefined) {
-        setUnread(detail.unread);
-      }
-      if (detail?.id) {
-        const readAt = new Date().toISOString();
-        setItems((current) =>
-          current.map((item) =>
-            item.id === detail.id && !item.readAt ? { ...item, readAt } : item,
-          ),
-        );
-      }
-      void load();
-    };
-    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, onChanged);
-    return () => window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, onChanged);
-  }, [load]);
-
-  const markAllRead = useCallback(async () => {
-    setUnread(0);
-    setItems((current) =>
-      current.map((item) =>
-        item.readAt ? item : { ...item, readAt: new Date().toISOString() },
-      ),
-    );
-    try {
-      await fetch("/api/notifications", { method: "POST" });
-      emitNotificationsChanged({ unread: 0 });
-      await load();
-    } catch {
-      await load();
-    }
-  }, [load]);
-
-  const markOneRead = useCallback(
-    async (id: string) => {
-      const target = items.find((item) => item.id === id);
-      if (!target || target.readAt) return;
-
-      const readAt = new Date().toISOString();
-      setItems((current) =>
-        current.map((item) => (item.id === id ? { ...item, readAt } : item)),
-      );
-      setUnread((count) => Math.max(0, count - 1));
-
-      const nextUnread = await markNotificationRead(id);
-      if (nextUnread !== null) {
-        setUnread(nextUnread);
-      } else {
-        await load();
-      }
-    },
-    [items, load],
-  );
+  }, [open]);
 
   const openNotification = useCallback(
-    async (event: React.MouseEvent, item: NotificationItem) => {
+    async (event: React.MouseEvent, item: NotificationDTO) => {
       const href = item.href ?? viewAllHref;
       setOpen(false);
 
       if (item.readAt) return;
 
       event.preventDefault();
-      await markOneRead(item.id);
+      await feed.markRead.mutateAsync(item.id);
       router.push(href);
     },
-    [markOneRead, router, viewAllHref],
+    [feed.markRead, router, viewAllHref],
   );
 
   return (
-    <div className="relative">
+    <div className="relative" ref={panelRef}>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label="Notifications"
         aria-expanded={open}
-        className="relative inline-flex size-9 items-center justify-center border border-[#15130f]/15 bg-white text-[#15130f] transition-colors hover:border-[#f0a500]"
+        aria-haspopup="dialog"
+        className={cn(appIconButton, "relative size-9")}
       >
         <Bell className="size-4" />
-        {unread > 0 ? (
-          <span className="absolute -top-1.5 -right-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[#e2761b] px-1 text-[10px] font-bold text-white">
-            {unread > 9 ? "9+" : unread}
+        {feed.unread > 0 ? (
+          <span
+            className="absolute -top-1.5 -right-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[#e2761b] px-1 text-[10px] font-bold text-white"
+            aria-live="polite"
+          >
+            {feed.unread > 9 ? "9+" : feed.unread}
           </span>
         ) : null}
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-50 mt-2 w-80 border border-[#15130f]/15 bg-white shadow-xl">
-          <div className="flex items-center justify-between border-b border-[#15130f]/10 px-4 py-3">
+        <div
+          role="dialog"
+          aria-label="Notifications"
+          className={cn(appDropdown, "absolute right-0 z-50 mt-2 w-80 overflow-hidden")}
+        >
+          <div className="px-4 py-3 shadow-[0_1px_0_rgba(21,19,15,0.06)]">
             <p className="text-[11px] font-bold tracking-[0.16em] uppercase">Notifications</p>
-            {unread > 0 ? (
-              <button
-                type="button"
-                onClick={() => void markAllRead()}
-                className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.1em] text-[#b8770a] uppercase hover:underline"
-              >
-                <CheckCheck className="size-3" /> Mark all read
-              </button>
-            ) : null}
           </div>
-          <ul className="max-h-80 overflow-auto">
-            {items.length === 0 ? (
+          <ul className="max-h-80 overflow-auto" aria-live="polite">
+            {feed.isLoading ? (
+              <li className="px-4 py-6 text-sm text-[#6f6a60]">Loading…</li>
+            ) : feed.isError ? (
+              <li className="px-4 py-6 text-sm text-[#9a3b2e]">
+                Failed to load.{" "}
+                <button type="button" className="underline" onClick={() => void feed.refetch()}>
+                  Retry
+                </button>
+              </li>
+            ) : feed.items.length === 0 ? (
               <li className="px-4 py-6 text-sm text-[#6f6a60]">No notifications yet.</li>
             ) : (
-              items.map((item) => (
-                <li key={item.id} className="border-b border-[#15130f]/8 last:border-0">
+              feed.items.map((item) => (
+                <li
+                  key={item.id}
+                  className={`border-b border-[#15130f]/8 last:border-0 ${item.readAt ? "" : "bg-[#fffaf0]"}`}
+                >
                   <Link
                     href={item.href ?? viewAllHref}
                     onClick={(event) => void openNotification(event, item)}
-                    className={`block px-4 py-3 hover:bg-[#f7f4ee] ${item.readAt ? "" : "bg-[#fffaf0]"}`}
+                    className="block px-4 py-3 hover:bg-sc-section-alt"
                   >
-                    <p className="text-sm font-semibold">{item.title}</p>
-                    {item.body ? (
-                      <p className="mt-1 line-clamp-2 text-xs text-[#6f6a60]">{item.body}</p>
-                    ) : null}
-                    <p className="mt-1 text-[10px] text-[#9a9488]">
-                      {new Date(item.createdAt).toLocaleString()}
-                      {item.readAt ? " · read" : " · new"}
-                    </p>
+                    <NotificationRowContent item={item} compact />
                   </Link>
                 </li>
               ))
@@ -171,7 +119,7 @@ export function NotificationBell({
           <Link
             href={viewAllHref}
             onClick={() => setOpen(false)}
-            className="block border-t border-[#15130f]/10 px-4 py-3 text-center text-[10px] font-bold tracking-[0.14em] uppercase hover:text-[#b8770a]"
+            className="block border-t border-[#15130f]/10 px-4 py-3 text-center text-[10px] font-bold tracking-[0.14em] uppercase hover:text-sc-accent"
           >
             View all
           </Link>

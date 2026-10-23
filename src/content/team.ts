@@ -1,8 +1,14 @@
 export type TeamMember = {
+  /** Set when loaded from the studio team (users table). */
+  id?: string;
   name: string;
   role: string;
   skills: string[];
   image?: string | null;
+  bio?: string | null;
+  linkedinUrl?: string | null;
+  githubUrl?: string | null;
+  portfolioUrl?: string | null;
 };
 
 export const TEAM_DESIGN = ["UX Design", "Figma", "Prototyping"];

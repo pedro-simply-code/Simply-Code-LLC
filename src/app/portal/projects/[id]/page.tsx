@@ -13,6 +13,9 @@ import { auth } from "~/lib/auth";
 import { projectDisplayDate } from "~/lib/project-year";
 import { createClientReview, createPortalRequest } from "~/server/studio/actions";
 import { getPortalProject } from "~/server/studio/queries";
+import { reviewStatusLabel } from "~/lib/reviews";
+import { appGhostButtonLg } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +42,7 @@ export default async function PortalProjectPage({
         actions={
           <Link
             href="/portal"
-            className="inline-flex border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.14em] uppercase hover:border-[#b8770a]"
+            className={cn("inline-flex", appGhostButtonLg)}
           >
             All projects
           </Link>
@@ -164,7 +167,7 @@ export default async function PortalProjectPage({
             </Field>
             <button
               type="submit"
-              className="w-full bg-[#15130f] px-4 py-3 text-[10px] font-bold tracking-[0.16em] text-white uppercase hover:bg-[#b8770a]"
+              className="w-full rounded-md bg-[#15130f] px-4 py-3 text-[10px] font-bold tracking-[0.16em] text-white uppercase hover:bg-sc-accent"
             >
               Submit request
             </button>
@@ -184,8 +187,8 @@ export default async function PortalProjectPage({
 
             {review ? (
               <div>
-                <p className="text-[10px] font-bold tracking-[0.12em] text-[#b8770a] uppercase">
-                  {review.status} · {review.rating}/5
+                <p className="text-[10px] font-bold tracking-[0.12em] text-sc-accent uppercase">
+                  {reviewStatusLabel(review.status, "portal")} · {review.rating}/5
                 </p>
                 <blockquote className="mt-2 text-sm leading-relaxed text-[#15130f]">
                   &ldquo;{review.quote}&rdquo;
@@ -211,7 +214,7 @@ export default async function PortalProjectPage({
                 </Field>
                 <button
                   type="submit"
-                  className="w-full border border-[#15130f]/20 px-4 py-3 text-[10px] font-bold tracking-[0.16em] uppercase hover:border-[#b8770a]"
+                  className={cn("w-full", appGhostButtonLg, "px-4 py-3 tracking-[0.16em]")}
                 >
                   Submit review
                 </button>

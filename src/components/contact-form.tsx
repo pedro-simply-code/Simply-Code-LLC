@@ -2,9 +2,11 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
-import { submitContact } from "~/app/contact/actions";
-import { INITIAL_CONTACT_STATE } from "~/app/contact/schema";
+import { MessageAttachmentUpload } from "~/components/messages/message-attachment-upload";
+import { submitContact } from "~/app/(site)/contact/actions";
+import { INITIAL_CONTACT_STATE } from "~/app/(site)/contact/schema";
 import { SITE } from "~/content/site";
+import { appInputLg, appPanel } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 const SERVICE_OPTIONS = [
@@ -15,8 +17,7 @@ const SERVICE_OPTIONS = [
   { value: "other", label: "Something else" },
 ];
 
-const inputClass =
-  "w-full border border-[#15130f]/15 bg-white px-4 py-3 text-sm text-[#15130f] placeholder:text-[#6f6a60] outline-none transition-colors focus:border-[#f0a500] focus-visible:border-[#f0a500] aria-[invalid=true]:border-red-600";
+const inputClass = appInputLg;
 
 function FieldError({ id, messages }: { id: string; messages?: string[] }) {
   if (!messages?.length) return null;
@@ -43,9 +44,9 @@ export function ContactForm() {
     return (
       <div
         role="status"
-        className="flex h-full flex-col justify-center border border-[#15130f]/12 bg-white p-8 sm:p-10"
+        className={cn(appPanel, "flex h-full flex-col justify-center p-8 sm:p-10")}
       >
-        <CheckCircle2 className="size-10 text-[#b8770a]" />
+        <CheckCircle2 className="size-10 text-sc-accent" />
         <h3 className="mt-6 text-2xl font-black tracking-tight uppercase">Message sent</h3>
         <p className="mt-3 text-[15px] leading-relaxed text-[#57524a]">
           {state.message ??
@@ -55,7 +56,7 @@ export function ContactForm() {
           Need to add something? Email us at{" "}
           <a
             href={`mailto:${SITE.email}`}
-            className="font-semibold text-[#15130f] underline underline-offset-4 hover:text-[#b8770a]"
+            className="font-semibold text-[#15130f] underline underline-offset-4 hover:text-sc-accent"
           >
             {SITE.email}
           </a>
@@ -68,7 +69,7 @@ export function ContactForm() {
   const errors = state.errors ?? {};
 
   return (
-    <form action={formAction} className="border border-[#15130f]/12 bg-white p-6 sm:p-8" noValidate>
+    <form action={formAction} className={cn(appPanel, "p-6 sm:p-8")} noValidate>
       <input ref={startedAtRef} type="hidden" name="startedAt" defaultValue="" />
 
       <div className="sr-only" aria-hidden="true">
@@ -191,10 +192,17 @@ export function ContactForm() {
         )}
       </div>
 
+      <div className="mt-5 space-y-2">
+        <p className="text-[11px] font-bold tracking-[0.16em] uppercase">Attachments</p>
+        <MessageAttachmentUpload
+          hint="Optional — images, PDF, Word, Excel, TXT or CSV (max 5 files, 8 MB each)."
+        />
+      </div>
+
       <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[12px] text-[#6f6a60]">
           By sending this form you agree to our{" "}
-          <a href="/privacy" className="underline underline-offset-4 hover:text-[#b8770a]">
+          <a href="/privacy" className="underline underline-offset-4 hover:text-sc-accent">
             privacy policy
           </a>
           .
@@ -202,7 +210,7 @@ export function ContactForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex shrink-0 items-center justify-center gap-2 bg-[#15130f] px-7 py-3.5 text-[12px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-[#b8770a] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#15130f] px-7 py-3.5 text-[12px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-sc-accent disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Sending…" : "Send Message"}
           <ArrowRight className="size-4" />

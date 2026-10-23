@@ -7,6 +7,8 @@ import {
   UPWORK_PROFILE_URL,
   type Testimonial,
 } from "~/content/testimonials";
+import { appIconButton, appPanelMuted } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 function getPerPage() {
   if (typeof window === "undefined") return 3;
@@ -21,10 +23,10 @@ function getPerPage() {
  */
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
-    <figure className="flex h-full flex-col border border-[#15130f]/12 bg-[#f7f4ee] p-8">
+    <figure className={cn(appPanelMuted, "flex h-full flex-col p-8")}>
       <div className="flex items-center justify-between gap-4">
-        <Quote className="size-7 text-[#f0a500]" aria-hidden />
-        <div className="flex items-center gap-1 text-[#f0a500]" aria-hidden>
+        <Quote className="size-7 text-sc-accent-bright" aria-hidden />
+        <div className="flex items-center gap-1 text-sc-accent-bright" aria-hidden>
           {Array.from({ length: 5 }).map((_, index) => (
             <Star key={index} className="size-3.5 fill-current" />
           ))}
@@ -48,7 +50,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
         {testimonial.projectSlug ? (
           <Link
             href={`/work/${testimonial.projectSlug}`}
-            className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase underline underline-offset-4 hover:text-[#b8770a]"
+            className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase underline underline-offset-4 hover:text-sc-accent"
           >
             View project <ArrowRight className="size-3" />
           </Link>
@@ -161,7 +163,10 @@ export function TestimonialsCarousel({
             onClick={() => goTo(current - 1)}
             disabled={!canGoBack}
             aria-label="Previous reviews"
-            className="inline-flex size-10 items-center justify-center border border-[#15130f]/20 text-[#15130f] transition-colors hover:border-[#f0a500] hover:text-[#b8770a] disabled:pointer-events-none disabled:opacity-30"
+            className={cn(
+              appIconButton,
+              "size-10 text-[#15130f] hover:text-sc-accent disabled:pointer-events-none disabled:opacity-30",
+            )}
           >
             <ArrowLeft className="size-4" />
           </button>
@@ -170,7 +175,10 @@ export function TestimonialsCarousel({
             onClick={() => goTo(current + 1)}
             disabled={!canGoForward}
             aria-label="Next reviews"
-            className="inline-flex size-10 items-center justify-center border border-[#15130f]/20 text-[#15130f] transition-colors hover:border-[#f0a500] hover:text-[#b8770a] disabled:pointer-events-none disabled:opacity-30"
+            className={cn(
+              appIconButton,
+              "size-10 text-[#15130f] hover:text-sc-accent disabled:pointer-events-none disabled:opacity-30",
+            )}
           >
             <ArrowRight className="size-4" />
           </button>
@@ -181,7 +189,7 @@ export function TestimonialsCarousel({
         href={UPWORK_PROFILE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.16em] text-[#15130f] uppercase underline underline-offset-4 transition-colors hover:text-[#b8770a]"
+        className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.16em] text-[#15130f] uppercase underline underline-offset-4 transition-colors hover:text-sc-accent"
       >
         Read all reviews on Upwork <ArrowUpRight className="size-3" />
       </a>

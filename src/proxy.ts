@@ -11,37 +11,44 @@ export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
   const role = normalizeRole(req.auth?.user?.role);
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+
+  const withPathname = (response: NextResponse) => {
+    response.headers.set("x-pathname", pathname);
+    return response;
+  };
 
   // Public registration is disabled. Invitees use the emailed link instead.
   if (pathname === "/register" || pathname.startsWith("/register/")) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return withPathname(NextResponse.redirect(new URL("/login", req.url)));
   }
 
   // Signed-in users do not need the auth screens.
   if (authPages.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     if (isLoggedIn) {
-      return NextResponse.redirect(new URL(homePathForRole(role), req.url));
+      return withPathname(NextResponse.redirect(new URL(homePathForRole(role), req.url)));
     }
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
     if (!isLoggedIn) {
       const login = new URL("/login", req.url);
       login.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(login);
+      return withPathname(NextResponse.redirect(login));
     }
-    return NextResponse.redirect(new URL(homePathForRole(role), req.url));
+    return withPathname(NextResponse.redirect(new URL(homePathForRole(role), req.url)));
   }
 
   if (pathname === "/studio" || pathname.startsWith("/studio/")) {
     if (!isLoggedIn) {
       const login = new URL("/login", req.url);
       login.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(login);
+      return withPathname(NextResponse.redirect(login));
     }
     if (!isTeam(role)) {
-      return NextResponse.redirect(new URL("/portal", req.url));
+      return withPathname(NextResponse.redirect(new URL("/portal", req.url)));
     }
   }
 
@@ -49,22 +56,18 @@ export const proxy = auth((req) => {
     if (!isLoggedIn) {
       const login = new URL("/login", req.url);
       login.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(login);
+      return withPathname(NextResponse.redirect(login));
     }
     if (isTeam(role)) {
-      return NextResponse.redirect(new URL("/studio", req.url));
+      return withPathname(NextResponse.redirect(new URL("/studio", req.url)));
     }
   }
 
-  return NextResponse.next();
+  return NextResponse.next({ request: { headers: requestHeaders } });
 });
 
 export const config = {
   matcher: [
-    "/studio/:path*",
-    "/portal/:path*",
-    "/dashboard/:path*",
-    "/login",
-    "/register",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

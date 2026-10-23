@@ -8,12 +8,7 @@ import { getClients, getTeamUsers, getTechnologies } from "~/server/studio/queri
 
 export const dynamic = "force-dynamic";
 
-export default async function NewProjectPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const { error } = await searchParams;
+export default async function NewProjectPage() {
   const session = await auth();
   if (!canCreateProjects(session?.user.role)) redirect("/studio/projects");
 
@@ -29,11 +24,6 @@ export default async function NewProjectPage({
         title="New project"
         description="Create the project, assign a lead and developers, and publish when it is ready."
       />
-      {error === "cover-upload" ? (
-        <p className="mb-6 border border-[#9a3b2e]/25 bg-[#fdf1ef] px-4 py-3 text-sm text-[#9a3b2e]">
-          The cover image could not be saved. Try again or use a smaller file.
-        </p>
-      ) : null}
       <ProjectForm
         action={createProject}
         team={team}

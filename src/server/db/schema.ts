@@ -48,6 +48,15 @@ export const users = createTable("users", {
   passwordHash: text("password_hash"),
   role: userRoleEnum("role").notNull().default("client"),
   title: text("title"),
+  /** Short public bio for /about#team (team) or context in portal (clients). */
+  bio: text("bio"),
+  /** Optional phone for scheduling and project contact (E.164 or free-form). */
+  phone: text("phone"),
+  /** IANA timezone id, e.g. America/Guatemala */
+  timezone: text("timezone"),
+  linkedinUrl: text("linkedin_url"),
+  githubUrl: text("github_url"),
+  portfolioUrl: text("portfolio_url"),
   /** Shown as skill chips on the public About team section. */
   profileSkills: jsonb("profile_skills").$type<string[]>().notNull().default([]),
   /** When true, team members appear on /about#team (founder, lead, developer only). */
@@ -342,6 +351,10 @@ export const notifications = createTable(
     title: text("title").notNull(),
     body: text("body").notNull().default(""),
     href: text("href"),
+    entityType: text("entity_type"),
+    entityId: uuid("entity_id"),
+    metadata: jsonb("metadata").$type<Record<string, string>>().default({}),
+    dedupeKey: text("dedupe_key"),
     readAt: timestamp("read_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
@@ -352,6 +365,13 @@ export const notifications = createTable(
       table.userId,
       table.readAt,
     ),
+    userCreatedIdx: index(`${env.DB_TABLE_PREFIX}_notifications_user_created_idx`).on(
+      table.userId,
+      table.createdAt,
+    ),
+    userDedupeIdx: uniqueIndex(`${env.DB_TABLE_PREFIX}_notifications_user_dedupe_idx`)
+      .on(table.userId, table.dedupeKey)
+      .where(sql`${table.dedupeKey} is not null`),
   }),
 );
 
@@ -362,10 +382,57 @@ export const contactMessages = createTable("contact_messages", {
   company: text("company"),
   service: text("service"),
   message: text("message").notNull(),
+  attachments: jsonb("attachments")
+    .$type<import("~/lib/message-attachments").MessageAttachment[]>()
+    .notNull()
+    .default([]),
+  /** new | replied | archived */
   status: text("status").notNull().default("new"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+});
+
+/** Founder → client replies (portal inbox and/or email audit). */
+export const clientInboxMessages = createTable(
+  "client_inbox_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Null when the reply was email-only (studio history still kept on the enquiry). */
+    recipientUserId: uuid("recipient_user_id").references(() => users.id, { onDelete: "cascade" }),
+    contactMessageId: uuid("contact_message_id").references(() => contactMessages.id, {
+      onDelete: "set null",
+    }),
+    subject: text("subject").notNull(),
+    body: text("body").notNull(),
+    attachments: jsonb("attachments")
+      .$type<import("~/lib/message-attachments").MessageAttachment[]>()
+      .notNull()
+      .default([]),
+    /** portal | email | both */
+    channel: text("channel").notNull(),
+    sentById: uuid("sent_by_id").references(() => users.id, { onDelete: "set null" }),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    recipientIdx: index(`${env.DB_TABLE_PREFIX}_client_inbox_recipient_idx`).on(
+      table.recipientUserId,
+      table.createdAt,
+    ),
+  }),
+);
+
+/** Singleton row (`key = global`) for founder-controlled site appearance and flags. */
+export const siteSettings = createTable("site_settings", {
+  key: text("key").primaryKey().notNull(),
+  settings: jsonb("settings").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedById: uuid("updated_by_id").references(() => users.id, { onDelete: "set null" }),
 });
 
 /** Example domain table — replace or extend per project. */

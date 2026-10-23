@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 const NAV: DashboardNavItem[] = [
   { href: "/portal", label: "Projects", icon: "projects", section: "Workspace" },
+  { href: "/portal/messages", label: "Messages", icon: "messages", section: "Workspace" },
   {
     href: "/portal/notifications",
     label: "Notifications",
@@ -44,7 +45,7 @@ export default async function PortalLayout({ children }: { children: React.React
       }}
       actions={
         <>
-          <NotificationBell viewAllHref="/portal/notifications" />
+          <NotificationBell context="portal" viewAllHref="/portal/notifications" />
           <SignOutButton compact />
         </>
       }

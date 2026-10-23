@@ -3,22 +3,23 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
-import { toast } from "sonner";
+import { appToast } from "~/lib/app-toast";
+import { isUploadThingImageUrl } from "~/lib/project-image";
+import { useUploadThing } from "~/lib/uploadthing";
+import { discardPendingAvatarUpload } from "~/server/profile/actions";
 
-function assignFileToInput(input: HTMLInputElement | null, file: File | null) {
-  if (!input) return;
-  const dt = new DataTransfer();
-  if (file) dt.items.add(file);
-  input.files = dt.files;
+function uploadFileUrl(file: { url: string; ufsUrl?: string | null }) {
+  return file.ufsUrl ?? file.url;
 }
 
 export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const initialUrl = defaultUrl?.trim() ?? "";
+  const pendingUtUrlRef = useRef<string | null>(null);
   const localPreviewRef = useRef<string | null>(null);
 
-  const [savedUrl, setSavedUrl] = useState(defaultUrl?.trim() ?? "");
+  const [dbUrl] = useState(initialUrl);
+  const [imageValue, setImageValue] = useState(initialUrl);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
-  const [hasPendingFile, setHasPendingFile] = useState(false);
 
   const clearLocalPreview = () => {
     if (localPreviewRef.current) {
@@ -28,54 +29,100 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
     setLocalPreview(null);
   };
 
-  useEffect(() => {
-    return () => clearLocalPreview();
-  }, []);
+  const { startUpload, isUploading } = useUploadThing("avatar", {
+    onUploadError: (error) => {
+      clearLocalPreview();
+      appToast.error(error.message || "Upload failed.");
+    },
+  });
 
-  const applyFile = (file: File) => {
+  useEffect(() => {
+    const savedUrl = dbUrl;
+    return () => {
+      clearLocalPreview();
+      const pending = pendingUtUrlRef.current;
+      if (pending && pending !== savedUrl) {
+        void discardPendingAvatarUpload(pending);
+      }
+    };
+  }, [dbUrl]);
+
+  const discardPending = async (url: string) => {
+    if (!isUploadThingImageUrl(url)) return;
+    await discardPendingAvatarUpload(url);
+  };
+
+  const applyFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file.");
+      appToast.error("Please choose an image file.");
       return;
     }
     if (file.size > 4 * 1024 * 1024) {
-      toast.error("Image must be 4 MB or smaller.");
+      appToast.error("Image must be 4 MB or smaller.");
       return;
     }
+
     clearLocalPreview();
-    const preview = URL.createObjectURL(file);
-    localPreviewRef.current = preview;
-    setLocalPreview(preview);
-    setHasPendingFile(true);
-    assignFileToInput(inputRef.current, file);
+    const blob = URL.createObjectURL(file);
+    localPreviewRef.current = blob;
+    setLocalPreview(blob);
+
+    const previousPending = pendingUtUrlRef.current;
+    if (previousPending) {
+      await discardPending(previousPending);
+      pendingUtUrlRef.current = null;
+    }
+
+    try {
+      const uploaded = await startUpload([file]);
+      clearLocalPreview();
+
+      if (!uploaded?.[0]) {
+        appToast.error("Upload failed. Try again.");
+        setImageValue(dbUrl);
+        return;
+      }
+
+      const url = uploadFileUrl(uploaded[0]);
+      pendingUtUrlRef.current = url;
+      setImageValue(url);
+    } catch {
+      clearLocalPreview();
+      setImageValue(dbUrl);
+    }
   };
 
-  const removeAvatar = () => {
+  const removeAvatar = async () => {
     clearLocalPreview();
-    setHasPendingFile(false);
-    setSavedUrl("");
-    assignFileToInput(inputRef.current, null);
+    if (pendingUtUrlRef.current) {
+      await discardPending(pendingUtUrlRef.current);
+      pendingUtUrlRef.current = null;
+    }
+    setImageValue("");
   };
 
-  const previewSrc = localPreview || savedUrl || null;
+  const previewSrc = localPreview || imageValue || null;
+  const isUnsaved = imageValue !== dbUrl;
 
   return (
     <div className="space-y-4">
-      <input type="hidden" name="image" value={hasPendingFile ? "" : savedUrl} />
+      <input type="hidden" name="image" value={imageValue} />
       <input
-        ref={inputRef}
         type="file"
-        name="avatarFile"
         accept="image/png,image/jpeg,image/webp,image/gif"
         className="sr-only"
+        disabled={isUploading}
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (file) applyFile(file);
+          if (file) void applyFile(file);
+          event.target.value = "";
         }}
+        id="avatar-file-input"
       />
 
       <div className="flex flex-wrap items-center gap-5">
         <div
-          className="relative size-28 shrink-0 overflow-hidden rounded-full border border-[#15130f]/15 bg-gradient-to-br from-[#f0a500] to-[#e2761b]"
+          className="relative size-28 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-sc-accent-bright to-sc-accent shadow-[0_2px_12px_rgba(21,19,15,0.12)] ring-2 ring-white"
           onDragOver={(event) => {
             event.preventDefault();
             event.dataTransfer.dropEffect = "copy";
@@ -83,7 +130,7 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
           onDrop={(event) => {
             event.preventDefault();
             const file = event.dataTransfer.files[0];
-            if (file) applyFile(file);
+            if (file) void applyFile(file);
           }}
         >
           {previewSrc ? (
@@ -93,7 +140,7 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
               fill
               sizes="112px"
               className="object-cover"
-              unoptimized={previewSrc.startsWith("blob:")}
+              unoptimized={previewSrc.startsWith("blob:") || previewSrc.startsWith("/")}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-[#15130f]/50">
@@ -105,23 +152,33 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => inputRef.current?.click()}
-            className="bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-[#b8770a]"
+            disabled={isUploading}
+            onClick={() => document.getElementById("avatar-file-input")?.click()}
+            className="rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent disabled:opacity-60"
           >
-            {previewSrc ? "Choose another" : "Upload photo"}
+            {isUploading ? "Uploading…" : previewSrc ? "Choose another" : "Upload photo"}
           </button>
           {previewSrc ? (
             <button
               type="button"
-              onClick={removeAvatar}
-              className="border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#9a3b2e] hover:text-[#9a3b2e]"
+              disabled={isUploading}
+              onClick={() => void removeAvatar()}
+              className="rounded-md bg-white px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase shadow-[0_1px_2px_rgba(21,19,15,0.08)] hover:text-[#9a3b2e] hover:shadow-[0_2px_8px_rgba(154,59,46,0.12)] disabled:opacity-60"
             >
               Remove
             </button>
           ) : null}
-          {hasPendingFile ? (
-            <span className="text-[10px] font-bold tracking-[0.1em] text-[#b8770a] uppercase">
-              Unsaved
+          {isUploading ? (
+            <span className="text-[10px] font-bold tracking-[0.1em] text-sc-muted uppercase">
+              Uploading to storage…
+            </span>
+          ) : isUnsaved ? (
+            <span className="text-[10px] font-bold tracking-[0.1em] text-sc-accent uppercase">
+              Unsaved — save profile to apply
+            </span>
+          ) : imageValue ? (
+            <span className="text-[10px] font-bold tracking-[0.1em] text-[#2e7d32] uppercase">
+              Saved
             </span>
           ) : null}
         </div>

@@ -2,9 +2,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
 import { isFounder, roleLabel } from "~/lib/roles";
-import { createTeamMember, updateUserRole } from "~/server/studio/actions";
+import { createTeamMember } from "~/server/studio/actions";
 import { getPendingInvites } from "~/server/invites";
-import { getTeamUsers } from "~/server/studio/queries";
+import {
+  getTeamUsers,
+  getTechnologies,
+  getTechnologyAssignmentsForUsers,
+} from "~/server/studio/queries";
+import { StudioFormDialog } from "~/components/studio/studio-form-dialog";
+import { TeamMembersView } from "~/components/studio/team-members-view";
+import { StudioViewToolbar } from "~/components/studio/studio-view-toggle";
 import {
   Field,
   StudioCard,
@@ -12,158 +19,135 @@ import {
   StudioInput,
   StudioSelect,
 } from "~/components/studio/ui";
+import { StudioPagination } from "~/components/studio/studio-pagination";
+import { paginateStudio, parseStudioPage, studioPageSummary } from "~/lib/studio-pagination";
+import { parseStudioView } from "~/lib/studio-view";
+import { appGhostButtonLg } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-const ERROR_MESSAGES: Record<string, string> = {
-  validation: "Check the name and email, then try again.",
-  exists: "That email already has an account.",
-  self: "You cannot change your own role.",
-  "last-founder": "The studio needs at least one founder.",
-  email:
-    "Invitation saved, but the email could not be sent. Check the Google SMTP settings.",
-};
 
 export default async function TeamPage({
   searchParams,
 }: {
-  searchParams: Promise<{ invited?: string; error?: string }>;
+  searchParams: Promise<{
+    invited?: string;
+    error?: string;
+    updated?: string;
+    view?: string;
+    page?: string;
+  }>;
 }) {
   const session = await auth();
   if (!isFounder(session?.user.role)) redirect("/studio");
 
-  const { invited, error } = await searchParams;
-  const [team, pendingInvites] = await Promise.all([
+  const query = await searchParams;
+  const view = parseStudioView(query.view);
+  const page = parseStudioPage(query.page);
+  const returnParams = new URLSearchParams();
+  if (view === "list") returnParams.set("view", "list");
+  if (page > 1) returnParams.set("page", String(page));
+  const returnTo = returnParams.size
+    ? `/studio/team?${returnParams.toString()}`
+    : "/studio/team";
+  const [team, pendingInvites, technologyCatalog] = await Promise.all([
     getTeamUsers(),
     getPendingInvites(),
+    getTechnologies(),
   ]);
+  const assignmentsByUser = await getTechnologyAssignmentsForUsers(team.map((member) => member.id));
+  const teamWithStack = team.map((member) => ({
+    ...member,
+    technologies: assignmentsByUser.get(member.id) ?? [],
+  }));
   const pending = pendingInvites.filter((invite) => invite.role !== "client");
-  const message = invited
-    ? "Invitation sent."
-    : error
-      ? ERROR_MESSAGES[error]
-      : null;
+  const paginated = paginateStudio(teamWithStack, page);
+  const catalogOptions = technologyCatalog.map((technology) => ({
+    id: technology.id,
+    name: technology.name,
+    category: technology.category,
+  }));
 
   return (
     <div>
       <StudioHeader
         title="Team"
-        description="Founder inherits every role. Leads inherit developers. Developers only see their assigned projects."
+        description="Roster cards show photo and role. Manage opens technology assignments (from the catalog), studio role, and About visibility."
         actions={
-          <Link
-            href="/studio/technologies"
-            className="inline-flex border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.14em] uppercase hover:border-[#b8770a]"
-          >
-            Technologies
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <StudioFormDialog
+              triggerLabel="Invite member"
+              title="Invite team member"
+              description="Sends an email invitation. The recipient sets their own password. Public registration is closed."
+            >
+              <form action={createTeamMember} className="grid gap-4">
+                <Field label="Name">
+                  <StudioInput name="name" required maxLength={120} />
+                </Field>
+                <Field label="Email">
+                  <StudioInput name="email" type="email" required />
+                </Field>
+                <Field label="Title">
+                  <StudioInput
+                    name="title"
+                    placeholder="Full Stack Developer"
+                    maxLength={120}
+                  />
+                </Field>
+                <Field label="Role">
+                  <StudioSelect name="role" defaultValue="developer">
+                    <option value="developer">Developer</option>
+                    <option value="lead">Lead (lead + developer)</option>
+                    <option value="founder">Founder (all permissions)</option>
+                  </StudioSelect>
+                </Field>
+                <button
+                  type="submit"
+                  className="w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+                >
+                  Send invitation
+                </button>
+              </form>
+            </StudioFormDialog>
+            <Link href="/studio/technologies" className={cn("inline-flex", appGhostButtonLg)}>
+              Technologies
+            </Link>
+          </div>
         }
       />
 
-      {message ? (
-        <p
-          className={
-            invited
-              ? "mb-6 border border-[#b8770a]/30 bg-[#b8770a]/5 px-4 py-3 text-sm text-[#7a4e05]"
-              : "mb-6 border border-[#b3261e]/30 bg-[#b3261e]/5 px-4 py-3 text-sm text-[#b3261e]"
-          }
-        >
-          {message}
+      {query.updated === "1" ? (
+        <p className="mb-4 rounded-md bg-[#e8f5e9] px-4 py-3 text-sm text-[#2e7d32]">
+          Team member updated.
+        </p>
+      ) : null}
+      {query.error === "self" ? (
+        <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-[#9a3b2e]">
+          You cannot change your own role here. Ask another founder or use Profile for your details.
+        </p>
+      ) : null}
+      {query.error === "last-founder" ? (
+        <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-[#9a3b2e]">
+          At least one founder must remain in the studio.
         </p>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-        <StudioCard
-          title="Invite team member"
-          description="Sends an email invitation. The recipient sets their own password. Public registration is closed."
-        >
-          <form action={createTeamMember} className="grid gap-4">
-            <Field label="Name">
-              <StudioInput name="name" required maxLength={120} />
-            </Field>
-            <Field label="Email">
-              <StudioInput name="email" type="email" required />
-            </Field>
-            <Field label="Title">
-              <StudioInput
-                name="title"
-                placeholder="Full Stack Developer"
-                maxLength={120}
-              />
-            </Field>
-            <Field label="Role">
-              <StudioSelect name="role" defaultValue="developer">
-                <option value="developer">Developer</option>
-                <option value="lead">Lead (lead + developer)</option>
-                <option value="founder">Founder (all permissions)</option>
-              </StudioSelect>
-            </Field>
-            <button
-              type="submit"
-              className="w-fit bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-[#b8770a]"
-            >
-              Send invitation
-            </button>
-          </form>
-        </StudioCard>
-
-        <StudioCard title="Team members">
-          <ul className="divide-y divide-[#15130f]/10">
-            {team.map((person) => (
-              <li key={person.id} className="py-4">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold">
-                      {person.name ?? person.email}
-                      {person.id === session?.user.id ? (
-                        <span className="ml-2 text-[10px] font-bold tracking-[0.12em] text-[#b8770a] uppercase">
-                          You
-                        </span>
-                      ) : null}
-                    </p>
-                    <p className="text-[11px] text-[#6f6a60]">
-                      {person.email} · {person.title ?? roleLabel(person.role)}
-                    </p>
-                  </div>
-                  <span className="border border-[#15130f]/15 px-2 py-1 text-[10px] font-bold tracking-[0.1em] uppercase">
-                    {roleLabel(person.role)}
-                  </span>
-                </div>
-
-                {person.id !== session?.user.id ? (
-                  <form
-                    action={updateUserRole}
-                    className="mt-3 flex flex-wrap items-end gap-2"
-                  >
-                    <input type="hidden" name="userId" value={person.id} />
-                    <StudioSelect
-                      name="role"
-                      defaultValue={roleLabel(person.role).toLowerCase()}
-                      className="max-w-44"
-                    >
-                      <option value="developer">Developer</option>
-                      <option value="lead">Lead</option>
-                      <option value="founder">Founder</option>
-                      <option value="client">Client</option>
-                    </StudioSelect>
-                    <button
-                      type="submit"
-                      className="border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#b8770a]"
-                    >
-                      Update role
-                    </button>
-                  </form>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </StudioCard>
-      </div>
+      <StudioViewToolbar
+        summary={<span className="font-semibold text-[#15130f]">{team.length} team members</span>}
+        pageSummary={studioPageSummary(paginated.page, paginated.pageSize, paginated.total)}
+      />
+      <TeamMembersView
+        team={paginated.items}
+        currentUserId={session!.user.id}
+        view={view}
+        returnTo={returnTo}
+        technologyCatalog={catalogOptions}
+        canManageAbout={isFounder(session!.user.role)}
+      />
+      <StudioPagination page={paginated.page} totalPages={paginated.totalPages} />
 
       {pending.length > 0 ? (
-        <StudioCard
-          title={`Pending invitations (${pending.length})`}
-          className="mt-6"
-        >
+        <StudioCard title={`Pending invitations (${pending.length})`} className="mt-6">
           <ul className="divide-y divide-[#15130f]/10">
             {pending.map((invite) => (
               <li
@@ -171,9 +155,7 @@ export default async function TeamPage({
                 className="flex flex-wrap items-center justify-between gap-3 py-3"
               >
                 <div>
-                  <p className="text-sm font-semibold">
-                    {invite.name ?? invite.email}
-                  </p>
+                  <p className="text-sm font-semibold">{invite.name ?? invite.email}</p>
                   <p className="text-[11px] text-[#6f6a60]">
                     {invite.email} · {roleLabel(invite.role)}
                     {invite.title ? ` · ${invite.title}` : ""}

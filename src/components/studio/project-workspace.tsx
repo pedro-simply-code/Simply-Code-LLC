@@ -10,6 +10,11 @@ import {
   StudioTextarea,
 } from "~/components/studio/ui";
 import { roleLabel } from "~/lib/roles";
+import {
+  studioProjectGhostButton,
+  studioProjectPanel,
+} from "~/lib/studio-project-surface";
+import { appGhostButton } from "~/lib/surface";
 import type { UserRole } from "~/server/db/schema";
 import {
   assignProjectMember,
@@ -51,11 +56,11 @@ export function ProjectWorkspace({
 
   const overviewPanel = (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2 border border-[#15130f]/12 bg-white p-4">
+      <div className={`flex flex-wrap gap-2 p-4 ${studioProjectPanel}`}>
         {isManager ? (
           <Link
             href={`${projectPath}?tab=edit`}
-            className="inline-flex items-center gap-1.5 bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-[#b8770a]"
+            className="inline-flex items-center gap-1.5 rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
           >
             <Pencil className="size-3" />
             Edit project
@@ -66,7 +71,7 @@ export function ProjectWorkspace({
             href={`/work/${project.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#b8770a]"
+            className={`inline-flex items-center gap-1.5 ${studioProjectGhostButton}`}
           >
             <ExternalLink className="size-3" />
             View public page
@@ -74,14 +79,14 @@ export function ProjectWorkspace({
         ) : null}
         <Link
           href={`${projectPath}?tab=updates`}
-          className="inline-flex items-center gap-1.5 border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#b8770a]"
+          className={`inline-flex items-center gap-1.5 ${studioProjectGhostButton}`}
         >
           Updates
           <ArrowRight className="size-3" />
         </Link>
         <Link
           href={`${projectPath}?tab=requests`}
-          className="inline-flex items-center gap-1.5 border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#b8770a]"
+          className={`inline-flex items-center gap-1.5 ${studioProjectGhostButton}`}
         >
           Requests
           {openRequests > 0 ? (
@@ -94,7 +99,7 @@ export function ProjectWorkspace({
         {isManager ? (
           <Link
             href={`${projectPath}?tab=team`}
-            className="inline-flex items-center gap-1.5 border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#b8770a]"
+            className={`inline-flex items-center gap-1.5 ${studioProjectGhostButton}`}
           >
             Team
             <ArrowRight className="size-3" />
@@ -114,7 +119,7 @@ export function ProjectWorkspace({
           {isManager ? (
             <p className="mt-2 text-[11px] leading-snug text-[#6f6a60]">
               Change in{" "}
-              <Link href={`${projectPath}?tab=edit`} className="font-bold text-[#b8770a] hover:underline">
+              <Link href={`${projectPath}?tab=edit`} className="font-bold text-sc-accent hover:underline">
                 Edit → Publishing
               </Link>
               .
@@ -180,7 +185,7 @@ export function ProjectWorkspace({
         <p className="text-sm font-semibold capitalize">Current status: {project.status}</p>
         <p className="mt-2 text-xs leading-relaxed text-[#6f6a60]">
           Update status, featured flag, cover, and permalink in{" "}
-          <Link href={`${projectPath}?tab=edit`} className="font-bold text-[#b8770a] hover:underline">
+          <Link href={`${projectPath}?tab=edit`} className="font-bold text-sc-accent hover:underline">
             Edit project → Publishing
           </Link>
           , then save changes.
@@ -241,7 +246,7 @@ export function ProjectWorkspace({
           </StudioSelect>
           <button
             type="submit"
-            className="bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-[#b8770a]"
+            className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
           >
             Assign
           </button>
@@ -307,7 +312,7 @@ export function ProjectWorkspace({
           </Field>
           <button
             type="submit"
-            className="bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-[#b8770a]"
+            className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
           >
             Post update
           </button>
@@ -377,7 +382,7 @@ export function ProjectWorkspace({
                     <input type="hidden" name="status" value="open" />
                     <button
                       type="submit"
-                      className="border border-[#15130f]/20 px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-[#b8770a]"
+                      className={appGhostButton}
                     >
                       Reopen request
                     </button>
@@ -406,7 +411,7 @@ export function ProjectWorkspace({
                       />
                       <button
                         type="submit"
-                        className="inline-flex w-fit items-center gap-1 border border-[#9a3b2e]/30 px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#9a3b2e] uppercase hover:border-[#9a3b2e]"
+                        className="inline-flex w-fit items-center gap-1 rounded-md bg-white px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#9a3b2e] uppercase shadow-[0_1px_2px_rgba(154,59,46,0.15)] hover:shadow-[0_2px_8px_rgba(154,59,46,0.2)]"
                       >
                         <X className="size-3" /> Reject request
                       </button>

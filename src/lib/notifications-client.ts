@@ -16,16 +16,10 @@ export function emitNotificationsChanged(detail: { unread: number; id?: string }
 
 export async function markNotificationRead(id: string): Promise<number | null> {
   try {
-    const res = await fetch("/api/notifications", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-      keepalive: true,
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { unread: number };
-    emitNotificationsChanged({ unread: data.unread, id });
-    return data.unread;
+    const { markNotificationReadApi } = await import("~/lib/notifications-api");
+    const unread = await markNotificationReadApi(id);
+    emitNotificationsChanged({ unread, id });
+    return unread;
   } catch {
     return null;
   }

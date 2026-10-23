@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { appInputOnMuted } from "~/lib/surface";
+import { StudioViewToggle } from "~/components/studio/studio-view-toggle";
+import {
+  studioProjectGhostButton,
+  studioProjectPanel,
+} from "~/lib/studio-project-surface";
 
 function StudioProjectsFiltersInner() {
   const router = useRouter();
@@ -28,6 +34,7 @@ function StudioProjectsFiltersInner() {
     else params.delete("q");
     if (nextStatus && nextStatus !== "all") params.set("status", nextStatus);
     else params.delete("status");
+    params.delete("page");
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
@@ -35,8 +42,11 @@ function StudioProjectsFiltersInner() {
   const hasFilters = Boolean(query.trim()) || status !== "all";
 
   return (
-    <div className="mb-6 flex flex-col gap-3 border border-[#15130f]/12 bg-white p-4 sm:flex-row sm:flex-wrap sm:items-end">
-      <label className="grid min-w-0 flex-1 gap-1.5">
+    <div
+      className={`mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between ${studioProjectPanel}`}
+    >
+      <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+      <label className="grid min-w-0 flex-1 gap-1.5 sm:min-w-[200px]">
         <span className="text-[10px] font-bold tracking-[0.14em] text-[#6f6a60] uppercase">
           Search
         </span>
@@ -55,7 +65,7 @@ function StudioProjectsFiltersInner() {
             }, 300);
           }}
           placeholder="Title, slug, client, stack…"
-          className="border border-[#15130f]/20 bg-[#f7f4ee] px-3 py-2 text-sm outline-none focus:border-[#b8770a]"
+          className={appInputOnMuted}
         />
       </label>
       <label className="grid gap-1.5 sm:w-44">
@@ -69,7 +79,7 @@ function StudioProjectsFiltersInner() {
             setDraftQ(null);
             pushParams(query, event.target.value);
           }}
-          className="border border-[#15130f]/20 bg-[#f7f4ee] px-3 py-2 text-sm outline-none focus:border-[#b8770a]"
+          className={appInputOnMuted}
         >
           <option value="all">All</option>
           <option value="draft">Draft</option>
@@ -84,11 +94,15 @@ function StudioProjectsFiltersInner() {
             if (debounceRef.current) clearTimeout(debounceRef.current);
             setDraftQ(null);
           }}
-          className="inline-flex items-center border border-[#15130f]/20 px-4 py-2 text-[10px] font-bold tracking-[0.14em] uppercase hover:border-[#b8770a] sm:mb-0.5"
+          className={`inline-flex items-center px-4 py-2 sm:mb-0.5 ${studioProjectGhostButton}`}
         >
           Clear
         </Link>
       ) : null}
+      </div>
+      <div className="flex shrink-0 items-center sm:mb-0.5">
+        <StudioViewToggle />
+      </div>
     </div>
   );
 }
@@ -97,7 +111,7 @@ export function StudioProjectsFilters() {
   return (
     <Suspense
       fallback={
-        <div className="mb-6 h-[88px] border border-[#15130f]/12 bg-white p-4 text-sm text-[#6f6a60]">
+        <div className={`mb-6 h-[88px] p-4 text-sm text-[#6f6a60] ${studioProjectPanel}`}>
           Loading filters…
         </div>
       }

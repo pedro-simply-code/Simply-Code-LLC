@@ -5,18 +5,17 @@ import { StudioHeader } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
 import { isFounder } from "~/lib/roles";
 import { getClients, getProjectById, getTeamUsers, getTechnologies } from "~/server/studio/queries";
+import { appGhostButtonLg } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; tab?: string }>;
 }) {
   const { id } = await params;
-  const { error } = await searchParams;
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
@@ -62,31 +61,20 @@ export default async function ProjectDetailPage({
             {project.status === "published" || project.status === "completed" ? (
               <Link
                 href={`/work/${project.slug}`}
-                className="inline-flex border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.14em] uppercase hover:border-[#b8770a]"
+                className={cn("inline-flex", appGhostButtonLg)}
               >
                 View public page
               </Link>
             ) : null}
             <Link
               href="/studio/projects"
-              className="inline-flex border border-[#15130f]/20 px-3 py-2 text-[10px] font-bold tracking-[0.14em] uppercase hover:border-[#b8770a]"
+              className={cn("inline-flex", appGhostButtonLg)}
             >
               All projects
             </Link>
           </>
         }
       />
-
-      {error === "request-reason" ? (
-        <p className="mb-6 border border-[#9a3b2e]/25 bg-[#fdf1ef] px-4 py-3 text-sm text-[#9a3b2e]">
-          A reason is required when rejecting a client request.
-        </p>
-      ) : null}
-      {error === "cover-upload" ? (
-        <p className="mb-6 border border-[#9a3b2e]/25 bg-[#fdf1ef] px-4 py-3 text-sm text-[#9a3b2e]">
-          The cover image could not be saved. Try again or use a smaller file.
-        </p>
-      ) : null}
 
       <ProjectWorkspace
         detail={detail}

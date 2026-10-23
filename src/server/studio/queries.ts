@@ -1,12 +1,12 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNotNull, isNull, ne } from "drizzle-orm";
 import { db } from "~/server/db";
 import {
   clientMembers,
   clients,
   contactMessages,
-  notifications,
+  invites,
   projectMembers,
   projectRequests,
   projectTechnologies,
@@ -16,10 +16,12 @@ import {
   technologies,
   userTechnologies,
   users,
+  type UserRole,
 } from "~/server/db/schema";
 import { projectDisplayYear } from "~/lib/project-year";
 import { normalizeRole } from "~/lib/roles";
 import type { Project as ContentProject } from "~/content/projects";
+import { getUnreadNotificationCount } from "~/server/notifications";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -39,6 +41,8 @@ export async function getAllUsers() {
       image: users.image,
       role: users.role,
       title: users.title,
+      profileSkills: users.profileSkills,
+      showOnAbout: users.showOnAbout,
       createdAt: users.createdAt,
     })
     .from(users)
@@ -76,6 +80,42 @@ export async function getTechnologyAssignments(userId: string) {
     .where(eq(userTechnologies.userId, userId));
 }
 
+export type UserTechnologyChip = {
+  technologyId: string;
+  name: string;
+  category: string | null;
+};
+
+export async function getTechnologyAssignmentsForUsers(
+  userIds: string[],
+): Promise<Map<string, UserTechnologyChip[]>> {
+  const map = new Map<string, UserTechnologyChip[]>();
+  if (userIds.length === 0) return map;
+
+  const rows = await db
+    .select({
+      userId: userTechnologies.userId,
+      technologyId: userTechnologies.technologyId,
+      name: technologies.name,
+      category: technologies.category,
+    })
+    .from(userTechnologies)
+    .innerJoin(technologies, eq(technologies.id, userTechnologies.technologyId))
+    .where(inArray(userTechnologies.userId, userIds))
+    .orderBy(technologies.name);
+
+  for (const row of rows) {
+    const list = map.get(row.userId) ?? [];
+    list.push({
+      technologyId: row.technologyId,
+      name: row.name,
+      category: row.category,
+    });
+    map.set(row.userId, list);
+  }
+  return map;
+}
+
 export async function getStudioProjects(viewerId?: string) {
   let memberProjectIds: string[] | null = null;
   if (viewerId) {
@@ -92,6 +132,7 @@ export async function getStudioProjects(viewerId?: string) {
       id: projects.id,
       slug: projects.slug,
       title: projects.title,
+      summary: projects.summary,
       clientName: projects.clientName,
       year: projects.year,
       status: projects.status,
@@ -367,6 +408,124 @@ export async function getClientsWithMembers() {
   }));
 }
 
+export type ClientOverviewRow = {
+  id: string;
+  name: string;
+  slug: string;
+  contactEmail: string | null;
+  memberCount: number;
+  projectCount: number;
+  pendingInviteCount: number;
+};
+
+export async function getClientsOverview(): Promise<ClientOverviewRow[]> {
+  const clientRows = await getClients();
+  const [memberLinks, projectLinks, pendingInvites] = await Promise.all([
+    db.select({ clientId: clientMembers.clientId }).from(clientMembers),
+    db
+      .select({ clientId: projects.clientId })
+      .from(projects)
+      .where(isNotNull(projects.clientId)),
+    db
+      .select({ clientId: invites.clientId })
+      .from(invites)
+      .where(
+        and(
+          isNull(invites.acceptedAt),
+          gt(invites.expiresAt, new Date()),
+          eq(invites.role, "client"),
+        ),
+      ),
+  ]);
+
+  return clientRows.map((client) => ({
+    id: client.id,
+    name: client.name,
+    slug: client.slug,
+    contactEmail: client.contactEmail,
+    memberCount: memberLinks.filter((row) => row.clientId === client.id).length,
+    projectCount: projectLinks.filter((row) => row.clientId === client.id).length,
+    pendingInviteCount: pendingInvites.filter((row) => row.clientId === client.id).length,
+  }));
+}
+
+export type ClientPortalMember = {
+  userId: string;
+  name: string | null;
+  email: string | null;
+  role: UserRole;
+};
+
+export type ClientLinkedProject = {
+  id: string;
+  title: string;
+  status: string;
+  updatedAt: Date;
+};
+
+export type ClientDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  contactEmail: string | null;
+  members: ClientPortalMember[];
+  pendingInvites: Array<{ id: string; email: string; expiresAt: Date }>;
+  projects: ClientLinkedProject[];
+};
+
+export async function getClientDetail(clientId: string): Promise<ClientDetail | null> {
+  const [client] = await db.select().from(clients).where(eq(clients.id, clientId)).limit(1);
+  if (!client) return null;
+
+  const [members, pendingInvites, projectRows] = await Promise.all([
+    db
+      .select({
+        userId: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+      })
+      .from(clientMembers)
+      .innerJoin(users, eq(users.id, clientMembers.userId))
+      .where(eq(clientMembers.clientId, clientId)),
+    db
+      .select({
+        id: invites.id,
+        email: invites.email,
+        expiresAt: invites.expiresAt,
+      })
+      .from(invites)
+      .where(
+        and(
+          eq(invites.clientId, clientId),
+          isNull(invites.acceptedAt),
+          gt(invites.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(invites.createdAt)),
+    db
+      .select({
+        id: projects.id,
+        title: projects.title,
+        status: projects.status,
+        updatedAt: projects.updatedAt,
+      })
+      .from(projects)
+      .where(eq(projects.clientId, clientId))
+      .orderBy(desc(projects.updatedAt)),
+  ]);
+
+  return {
+    id: client.id,
+    name: client.name,
+    slug: client.slug,
+    contactEmail: client.contactEmail,
+    members,
+    pendingInvites,
+    projects: projectRows,
+  };
+}
+
 export async function getClientIdsForUser(userId: string): Promise<string[]> {
   const rows = await db
     .select({ clientId: clientMembers.clientId })
@@ -488,66 +647,184 @@ export async function getPortalProject(id: string, userId: string) {
   };
 }
 
-export async function getNotifications(userId: string, limit = 20) {
+
+export type StudioOverviewRequestItem = {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  priority: string;
+  projectId: string;
+  projectTitle: string;
+  clientName: string | null;
+  authorName: string | null;
+  createdAt: Date;
+};
+
+export type StudioOverviewUpdateItem = {
+  id: string;
+  title: string;
+  body: string;
+  projectId: string;
+  projectTitle: string;
+  visibility: string;
+  authorName: string | null;
+  authorRole: string | null;
+  projectRole: string | null;
+  createdAt: Date;
+};
+
+export type StudioOverviewOptions = {
+  /** When set, projects, requests, and updates are limited to these memberships. */
+  projectViewerId?: string;
+  userId: string;
+  founder: boolean;
+};
+
+async function getOpenProjectRequestsForOverview(viewerId?: string) {
+  let projectIds: string[] | null = null;
+  if (viewerId) {
+    const memberships = await db
+      .select({ projectId: projectMembers.projectId })
+      .from(projectMembers)
+      .where(eq(projectMembers.userId, viewerId));
+    projectIds = memberships.map((row) => row.projectId);
+    if (projectIds.length === 0) return [];
+  }
+
+  const conditions = [eq(projectRequests.status, "open")];
+  if (projectIds) {
+    conditions.push(inArray(projectRequests.projectId, projectIds));
+  }
+
   return db
-    .select()
-    .from(notifications)
-    .where(eq(notifications.userId, userId))
-    .orderBy(desc(notifications.createdAt))
-    .limit(limit);
+    .select({
+      id: projectRequests.id,
+      title: projectRequests.title,
+      description: projectRequests.description,
+      type: projectRequests.type,
+      priority: projectRequests.priority,
+      createdAt: projectRequests.createdAt,
+      projectId: projectRequests.projectId,
+      projectTitle: projects.title,
+      clientName: clients.name,
+      authorName: users.name,
+    })
+    .from(projectRequests)
+    .innerJoin(projects, eq(projects.id, projectRequests.projectId))
+    .leftJoin(clients, eq(clients.id, projectRequests.clientId))
+    .leftJoin(users, eq(users.id, projectRequests.createdById))
+    .where(and(...conditions))
+    .orderBy(desc(projectRequests.createdAt))
+    .limit(12);
 }
 
-export async function getUnreadNotificationCount(userId: string) {
-  const rows = await db
-    .select({ id: notifications.id })
-    .from(notifications)
-    .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
-  return rows.length;
-}
+async function getRecentProjectUpdatesForOverview(viewerId?: string) {
+  let projectIds: string[] | null = null;
+  if (viewerId) {
+    const memberships = await db
+      .select({ projectId: projectMembers.projectId })
+      .from(projectMembers)
+      .where(eq(projectMembers.userId, viewerId));
+    projectIds = memberships.map((row) => row.projectId);
+    if (projectIds.length === 0) return [];
+  }
 
-export async function markAllNotificationsReadForUser(userId: string) {
-  await db
-    .update(notifications)
-    .set({ readAt: new Date() })
-    .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
-}
-
-export async function markNotificationReadForUser(userId: string, notificationId: string) {
-  if (!isUuid(notificationId)) return false;
-
-  const updated = await db
-    .update(notifications)
-    .set({ readAt: new Date() })
-    .where(
+  const baseQuery = db
+    .select({
+      id: projectUpdates.id,
+      title: projectUpdates.title,
+      body: projectUpdates.body,
+      visibility: projectUpdates.visibility,
+      createdAt: projectUpdates.createdAt,
+      projectId: projectUpdates.projectId,
+      projectTitle: projects.title,
+      authorName: users.name,
+      authorRole: users.role,
+      projectRole: projectMembers.projectRole,
+    })
+    .from(projectUpdates)
+    .innerJoin(projects, eq(projects.id, projectUpdates.projectId))
+    .leftJoin(users, eq(users.id, projectUpdates.authorId))
+    .leftJoin(
+      projectMembers,
       and(
-        eq(notifications.id, notificationId),
-        eq(notifications.userId, userId),
-        isNull(notifications.readAt),
+        eq(projectMembers.userId, projectUpdates.authorId),
+        eq(projectMembers.projectId, projectUpdates.projectId),
       ),
     )
-    .returning({ id: notifications.id });
+    .orderBy(desc(projectUpdates.createdAt))
+    .limit(12);
 
-  return updated.length > 0;
+  if (projectIds) {
+    return baseQuery.where(inArray(projectUpdates.projectId, projectIds));
+  }
+
+  return baseQuery;
 }
 
-export async function getStudioOverview(viewerId?: string) {
-  const [allProjects, allUsers, allTechnologies, allReviews] = await Promise.all([
-    getStudioProjects(viewerId),
-    getAllUsers(),
-    getTechnologies(),
-    getReviews(),
-  ]);
+export async function getStudioOverview(options: StudioOverviewOptions) {
+  const { projectViewerId, userId, founder } = options;
+
+  const [allProjects, allUsers, allTechnologies, unreadNotificationCount, openRequests, recentUpdates] =
+    await Promise.all([
+      getStudioProjects(projectViewerId),
+      founder ? getAllUsers() : Promise.resolve([]),
+      founder ? getTechnologies() : Promise.resolve([]),
+      getUnreadNotificationCount(userId, "studio"),
+      getOpenProjectRequestsForOverview(projectViewerId),
+      getRecentProjectUpdatesForOverview(projectViewerId),
+    ]);
+
+  const draftCount = allProjects.filter((project) => project.status === "draft").length;
+  const publishedCount = allProjects.filter((project) => project.status === "published").length;
+  const completedCount = allProjects.filter((project) => project.status === "completed").length;
+  const publicPortfolioCount = publishedCount + completedCount;
+
+  const overviewRequests: StudioOverviewRequestItem[] = openRequests.map((request) => ({
+    id: request.id,
+    title: request.title,
+    description: request.description,
+    type: request.type,
+    priority: request.priority,
+    projectId: request.projectId,
+    projectTitle: request.projectTitle,
+    clientName: request.clientName,
+    authorName: request.authorName,
+    createdAt: request.createdAt,
+  }));
+
+  const overviewUpdates: StudioOverviewUpdateItem[] = recentUpdates.map((update) => ({
+    id: update.id,
+    title: update.title,
+    body: update.body,
+    projectId: update.projectId,
+    projectTitle: update.projectTitle,
+    visibility: update.visibility,
+    authorName: update.authorName,
+    authorRole: update.authorRole,
+    projectRole: update.projectRole,
+    createdAt: update.createdAt,
+  }));
 
   return {
     projectCount: allProjects.length,
-    publishedCount: allProjects.filter(
-      (project) => project.status === "published" || project.status === "completed",
-    ).length,
-    teamCount: allUsers.filter((user) => normalizeRole(user.role) !== "client").length,
-    clientCount: allUsers.filter((user) => normalizeRole(user.role) === "client").length,
-    technologyCount: allTechnologies.length,
-    pendingReviewCount: allReviews.filter((review) => review.status === "pending").length,
-    recentProjects: allProjects.slice(0, 5),
+    draftCount,
+    publishedCount,
+    completedCount,
+    publicPortfolioCount,
+    teamCount: founder
+      ? allUsers.filter((user) => normalizeRole(user.role) !== "client").length
+      : 0,
+    clientCount: founder
+      ? allUsers.filter((user) => normalizeRole(user.role) === "client").length
+      : 0,
+    technologyCount: founder ? allTechnologies.length : 0,
+    unreadNotificationCount,
+    openRequestCount: openRequests.length,
+    overviewRequests,
+    overviewUpdates,
+    recentProjects: allProjects,
   };
 }
 

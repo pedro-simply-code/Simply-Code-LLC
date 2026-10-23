@@ -59,7 +59,7 @@ function StudioTabsInner({
             className={cn(
               "relative -mb-px shrink-0 px-4 py-2.5 text-[10px] font-bold tracking-[0.14em] uppercase transition-colors",
               active === item.id
-                ? "text-[#15130f] after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-[#b8770a]"
+                ? "text-[#15130f] after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-sc-accent"
                 : "text-[#9a9488] hover:text-[#57524a]",
             )}
           >

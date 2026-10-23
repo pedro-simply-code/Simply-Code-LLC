@@ -2,6 +2,8 @@ import Link from "next/link";
 import { auth } from "~/lib/auth";
 import { getPortalProjects } from "~/server/studio/queries";
 import { StudioHeader } from "~/components/studio/ui";
+import { appChip, appPanel, appPanelHover } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +19,7 @@ export default async function PortalPage() {
       />
 
       {projects.length === 0 ? (
-        <div className="border border-[#15130f]/12 bg-white p-8">
+        <div className={cn(appPanel, "p-8")}>
           <p className="text-sm font-semibold">No projects linked to this account yet.</p>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#57524a]">
             Your account is active, but an admin still needs to link it to a client. Email{" "}
@@ -33,16 +35,16 @@ export default async function PortalPage() {
             <Link
               key={project.id}
               href={`/portal/projects/${project.id}`}
-              className="group border border-[#15130f]/12 bg-white p-6 transition-colors hover:border-[#f0a500]"
+              className={cn(appPanel, appPanelHover, "group p-6")}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-bold tracking-[0.14em] text-[#b8770a] uppercase">
+                  <p className="text-[10px] font-bold tracking-[0.14em] text-sc-accent uppercase">
                     {project.stackLabel || project.clientName || "Project"}
                   </p>
                   <h2 className="mt-2 text-xl font-black tracking-[-0.02em]">{project.title}</h2>
                 </div>
-                <span className="border border-[#15130f]/15 px-2 py-1 text-[10px] font-bold tracking-[0.1em] uppercase">
+                <span className={appChip}>
                   {project.status}
                 </span>
               </div>
@@ -55,7 +57,7 @@ export default async function PortalPage() {
                   ? ` · ${project.updates.length} update${project.updates.length === 1 ? "" : "s"}`
                   : ""}
               </p>
-              <span className="mt-4 inline-flex text-[10px] font-bold tracking-[0.14em] uppercase group-hover:text-[#b8770a]">
+              <span className="mt-4 inline-flex text-[10px] font-bold tracking-[0.14em] uppercase group-hover:text-sc-accent">
                 Open project →
               </span>
             </Link>

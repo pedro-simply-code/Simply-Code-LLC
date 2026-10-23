@@ -64,6 +64,12 @@ export default async function StudioLayout({ children }: { children: React.React
             icon: "clients" as const,
             section: "Manage",
           },
+          {
+            href: "/studio/settings",
+            label: "Site settings",
+            icon: "settings" as const,
+            section: "Manage",
+          },
         ]
       : []),
   ];

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { BrandLogo } from "~/components/brand-logo";
+import { appIconButton } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 const MENU = [
@@ -21,10 +22,10 @@ export function SiteNav() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#15130f]/10 bg-[#f7f4ee]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[#15130f]/10 bg-sc-canvas/95 backdrop-blur-md">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:bg-[#15130f] focus:px-4 focus:py-2 focus:text-[11px] focus:font-bold focus:tracking-[0.16em] focus:text-white focus:uppercase"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:rounded-md focus:bg-[#15130f] focus:px-4 focus:py-2 focus:text-[11px] focus:font-bold focus:tracking-[0.16em] focus:text-white focus:uppercase"
       >
         Skip to content
       </a>
@@ -39,8 +40,8 @@ export function SiteNav() {
               href={entry.href}
               aria-current={isActive(entry.href) ? "page" : undefined}
               className={cn(
-                "text-[13px] font-bold tracking-[0.12em] uppercase transition-colors hover:text-[#b8770a]",
-                isActive(entry.href) ? "text-[#b8770a]" : "text-[#15130f]",
+                "text-[13px] font-bold tracking-[0.12em] uppercase transition-colors hover:text-sc-accent",
+                isActive(entry.href) ? "text-sc-accent" : "text-[#15130f]",
               )}
             >
               {entry.label}
@@ -51,7 +52,7 @@ export function SiteNav() {
         <div className="hidden items-center gap-5 lg:flex">
           <Link
             href="/contact"
-            className="bg-[#15130f] px-6 py-3 text-[12px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-[#b8770a]"
+            className="rounded-md bg-[#15130f] px-6 py-3 text-[12px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-sc-accent"
           >
             Request a quote
           </Link>
@@ -62,14 +63,14 @@ export function SiteNav() {
           aria-label="Toggle navigation"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex size-10 items-center justify-center border border-[#15130f]/15 text-[#15130f] lg:hidden"
+          className={cn(appIconButton, "size-10 lg:hidden")}
         >
           {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
 
       {mobileOpen ? (
-        <div className="max-h-[80vh] overflow-y-auto border-t border-[#15130f]/10 bg-[#f7f4ee] px-6 py-6 lg:hidden">
+        <div className="max-h-[80vh] overflow-y-auto border-t border-[#15130f]/10 bg-sc-section-alt px-6 py-6 lg:hidden">
           <nav aria-label="Mobile" className="flex flex-col gap-4">
             {MENU.map((entry) => (
               <Link
@@ -84,7 +85,7 @@ export function SiteNav() {
             <Link
               href="/contact"
               onClick={() => setMobileOpen(false)}
-              className="mt-2 block bg-[#15130f] px-6 py-3.5 text-center text-[12px] font-bold tracking-[0.16em] text-white uppercase"
+              className="mt-2 block rounded-md bg-[#15130f] px-6 py-3.5 text-center text-[12px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-sc-accent"
             >
               Request a quote
             </Link>
