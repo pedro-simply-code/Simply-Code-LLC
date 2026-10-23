@@ -1,5 +1,6 @@
 import "server-only";
 
+import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "~/env";
 
 type SendEmailInput = {
@@ -9,48 +10,64 @@ type SendEmailInput = {
   replyTo?: string;
 };
 
+let transporter: Transporter | null = null;
+
+function getTransporter(): Transporter | null {
+  const user = env.GOOGLE_SMTP_USER;
+  const pass = env.GOOGLE_SMTP_APP_PASSWORD;
+  if (!user || !pass) return null;
+
+  transporter ??= nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: { user, pass },
+  });
+
+  return transporter;
+}
+
 /**
- * Sends transactional email through Resend when `RESEND_API_KEY` is set.
+ * Sends transactional email through Google Workspace / Gmail SMTP.
  *
- * In development without a key the email is logged instead of sent, so the
- * contact form can be exercised locally. In production a missing key throws so
- * the failure is visible rather than silently swallowing enquiries.
- *
- * Swap the `fetch` call for Postmark/SES if you change provider — keep secrets
- * in server env only.
+ * Create an App Password for the Google account and set
+ * `GOOGLE_SMTP_USER` + `GOOGLE_SMTP_APP_PASSWORD`. `CONTACT_FROM_EMAIL`
+ * should be the same address (or an authorised alias).
  */
 export async function sendEmail(input: SendEmailInput): Promise<void> {
-  const apiKey = env.RESEND_API_KEY;
+  const smtpUser = env.GOOGLE_SMTP_USER;
+  const mailer = getTransporter();
 
-  if (!apiKey) {
+  if (!smtpUser || !mailer) {
     if (env.NODE_ENV === "development") {
-      console.info("[sendEmail] RESEND_API_KEY missing — logging instead of sending", {
-        to: input.to,
-        subject: input.subject,
-      });
+      const links = [
+        ...new Set(
+          [...input.html.matchAll(/href="([^"]+)"/g)]
+            .map((match) => match[1])
+            .filter((link): link is string => Boolean(link)),
+        ),
+      ];
+      console.info(
+        "[sendEmail] Google SMTP is not configured — logging instead of sending",
+        {
+          to: input.to,
+          subject: input.subject,
+          links,
+        },
+      );
       return;
     }
 
-    throw new Error("Email provider not configured. Set RESEND_API_KEY in the environment.");
+    throw new Error(
+      "Email provider not configured. Set GOOGLE_SMTP_USER and GOOGLE_SMTP_APP_PASSWORD.",
+    );
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: env.CONTACT_FROM_EMAIL,
-      to: [input.to],
-      subject: input.subject,
-      html: input.html,
-      ...(input.replyTo ? { reply_to: input.replyTo } : {}),
-    }),
+  await mailer.sendMail({
+    from: env.CONTACT_FROM_EMAIL ?? `Simply Code <${smtpUser}>`,
+    to: input.to,
+    subject: input.subject,
+    html: input.html,
+    ...(input.replyTo ? { replyTo: input.replyTo } : {}),
   });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(`Resend rejected the email (${response.status}): ${detail.slice(0, 300)}`);
-  }
 }

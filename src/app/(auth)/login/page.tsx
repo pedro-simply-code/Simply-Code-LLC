@@ -15,16 +15,21 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
-          <CardDescription>Use Google or your email and password.</CardDescription>
+          <CardDescription>Studio and client portal access.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
             <LoginForm />
           </Suspense>
           <p className="text-center text-sm text-muted-foreground">
-            No account?{" "}
-            <Link href="/register" className="text-primary underline-offset-4 hover:underline">
-              Register
+            Accounts are created by the studio. Need access?{" "}
+            <a href="mailto:hello@simplycode.io" className="text-primary underline-offset-4 hover:underline">
+              Email us
+            </a>
+          </p>
+          <p className="text-center text-xs text-muted-foreground">
+            <Link href="/" className="underline-offset-4 hover:underline">
+              Back to simplycode.io
             </Link>
           </p>
         </CardContent>
@@ -32,3 +37,4 @@ export default function LoginPage() {
     </main>
   );
 }
+

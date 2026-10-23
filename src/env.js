@@ -14,9 +14,11 @@ export const env = createEnv({
     AUTH_GOOGLE_ID: z.string().min(1).optional(),
     AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
     UPLOADTHING_TOKEN: z.string().min(1).optional(),
-    RESEND_API_KEY: z.string().min(1).optional(),
+    /** Google Workspace / Gmail SMTP. Use an App Password, not the account password. */
+    GOOGLE_SMTP_USER: z.string().min(1).optional(),
+    GOOGLE_SMTP_APP_PASSWORD: z.string().min(1).optional(),
     CONTACT_EMAIL: z.email().default("hello@simplycode.io"),
-    CONTACT_FROM_EMAIL: z.string().default("Simply Code <onboarding@resend.dev>"),
+    CONTACT_FROM_EMAIL: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().default("Simply Code"),
@@ -31,7 +33,8 @@ export const env = createEnv({
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    GOOGLE_SMTP_USER: process.env.GOOGLE_SMTP_USER,
+    GOOGLE_SMTP_APP_PASSWORD: process.env.GOOGLE_SMTP_APP_PASSWORD,
     CONTACT_EMAIL: process.env.CONTACT_EMAIL,
     CONTACT_FROM_EMAIL: process.env.CONTACT_FROM_EMAIL,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,

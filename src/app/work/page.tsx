@@ -1,7 +1,11 @@
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNav } from "~/components/site-nav";
 import { WorkFilters } from "~/components/work-filters";
+import { PROJECTS } from "~/content/projects";
 import { pageMetadata } from "~/lib/seo";
+import { getPublicProjectsSafe } from "~/server/studio/queries";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata({
   title: "Work",
@@ -10,7 +14,9 @@ export const metadata = pageMetadata({
   path: "/work",
 });
 
-export default function WorkPage() {
+export default async function WorkPage() {
+  const projects = (await getPublicProjectsSafe()) ?? PROJECTS;
+
   return (
     <>
       <SiteNav />
@@ -35,7 +41,7 @@ export default function WorkPage() {
 
         <section className="bg-[#f7f4ee] py-16 lg:py-20">
           <div className="mx-auto max-w-[1400px] px-6">
-            <WorkFilters />
+            <WorkFilters projects={projects} />
           </div>
         </section>
       </main>

@@ -105,6 +105,12 @@ export function SiteFooter() {
         <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-8">
           <p className="text-xs text-white/35">© 2026 {SITE.name}. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-5 text-xs text-white/35">
+            <Link href="/portal" className="transition-colors hover:text-white">
+              Client portal
+            </Link>
+            <Link href="/login" className="transition-colors hover:text-white">
+              Team access
+            </Link>
             <Link href="/privacy" className="transition-colors hover:text-white">
               Privacy
             </Link>

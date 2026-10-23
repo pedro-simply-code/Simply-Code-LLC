@@ -16,11 +16,9 @@ function getPerPage() {
 }
 
 /**
- * Temporary layout fill while reviews are static: repeat the last review so
- * every page keeps a full row. Remove when the DB-backed reviews land.
+ * Fallback-only layout fill: when the bundled static reviews are shown, repeat
+ * the last review so every page keeps a full row. DB-backed reviews render as-is.
  */
-const FILL_LAST_REVIEW = true;
-
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
     <figure className="flex h-full flex-col border border-[#15130f]/12 bg-[#f7f4ee] p-8">
@@ -62,8 +60,10 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 
 export function TestimonialsCarousel({
   testimonials,
+  fillLast = false,
 }: {
   testimonials: Testimonial[];
+  fillLast?: boolean;
 }) {
   const [perPage, setPerPage] = useState(3);
   const [page, setPage] = useState(0);
@@ -77,8 +77,8 @@ export function TestimonialsCarousel({
   }, []);
 
   const items = useMemo(() => {
-    if (!FILL_LAST_REVIEW || testimonials.length === 0) return testimonials;
-    // Only fill the static demo list; once there are 6+ real reviews, show them as-is.
+    if (!fillLast || testimonials.length === 0) return testimonials;
+    // Only fill the short static list; once there are 6+ real reviews, show them as-is.
     if (testimonials.length >= 6) return testimonials;
     const remainder = testimonials.length % perPage;
     if (remainder === 0) return testimonials;
@@ -87,7 +87,7 @@ export function TestimonialsCarousel({
       ...testimonials,
       ...Array.from({ length: perPage - remainder }, () => last),
     ];
-  }, [testimonials, perPage]);
+  }, [testimonials, perPage, fillLast]);
 
   const pages = useMemo(() => {
     const groups: Testimonial[][] = [];

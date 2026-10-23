@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { PROJECTS } from "~/content/projects";
 import { env } from "~/env";
+import { getPublicProjectsSafe } from "~/server/studio/queries";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
   const now = new Date();
 
@@ -17,7 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
   ];
 
-  const projectRoutes: MetadataRoute.Sitemap = PROJECTS.map((project) => ({
+  const projects = (await getPublicProjectsSafe()) ?? PROJECTS;
+  const projectRoutes: MetadataRoute.Sitemap = projects.map((project) => ({
     url: `${base}/work/${project.slug}`,
     lastModified: now,
     changeFrequency: "yearly",

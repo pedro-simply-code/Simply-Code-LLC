@@ -3,7 +3,9 @@ import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import authConfig from "~/lib/auth.config";
+import { normalizeRole } from "~/lib/roles";
 import { loginSchema } from "~/schemas/auth";
+import type { UserRole } from "~/server/db/schema";
 import { verifyPassword } from "~/server/auth/password";
 import { db } from "~/server/db";
 import { accounts, sessions, users, verificationTokens } from "~/server/db/schema";
@@ -16,6 +18,53 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  callbacks: {
+    async jwt({ token, user, trigger }) {
+      if (user) {
+        token.sub = user.id;
+        if (user.role) token.role = normalizeRole(user.role as UserRole);
+        token.name = user.name;
+        token.picture = user.image;
+      }
+      if (trigger === "update" && token.sub) {
+        const row = await db.query.users.findFirst({
+          where: eq(users.id, token.sub),
+          columns: { name: true, image: true, role: true },
+        });
+        if (row) {
+          token.name = row.name;
+          token.picture = row.image;
+          token.role = normalizeRole(row.role);
+        }
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+        session.user.role = normalizeRole(token.role as UserRole | undefined);
+        if (typeof token.name === "string") session.user.name = token.name;
+        if (typeof token.picture === "string") session.user.image = token.picture;
+      }
+      return session;
+    },
+    async signIn({ user, account }) {
+      // Public registration is closed. Google may only sign in accounts that
+      // already exist (created through a founder invitation).
+      if (account?.provider !== "google") return true;
+      const email = user.email?.toLowerCase();
+      if (!email) return false;
+      const existing = await db.query.users.findFirst({
+        where: eq(users.email, email),
+        columns: { id: true },
+      });
+      if (!existing) {
+        console.warn("[auth] Blocked Google sign-in for an email without an account", email);
+        return false;
+      }
+      return true;
+    },
+  },
   providers: [
     ...authConfig.providers,
     Credentials({

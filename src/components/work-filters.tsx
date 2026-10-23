@@ -2,20 +2,31 @@
 
 import { useMemo, useState } from "react";
 import { WorkCard } from "~/components/work-card";
-import { PROJECTS, PROJECT_CATEGORIES, type ProjectCategory } from "~/content/projects";
+import type { Project } from "~/content/projects";
 import { cn } from "~/lib/utils";
 
-type Filter = "All" | ProjectCategory;
+export function WorkFilters({ projects }: { projects: Project[] }) {
+  const filters = useMemo(() => {
+    const tags = projects.flatMap((project) => project.tags);
+    return ["All", ...Array.from(new Set(tags)).sort((a, b) => a.localeCompare(b))];
+  }, [projects]);
+  const [active, setActive] = useState("All");
 
-const FILTERS: Filter[] = ["All", ...PROJECT_CATEGORIES];
-
-export function WorkFilters() {
-  const [active, setActive] = useState<Filter>("All");
-
-  const projects = useMemo(
-    () => (active === "All" ? PROJECTS : PROJECTS.filter((project) => project.category === active)),
-    [active],
+  const filtered = useMemo(
+    () =>
+      active === "All"
+        ? projects
+        : projects.filter((project) =>
+            project.tags.some((tag) => tag.toLowerCase() === active.toLowerCase()),
+          ),
+    [active, projects],
   );
+
+  if (projects.length === 0) {
+    return (
+      <p className="py-16 text-center text-[15px] text-[#57524a]">No projects published yet.</p>
+    );
+  }
 
   return (
     <div>
@@ -23,7 +34,7 @@ export function WorkFilters() {
         <span className="mr-2 text-[11px] font-bold tracking-[0.2em] text-[#6f6a60] uppercase">
           Filter
         </span>
-        {FILTERS.map((filter) => (
+        {filters.map((filter) => (
           <button
             key={filter}
             type="button"
@@ -40,19 +51,19 @@ export function WorkFilters() {
           </button>
         ))}
         <span className="ml-auto text-[12px] text-[#6f6a60]">
-          {projects.length} {projects.length === 1 ? "project" : "projects"}
+          {filtered.length} {filtered.length === 1 ? "project" : "projects"}
         </span>
       </div>
 
       <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3" aria-live="polite">
-        {projects.map((project) => (
+        {filtered.map((project) => (
           <WorkCard key={project.slug} project={project} />
         ))}
       </div>
 
-      {projects.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="py-16 text-center text-[15px] text-[#57524a]">
-          No projects in this category yet.
+          No projects with this stack tag yet.
         </p>
       ) : null}
     </div>

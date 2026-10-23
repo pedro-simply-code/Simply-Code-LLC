@@ -1,31 +1,6 @@
-import Link from "next/link";
-import type { Metadata } from "next";
-import { RegisterForm } from "~/app/(auth)/register/register-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Create account",
-  robots: { index: false, follow: false },
-};
-
+/** Public registration is disabled; invited users accept their email link. */
 export default function RegisterPage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Create account</CardTitle>
-          <CardDescription>Email and password registration (Google can be linked after sign-in).</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <RegisterForm />
-          <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary underline-offset-4 hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
-  );
+  redirect("/login");
 }

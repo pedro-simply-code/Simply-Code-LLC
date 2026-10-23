@@ -4,8 +4,10 @@ import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNav } from "~/components/site-nav";
 import { TeamGrid } from "~/components/team-grid";
+import { TEAM } from "~/content/team";
 import { SITE } from "~/content/site";
 import { pageMetadata } from "~/lib/seo";
+import { getPublicAboutTeamSafe } from "~/server/profile/queries";
 
 export const metadata = pageMetadata({
   title: "About",
@@ -58,7 +60,8 @@ const PROCESS = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const teamMembers = (await getPublicAboutTeamSafe()) ?? TEAM;
   return (
     <>
       <SiteNav />
@@ -202,7 +205,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <TeamGrid />
+            <TeamGrid members={teamMembers} />
           </div>
         </section>
 

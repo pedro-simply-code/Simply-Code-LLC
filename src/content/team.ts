@@ -2,6 +2,7 @@ export type TeamMember = {
   name: string;
   role: string;
   skills: string[];
+  image?: string | null;
 };
 
 export const TEAM_DESIGN = ["UX Design", "Figma", "Prototyping"];

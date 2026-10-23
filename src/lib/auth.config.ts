@@ -1,13 +1,17 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import { env } from "~/env";
+import { normalizeRole } from "~/lib/roles";
+import type { UserRole } from "~/server/db/schema";
 
 const google =
   env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET
     ? Google({
         clientId: env.AUTH_GOOGLE_ID,
         clientSecret: env.AUTH_GOOGLE_SECRET,
-        allowDangerousEmailAccountLinking: false,
+        // Invite-only: the founder has already approved the email address.
+        // Google verifies ownership, so linking it to the invited account is safe.
+        allowDangerousEmailAccountLinking: true,
       })
     : null;
 
@@ -27,14 +31,14 @@ export default {
     jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
-        if (user.role) token.role = user.role;
+        if (user.role) token.role = normalizeRole(user.role);
       }
       return token;
     },
     session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
-        session.user.role = token.role === "admin" ? "admin" : "user";
+        session.user.role = normalizeRole(token.role as UserRole | undefined);
       }
       return session;
     },

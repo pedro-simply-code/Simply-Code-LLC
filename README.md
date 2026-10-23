@@ -50,11 +50,12 @@ Each app should use a **unique `DB_TABLE_PREFIX`** when sharing one Neon project
 
 ## Auth routes
 
-- `/login`, `/register`
-- `/dashboard` (authenticated)
-- `/dashboard/admin` (requires `users.role = admin`)
+- `/login`
+- `/accept-invite?token=…` (invite-only account setup)
+- `/register` redirects to `/login`; public registration is disabled
+- `/studio` (team), `/portal` (client), `/dashboard` (legacy role redirect)
 
-Promote an admin in SQL or Drizzle Studio after registering.
+Founders invite team and client accounts from `/studio/team` and `/studio/clients`. Invite emails are sent through Google SMTP; see `.env.example` for `GOOGLE_SMTP_USER` and `GOOGLE_SMTP_APP_PASSWORD`.
 
 ## Adding shadcn components
 
@@ -75,6 +76,8 @@ pnpm dlx shadcn@latest add dialog
    | `DB_TABLE_PREFIX` | e.g. `simplycode` |
    | `AUTH_SECRET` | Production secret; mark **Sensitive** in Vercel |
    | `AUTH_URL` | `https://your-app.vercel.app` (or custom domain) |
+   | `GOOGLE_SMTP_USER` | Google Workspace / Gmail address used to send invite and contact email |
+   | `GOOGLE_SMTP_APP_PASSWORD` | Google App Password; mark **Sensitive** in Vercel |
 
 3. **Neon integration:** Vercel may create vars like `cc_POSTGRES_URL` if you set an integration **prefix**. That prefix is **only for env var names** — the app still needs **`DATABASE_URL`**. Copy the **pooled** URL from Neon (or `vercel env pull`) into `DATABASE_URL`. Integration vars can stay; they are optional once `DATABASE_URL` is set.
 4. After the first successful deploy, apply schema to production once from your machine (prod `DATABASE_URL` in env): **`pnpm db:push`** or **`pnpm db:migrate`** — see `drizzle/README.md`.

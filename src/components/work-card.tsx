@@ -57,7 +57,7 @@ export function WorkCard({ project, showSummary = true }: WorkCardProps) {
               {project.title}
             </h3>
             <span className="shrink-0 text-[11px] font-semibold tracking-[0.12em] text-[#6f6a60] uppercase">
-              {project.year}
+              {project.client}
             </span>
           </div>
 

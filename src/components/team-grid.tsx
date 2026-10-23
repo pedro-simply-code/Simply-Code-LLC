@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Users } from "lucide-react";
 import { TEAM, type TeamMember } from "~/content/team";
 
@@ -10,11 +11,23 @@ export function TeamGrid({ members = TEAM }: TeamGridProps) {
     <div className="flex flex-wrap justify-center gap-8">
       {members.map((member) => (
         <div
-          key={member.name}
+          key={`${member.name}-${member.role}`}
           className="w-full border border-[#15130f]/12 bg-white p-8 text-center sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.334rem)]"
         >
-          <div className="mx-auto mb-6 flex size-24 items-center justify-center bg-gradient-to-br from-[#f0a500] to-[#e2761b]">
-            <Users className="size-12 text-white" />
+          <div className="relative mx-auto mb-6 size-24 overflow-hidden rounded-full bg-gradient-to-br from-[#f0a500] to-[#e2761b]">
+            {member.image ? (
+              <Image
+                src={member.image}
+                alt={member.name}
+                fill
+                sizes="96px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex size-full items-center justify-center">
+                <Users className="size-12 text-white" />
+              </div>
+            )}
           </div>
           <h3 className="text-xl font-black tracking-tight uppercase">{member.name}</h3>
           <p className="mt-2 text-[13px] font-semibold tracking-[0.12em] text-[#b8770a] uppercase">

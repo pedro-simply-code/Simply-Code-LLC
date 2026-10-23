@@ -3,6 +3,9 @@
 import { env } from "~/env";
 import { sendEmail } from "~/server/email/sendEmail";
 import { contactSchema, type ContactState } from "~/app/contact/schema";
+import { db } from "~/server/db";
+import { contactMessages } from "~/server/db/schema";
+import { notifyFounders } from "~/server/notifications";
 
 function escapeHtml(value: string): string {
   return value
@@ -54,6 +57,26 @@ export async function submitContact(
   }
 
   const submittedAt = new Date().toLocaleString("en-US", { timeZone: "UTC" });
+
+  try {
+    await db.insert(contactMessages).values({
+      name: data.name,
+      email: data.email,
+      company: data.company || null,
+      service: data.service,
+      message: data.message,
+    });
+
+    await notifyFounders({
+      type: "contact",
+      title: `New enquiry from ${data.name}`,
+      body: `${data.service}${data.company ? ` · ${data.company}` : ""} — ${data.message.slice(0, 160)}`,
+      href: "/studio/messages",
+    });
+  } catch (error) {
+    // Email is still the source of truth if the notification write fails.
+    console.error("[contact] Failed to persist enquiry", error);
+  }
 
   const html = `
     <h1>New project enquiry</h1>

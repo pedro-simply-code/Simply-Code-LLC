@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { TestimonialsCarousel } from "~/components/testimonials-carousel";
-import { TESTIMONIALS } from "~/content/testimonials";
+import { TESTIMONIALS, type Testimonial } from "~/content/testimonials";
 
 const OUTCOMES = [
   {
@@ -24,8 +24,14 @@ const OUTCOMES = [
   },
 ];
 
-export function ClientProof() {
-  const hasQuotes = TESTIMONIALS.length > 0;
+export function ClientProof({
+  testimonials = TESTIMONIALS,
+  fillLast = false,
+}: {
+  testimonials?: Testimonial[];
+  fillLast?: boolean;
+}) {
+  const hasQuotes = testimonials.length > 0;
 
   return (
     <section
@@ -48,7 +54,7 @@ export function ClientProof() {
         </div>
 
         {hasQuotes ? (
-          <TestimonialsCarousel testimonials={TESTIMONIALS} />
+          <TestimonialsCarousel testimonials={testimonials} fillLast={fillLast} />
         ) : (
           <div className="grid gap-6 md:grid-cols-3">
             {OUTCOMES.map((outcome) => (

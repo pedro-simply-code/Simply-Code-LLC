@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { BrandLogo } from "~/components/brand-logo";
 import { cn } from "~/lib/utils";
 
 const MENU = [
@@ -29,14 +30,7 @@ export function SiteNav() {
       </a>
 
       <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between gap-6 px-6">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center bg-[#f0a500] font-mono leading-none font-bold tracking-[-0.08em] text-[#15130f]">
-            <span className="inline-block -rotate-45 text-[18px]">{"</>"}</span>
-          </span>
-          <span className="text-xl leading-none font-black tracking-tight text-[#15130f] uppercase">
-            Simply <span className="text-[#f0a500]">Code</span>
-          </span>
-        </Link>
+        <BrandLogo href="/" />
 
         <nav aria-label="Main" className="hidden items-center gap-7 lg:flex">
           {MENU.map((entry) => (

@@ -1,6 +1,9 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
+  index,
   integer,
+  jsonb,
   pgEnum,
   pgTableCreator,
   primaryKey,
@@ -15,8 +18,25 @@ import { env } from "~/env";
 /** All app tables are prefixed via `DB_TABLE_PREFIX` (multi-app Neon clusters). */
 export const createTable = pgTableCreator((name) => `${env.DB_TABLE_PREFIX}_${name}`);
 
-/** Extend with app-specific roles as products grow. */
-export const userRoleEnum = pgEnum(`${env.DB_TABLE_PREFIX}_user_role`, ["user", "admin"]);
+/**
+ * Team roles inherit downwards:
+ *   founder  -> everything (lead + developer + client access)
+ *   lead     -> lead + developer
+ *   developer
+ *   client   -> portal only
+ *
+ * `user` / `admin` are legacy values kept so existing databases can be
+ * migrated without dropping rows. `normalizeRole` in `src/lib/roles.ts`
+ * maps them to `developer` / `founder`.
+ */
+export const userRoleEnum = pgEnum(`${env.DB_TABLE_PREFIX}_user_role`, [
+  "user",
+  "admin",
+  "founder",
+  "lead",
+  "developer",
+  "client",
+]);
 
 export const users = createTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -26,7 +46,12 @@ export const users = createTable("users", {
   image: text("image"),
   /** Argon2id hash; null when the account is OAuth-only. */
   passwordHash: text("password_hash"),
-  role: userRoleEnum("role").notNull().default("user"),
+  role: userRoleEnum("role").notNull().default("client"),
+  title: text("title"),
+  /** Shown as skill chips on the public About team section. */
+  profileSkills: jsonb("profile_skills").$type<string[]>().notNull().default([]),
+  /** When true, team members appear on /about#team (founder, lead, developer only). */
+  showOnAbout: boolean("show_on_about").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -78,6 +103,271 @@ export const verificationTokens = createTable(
   }),
 );
 
+/** Technologies the studio can assign to developers and projects. */
+export const technologies = createTable(
+  "technologies",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    category: text("category").notNull().default("General"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_technologies_slug_unique`).on(table.slug),
+  }),
+);
+
+export const userTechnologies = createTable(
+  "user_technologies",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    technologyId: uuid("technology_id")
+      .notNull()
+      .references(() => technologies.id, { onDelete: "cascade" }),
+    level: text("level").notNull().default("practicing"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.technologyId] }),
+  }),
+);
+
+/** A client account can contain several people from the same company. */
+export const clients = createTable(
+  "clients",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    contactEmail: text("contact_email"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_clients_slug_unique`).on(table.slug),
+  }),
+);
+
+export const clientMembers = createTable(
+  "client_members",
+  {
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("member"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.clientId, table.userId] }),
+  }),
+);
+
+/**
+ * Invite-only account creation. Founders create a tokenised invite; the
+ * recipient opens the emailed link and sets their own password. Public
+ * registration stays disabled.
+ */
+export const invites = createTable(
+  "invites",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    token: text("token").notNull(),
+    email: text("email").notNull(),
+    name: text("name"),
+    role: userRoleEnum("role").notNull().default("developer"),
+    title: text("title"),
+    clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }),
+    invitedById: uuid("invited_by_id").references(() => users.id, { onDelete: "set null" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    tokenUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_invites_token_unique`).on(table.token),
+    emailIdx: index(`${env.DB_TABLE_PREFIX}_invites_email_idx`).on(table.email),
+  }),
+);
+
+export const projects = createTable(
+  "projects",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: text("slug").notNull(),
+    title: text("title").notNull(),
+    category: text("category").notNull().default("Next.js"),
+    clientName: text("client_name").notNull().default(""),
+    clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
+    year: text("year").notNull().default(""),
+    summary: text("summary").notNull().default(""),
+    tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    services: jsonb("services").$type<string[]>().notNull().default([]),
+    image: text("image"),
+    liveUrl: text("live_url"),
+    status: text("status").notNull().default("draft"),
+    featured: boolean("featured").notNull().default(false),
+    createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_projects_slug_unique`).on(table.slug),
+    statusIdx: index(`${env.DB_TABLE_PREFIX}_projects_status_idx`).on(table.status),
+  }),
+);
+
+export const projectMembers = createTable(
+  "project_members",
+  {
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** `lead` receives project email and can manage the project. */
+    projectRole: text("project_role").notNull().default("developer"),
+    assignedById: uuid("assigned_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.projectId, table.userId] }),
+  }),
+);
+
+export const projectTechnologies = createTable(
+  "project_technologies",
+  {
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    technologyId: uuid("technology_id")
+      .notNull()
+      .references(() => technologies.id, { onDelete: "cascade" }),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.projectId, table.technologyId] }),
+  }),
+);
+
+export const projectUpdates = createTable("project_updates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  body: text("body").notNull().default(""),
+  /** `client` is visible in the portal; `internal` is studio-only. */
+  visibility: text("visibility").notNull().default("client"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const projectRequests = createTable("project_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  type: text("type").notNull().default("request"),
+  priority: text("priority").notNull().default("normal"),
+  /** `open` | `completed` | `rejected` */
+  status: text("status").notNull().default("open"),
+  /** Reason/note attached when a request is rejected or completed. */
+  resolutionNote: text("resolution_note"),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const reviews = createTable("reviews", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  quote: text("quote").notNull(),
+  authorName: text("author_name").notNull().default("Client"),
+  authorRole: text("author_role"),
+  company: text("company"),
+  projectTitle: text("project_title"),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  rating: integer("rating").notNull().default(5),
+  /** `upwork` | `client` | `manual` | `google` */
+  source: text("source").notNull().default("manual"),
+  sourceUrl: text("source_url"),
+  period: text("period"),
+  /** `pending` | `approved` | `hidden` */
+  status: text("status").notNull().default("pending"),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const notifications = createTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** contact | project | review | request | system */
+    type: text("type").notNull().default("system"),
+    title: text("title").notNull(),
+    body: text("body").notNull().default(""),
+    href: text("href"),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    userReadIdx: index(`${env.DB_TABLE_PREFIX}_notifications_user_read_idx`).on(
+      table.userId,
+      table.readAt,
+    ),
+  }),
+);
+
+export const contactMessages = createTable("contact_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  company: text("company"),
+  service: text("service"),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("new"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
 /** Example domain table — replace or extend per project. */
 export const posts = createTable("posts", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -92,3 +382,6 @@ export const posts = createTable("posts", {
 });
 
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
+export type Project = typeof projects.$inferSelect;
+export type Review = typeof reviews.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;

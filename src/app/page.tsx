@@ -18,6 +18,8 @@ import { SiteNav } from "~/components/site-nav";
 import { WorkCard } from "~/components/work-card";
 import { PROJECTS } from "~/content/projects";
 import { SERVICES } from "~/content/services";
+import { TESTIMONIALS } from "~/content/testimonials";
+import { getApprovedReviewsSafe, getPublicProjectsSafe } from "~/server/studio/queries";
 import { cn } from "~/lib/utils";
 
 export const metadata: Metadata = {
@@ -54,8 +56,6 @@ const BUILD_STEPS: { label: string; status: keyof typeof STEP_STATUS }[] = [
   { label: "Deploy & handover", status: "queued" },
 ];
 
-const FEATURED_WORK = PROJECTS.slice(0, 3);
-
 const CORE_SERVICES = SERVICES.filter(
   (service) => service.slug !== "agency-partnerships",
 );
@@ -63,7 +63,22 @@ const AGENCY_SERVICE = SERVICES.find(
   (service) => service.slug === "agency-partnerships",
 );
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [dbProjects, dbReviews] = await Promise.all([
+    getPublicProjectsSafe(),
+    getApprovedReviewsSafe(),
+  ]);
+
+  const featuredWork = (dbProjects ?? PROJECTS).slice(0, 3);
+  const testimonials = dbReviews
+    ? dbReviews.map((review) => ({
+        quote: review.quote,
+        project: review.projectTitle ?? review.authorName,
+        period: review.period ?? new Date(review.createdAt).getFullYear().toString(),
+        rating: review.rating,
+      }))
+    : TESTIMONIALS;
+
   return (
     <div id="main" className="min-h-screen bg-[#f7f4ee] text-[#15130f] antialiased">
       <SiteNav />
@@ -248,25 +263,33 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
-            {FEATURED_WORK.map((project) => (
-              <WorkCard key={project.slug} project={project} />
-            ))}
-          </div>
+          {featuredWork.length > 0 ? (
+            <>
+              <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
+                {featuredWork.map((project) => (
+                  <WorkCard key={project.slug} project={project} />
+                ))}
+              </div>
 
-          <div className="mt-12 text-center">
-            <Link
-              href="/work"
-              className="inline-flex items-center gap-2 bg-[#15130f] px-8 py-4 text-[12px] font-bold tracking-[0.18em] text-white uppercase transition-colors hover:bg-[#b8770a]"
-            >
-              See All Our Work <ArrowRight className="size-4" />
-            </Link>
-          </div>
+              <div className="mt-12 text-center">
+                <Link
+                  href="/work"
+                  className="inline-flex items-center gap-2 bg-[#15130f] px-8 py-4 text-[12px] font-bold tracking-[0.18em] text-white uppercase transition-colors hover:bg-[#b8770a]"
+                >
+                  See All Our Work <ArrowRight className="size-4" />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="border border-[#15130f]/10 bg-white/60 px-6 py-16 text-center text-[15px] text-[#57524a]">
+              New case studies are on the way.
+            </p>
+          )}
         </div>
       </section>
 
       {/* CLIENT PROOF / REVIEWS */}
-      <ClientProof />
+      <ClientProof testimonials={testimonials} fillLast={!dbReviews} />
 
       {/* WHY CHOOSE US */}
       <section className="border-b border-[#15130f]/10 py-20 lg:py-24">
