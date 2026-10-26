@@ -16,14 +16,14 @@ export function CtaSection({
     <section className="border-t border-[#15130f]/10 bg-sc-section py-20 lg:py-24">
       <div className="mx-auto max-w-[1400px] px-6">
         <div className="grid gap-10 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
-          <div>
+          <div className="site-reveal">
             <h2 className="max-w-3xl text-[clamp(2rem,4.8vw,3.6rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
               {title}
             </h2>
             <p className="mt-6 max-w-xl text-[16px] leading-relaxed text-[#57524a]">{description}</p>
           </div>
 
-          <div className="flex flex-col items-start gap-4 lg:items-end">
+          <div className="site-reveal flex flex-col items-start gap-4 lg:items-end">
             <Link href="/contact" className={appPrimaryButtonMarketingLg}>
               Start Your Project <ArrowRight className="size-4" />
             </Link>

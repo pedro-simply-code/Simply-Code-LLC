@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { CancelInviteForm } from "~/components/studio/cancel-invite-form";
 import { StudioFormDialog } from "~/components/studio/studio-form-dialog";
 import { Field, StudioCard, StudioHeader, StudioInput } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
@@ -141,9 +142,17 @@ export default async function ClientDetailPage({
                       <p className="text-sm font-semibold">{invite.email}</p>
                       <p className="text-[11px] text-[#6f6a60]">Invitation pending</p>
                     </div>
-                    <span className="text-[10px] text-[#9a9488]">
-                      Expires {invite.expiresAt.toLocaleDateString(undefined, { dateStyle: "medium" })}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-[10px] text-[#9a9488]">
+                        Expires{" "}
+                        {invite.expiresAt.toLocaleDateString(undefined, { dateStyle: "medium" })}
+                      </span>
+                      <CancelInviteForm
+                        inviteId={invite.id}
+                        returnTo={returnTo}
+                        email={invite.email}
+                      />
+                    </div>
                   </li>
                 ))}
               </ul>

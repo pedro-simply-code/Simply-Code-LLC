@@ -4,6 +4,7 @@ import { TestimonialsCarousel } from "~/components/testimonials-carousel";
 import { appPanelHover, appPanelMuted } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 import { TESTIMONIALS, type Testimonial } from "~/content/testimonials";
+import { clientProofIntro } from "~/lib/reviews";
 
 const OUTCOMES = [
   {
@@ -41,7 +42,7 @@ export function ClientProof({
       className="border-b border-[#15130f]/10 bg-sc-section py-20 lg:py-24"
     >
       <div className="mx-auto max-w-[1400px] px-6">
-        <div className="mb-14 max-w-2xl">
+        <div className="site-reveal mb-14 max-w-2xl">
           <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
             {hasQuotes ? "Client Feedback" : "Client Outcomes"}
           </p>
@@ -50,7 +51,7 @@ export function ClientProof({
           </h2>
           <p className="mt-6 text-[16px] leading-relaxed text-[#57524a]">
             {hasQuotes
-              ? "Verified reviews from our founder's public Upwork profile — published as written. Client names stay private on Upwork."
+              ? clientProofIntro(testimonials, fillLast)
               : "No stock testimonials and no invented metrics. Here is the record, with a case study behind every number."}
           </p>
         </div>
@@ -58,12 +59,16 @@ export function ClientProof({
         {hasQuotes ? (
           <TestimonialsCarousel testimonials={testimonials} fillLast={fillLast} />
         ) : (
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="site-stagger grid gap-6 md:grid-cols-3">
             {OUTCOMES.map((outcome) => (
               <Link
                 key={outcome.label}
                 href={outcome.href}
-                className={cn(appPanelMuted, appPanelHover, "group flex flex-col p-8")}
+                className={cn(
+                  appPanelMuted,
+                  appPanelHover,
+                  "site-reveal site-motion-lift group flex flex-col p-8",
+                )}
               >
                 <p className="text-[42px] leading-none font-black tracking-[-0.03em] text-sc-accent">
                   {outcome.value}

@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
 import { isFounder } from "~/lib/roles";
+import { normalizeMotionLevel } from "~/lib/site-motion";
 import { normalizeColorPalette } from "~/lib/site-palette";
 import { siteSettingsSchema } from "~/lib/site-settings";
 import { db } from "~/server/db";
@@ -24,6 +25,7 @@ export async function updateSiteSettings(formData: FormData) {
     surfaceStyle: text(formData, "surfaceStyle"),
     cornerRadius: text(formData, "cornerRadius"),
     colorPalette: normalizeColorPalette(text(formData, "colorPalette")),
+    motionLevel: normalizeMotionLevel(text(formData, "motionLevel")),
     maintenanceMode: formData.get("maintenanceMode") === "on",
     maintenanceMessage: text(formData, "maintenanceMessage"),
   });

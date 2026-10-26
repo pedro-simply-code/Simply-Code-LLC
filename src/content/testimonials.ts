@@ -1,3 +1,5 @@
+import type { ReviewSource } from "~/lib/reviews";
+
 export type Testimonial = {
   quote: string;
   /** Public project title from Upwork — client names stay private on the platform. */
@@ -7,6 +9,8 @@ export type Testimonial = {
   rating: number;
   /** Optional link to the matching case study. */
   projectSlug?: string;
+  /** Omitted on bundled static reviews (treated as Upwork). */
+  source?: ReviewSource;
 };
 
 export const UPWORK_PROFILE_URL =

@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, type ReactNode } from "react";
+import { appNotificationCountBadgeSm } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 export type StudioTabItem = {
@@ -65,7 +66,7 @@ function StudioTabsInner({
           >
             {item.label}
             {item.badge !== undefined && item.badge > 0 ? (
-              <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[#e2761b] px-1 text-[9px] font-bold text-white">
+              <span className={cn(appNotificationCountBadgeSm, "ml-1.5")}>
                 {item.badge > 9 ? "9+" : item.badge}
               </span>
             ) : null}

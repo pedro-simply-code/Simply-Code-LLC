@@ -1,4 +1,5 @@
 import { MaintenanceScreen } from "~/components/maintenance-screen";
+import { SiteMotionRoot } from "~/components/site-motion-root";
 import { getSiteSettings } from "~/server/site-settings/queries";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,9 @@ export default async function PublicSiteLayout({
   children: React.ReactNode;
 }) {
   const settings = await getSiteSettings();
-  if (!settings.maintenanceMode) return children;
+  if (!settings.maintenanceMode) {
+    return <SiteMotionRoot>{children}</SiteMotionRoot>;
+  }
 
   return <MaintenanceScreen message={settings.maintenanceMessage} />;
 }

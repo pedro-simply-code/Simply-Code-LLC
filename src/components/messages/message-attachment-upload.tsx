@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Paperclip, X } from "lucide-react";
 import { appToast } from "~/lib/app-toast";
 import {
-  ALLOWED_ATTACHMENT_MIME_TYPES,
   MESSAGE_ATTACHMENT_ACCEPT,
   MESSAGE_ATTACHMENT_MAX_BYTES,
   MESSAGE_ATTACHMENT_MAX_COUNT,
@@ -155,11 +154,6 @@ export function MessageAttachmentUpload({
           ))}
         </ul>
       ) : null}
-
-      <p className="text-[10px] text-[#9a9488]">
-        Allowed:{" "}
-        {ALLOWED_ATTACHMENT_MIME_TYPES.map((t) => t.split("/")[1]).join(", ")}
-      </p>
     </div>
   );
 }

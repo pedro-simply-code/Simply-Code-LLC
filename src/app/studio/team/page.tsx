@@ -22,6 +22,7 @@ import {
 import { StudioPagination } from "~/components/studio/studio-pagination";
 import { paginateStudio, parseStudioPage, studioPageSummary } from "~/lib/studio-pagination";
 import { parseStudioView } from "~/lib/studio-view";
+import { CancelInviteForm } from "~/components/studio/cancel-invite-form";
 import { appGhostButtonLg } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -161,12 +162,19 @@ export default async function TeamPage({
                     {invite.title ? ` · ${invite.title}` : ""}
                   </p>
                 </div>
-                <p className="text-[11px] text-[#9a9488]">
-                  Expires{" "}
-                  {invite.expiresAt.toLocaleDateString(undefined, {
-                    dateStyle: "medium",
-                  })}
-                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-[11px] text-[#9a9488]">
+                    Expires{" "}
+                    {invite.expiresAt.toLocaleDateString(undefined, {
+                      dateStyle: "medium",
+                    })}
+                  </p>
+                  <CancelInviteForm
+                    inviteId={invite.id}
+                    returnTo={returnTo}
+                    email={invite.email}
+                  />
+                </div>
               </li>
             ))}
           </ul>

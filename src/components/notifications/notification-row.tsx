@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { NotificationDTO } from "~/server/notifications/types";
-import { appChip } from "~/lib/surface";
+import { appChip, appNotificationUnreadRow } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 /** Shared size for type label + row actions on the notifications page. */
@@ -17,7 +17,7 @@ export const notificationRowActionButton = cn(
 );
 
 const rowTypeTag =
-  "absolute top-0 right-0 z-[1] block rounded-none border-0 px-[15px] py-[7.5px] shadow-none bg-sc-accent/15 text-[9px] font-bold tracking-[0.1em] uppercase text-sc-ink";
+  "absolute top-0 right-0 z-[1] block rounded-none border-0 px-[15px] py-[7.5px] shadow-none bg-sc-accent/20 text-[9px] font-bold tracking-[0.1em] uppercase text-sc-accent-deep";
 
 const titleClass =
   "line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug text-[#15130f]";
@@ -58,7 +58,11 @@ export function NotificationRowContent({
       ) : null}
       <p className="mt-1 text-[10px] font-bold tracking-[0.08em] text-[#9a9488] uppercase">
         {new Date(item.createdAt).toLocaleString()}
-        {item.readAt ? " · read" : " · new"}
+        {item.readAt ? (
+          " · read"
+        ) : (
+          <span className="text-sc-accent-deep"> · new</span>
+        )}
       </p>
     </>
   );
@@ -82,8 +86,7 @@ export function NotificationRow({
         compact
           ? "gap-2 border-b border-[#15130f]/8 px-4 py-3 last:border-0"
           : "relative items-end gap-4 overflow-hidden px-5 py-4",
-        !item.readAt && !compact && "bg-[#fffaf0]",
-        !item.readAt && compact && "bg-[#fffaf0]",
+        !item.readAt && appNotificationUnreadRow,
       )}
     >
       {!compact ? (

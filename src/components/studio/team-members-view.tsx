@@ -133,7 +133,7 @@ export function TeamMembersView({
                     On About page
                   </p>
                 ) : null}
-                {canManageAbout && !isSelf ? (
+                {canManageAbout ? (
                   <TeamAboutToggle
                     userId={person.id}
                     showOnAbout={person.showOnAbout}
@@ -208,7 +208,7 @@ export function TeamMembersView({
                   canEditRole={!isSelf}
                   trigger="manage"
                 />
-                {canManageAbout && !isSelf ? (
+                {canManageAbout ? (
                   <TeamAboutToggle
                     userId={person.id}
                     showOnAbout={person.showOnAbout}

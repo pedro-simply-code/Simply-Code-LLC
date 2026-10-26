@@ -23,7 +23,7 @@ type WorkCardProps = {
 export function WorkCard({ project, showSummary = true, activeFilterTags = [] }: WorkCardProps) {
   const hasActiveFilters = activeFilterTags.length > 0;
   return (
-    <article className="group flex flex-col">
+    <article className="site-reveal group flex flex-col">
       <Link
         href={`/work/${project.slug}`}
         className="flex flex-1 flex-col focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sc-accent"

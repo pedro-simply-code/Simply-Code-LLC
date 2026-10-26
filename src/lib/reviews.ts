@@ -27,8 +27,17 @@ export function reviewStatusLabel(status: string, audience: "studio" | "portal" 
   }
 }
 
+export type ReviewSource = "upwork" | "client" | "manual" | "google";
+
+export function normalizeReviewSource(source: unknown): ReviewSource {
+  if (source === "client" || source === "manual" || source === "google" || source === "upwork") {
+    return source;
+  }
+  return "manual";
+}
+
 export function reviewSourceLabel(source: string): string {
-  switch (source) {
+  switch (normalizeReviewSource(source)) {
     case "client":
       return "Client portal";
     case "upwork":
@@ -40,4 +49,50 @@ export function reviewSourceLabel(source: string): string {
     default:
       return source;
   }
+}
+
+/** Public site: bundled static testimonials omit `source` and are treated as Upwork. */
+export function testimonialDisplaySource(source?: string): ReviewSource {
+  if (source === "client" || source === "manual" || source === "google" || source === "upwork") {
+    return source;
+  }
+  return "upwork";
+}
+
+/** Public marketing carousel / testimonial cards. */
+export function testimonialRatingScreenReader(rating: number, source?: string): string {
+  const normalized = testimonialDisplaySource(source);
+  if (normalized === "upwork") return `Rated ${rating} out of 5 on Upwork.`;
+  if (normalized === "google") return `Rated ${rating} out of 5 on Google.`;
+  return `Rated ${rating} out of 5.`;
+}
+
+export function testimonialRatingMeta(rating: number, period: string, source?: string): string {
+  const normalized = testimonialDisplaySource(source);
+  const score = rating.toFixed(2);
+  if (normalized === "upwork") return `${score} on Upwork · ${period}`;
+  if (normalized === "google") return `${score} on Google · ${period}`;
+  return `${score} · ${period}`;
+}
+
+export function testimonialsIncludeUpwork(testimonials: { source?: string }[]): boolean {
+  return testimonials.some((item) => testimonialDisplaySource(item.source) === "upwork");
+}
+
+export function clientProofIntro(
+  testimonials: { source?: string }[],
+  staticFallback: boolean,
+): string {
+  if (staticFallback) {
+    return "Verified reviews from our founder's public Upwork profile — published as written. Client names stay private on Upwork.";
+  }
+
+  const sources = new Set(testimonials.map((item) => testimonialDisplaySource(item.source)));
+  if (sources.size === 1 && sources.has("client")) {
+    return "Feedback from clients on completed projects, submitted through our portal and published with their approval.";
+  }
+  if (sources.has("upwork") && !sources.has("client")) {
+    return "Verified reviews from our founder's public Upwork profile — published as written. Client names stay private on Upwork.";
+  }
+  return "Published client feedback — from our portal and verified platforms where noted.";
 }

@@ -14,7 +14,7 @@ import {
   studioProjectGhostButton,
   studioProjectPanel,
 } from "~/lib/studio-project-surface";
-import { appGhostButton } from "~/lib/surface";
+import { appGhostButton, appNotificationCountBadgeSm } from "~/lib/surface";
 import type { UserRole } from "~/server/db/schema";
 import {
   assignProjectMember,
@@ -90,7 +90,7 @@ export function ProjectWorkspace({
         >
           Requests
           {openRequests > 0 ? (
-            <span className="rounded-full bg-[#e2761b] px-1.5 text-[9px] font-bold text-white">
+            <span className={appNotificationCountBadgeSm}>
               {openRequests}
             </span>
           ) : null}

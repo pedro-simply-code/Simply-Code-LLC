@@ -6,4 +6,5 @@ export function applySiteSettingsToDocument(settings: SiteSettings) {
   root.dataset.siteSurface = settings.surfaceStyle;
   root.dataset.siteRadius = settings.cornerRadius;
   root.dataset.sitePalette = settings.colorPalette;
+  root.dataset.siteMotion = settings.motionLevel;
 }

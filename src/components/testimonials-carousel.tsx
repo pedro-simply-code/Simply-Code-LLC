@@ -7,6 +7,11 @@ import {
   UPWORK_PROFILE_URL,
   type Testimonial,
 } from "~/content/testimonials";
+import {
+  testimonialRatingMeta,
+  testimonialRatingScreenReader,
+  testimonialsIncludeUpwork,
+} from "~/lib/reviews";
 import { appIconButton, appPanelMuted } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -32,7 +37,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
           ))}
         </div>
         <span className="sr-only">
-          Rated {testimonial.rating} out of 5 on Upwork.
+          {testimonialRatingScreenReader(testimonial.rating, testimonial.source)}
         </span>
       </div>
 
@@ -45,7 +50,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
           {testimonial.project}
         </p>
         <p className="mt-0.5 text-[12px] text-[#6f6a60]">
-          {testimonial.rating.toFixed(2)} on Upwork · {testimonial.period}
+          {testimonialRatingMeta(testimonial.rating, testimonial.period, testimonial.source)}
         </p>
         {testimonial.projectSlug ? (
           <Link
@@ -98,6 +103,8 @@ export function TestimonialsCarousel({
     }
     return groups;
   }, [items, perPage]);
+
+  const showUpworkLink = testimonialsIncludeUpwork(testimonials);
 
   const totalPages = pages.length;
   const current = Math.min(page, Math.max(totalPages - 1, 0));
@@ -185,14 +192,16 @@ export function TestimonialsCarousel({
         </div>
       </div>
 
-      <a
-        href={UPWORK_PROFILE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.16em] text-[#15130f] uppercase underline underline-offset-4 transition-colors hover:text-sc-accent"
-      >
-        Read all reviews on Upwork <ArrowUpRight className="size-3" />
-      </a>
+      {showUpworkLink ? (
+        <a
+          href={UPWORK_PROFILE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.16em] text-[#15130f] uppercase underline underline-offset-4 transition-colors hover:text-sc-accent"
+        >
+          Read all reviews on Upwork <ArrowUpRight className="size-3" />
+        </a>
+      ) : null}
     </div>
   );
 }

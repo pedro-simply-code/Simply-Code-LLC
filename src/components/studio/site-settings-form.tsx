@@ -14,6 +14,12 @@ import {
 } from "~/lib/site-settings";
 import { applySiteSettingsToDocument } from "~/lib/site-settings-client";
 import {
+  SITE_MOTION_DESCRIPTIONS,
+  SITE_MOTION_LABELS,
+  SITE_MOTION_LEVELS,
+  type SiteMotionLevel,
+} from "~/lib/site-motion";
+import {
   SITE_COLOR_PALETTES,
   SITE_PALETTE_LABELS,
   SITE_PALETTE_NOTES,
@@ -72,6 +78,41 @@ function GridTile({
   );
 }
 
+function MotionPreview({ level }: { level: SiteMotionLevel }) {
+  if (level === "none") {
+    return (
+      <div className="flex h-12 items-end gap-1.5" aria-hidden>
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className="flex-1 rounded-sm bg-[#15130f]/12"
+            style={{ height: `${28 + i * 6}%` }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  const duration =
+    level === "subtle" ? "1.4s" : level === "balanced" ? "1.1s" : "0.85s";
+
+  return (
+    <div className="flex h-12 items-end gap-1.5" aria-hidden>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="flex-1 rounded-sm bg-sc-accent/70 motion-preview-bar"
+          style={{
+            height: `${28 + i * 6}%`,
+            animationDuration: duration,
+            animationDelay: `${i * (level === "bold" ? 0.14 : 0.08)}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function PalettePreview({ palette }: { palette: SiteColorPalette }) {
   const swatch = SITE_PALETTE_SWATCH[palette];
   return (
@@ -118,6 +159,7 @@ export function SiteSettingsForm({ settings: initial }: { settings: SiteSettings
       <input type="hidden" name="colorPalette" value={draft.colorPalette} />
       <input type="hidden" name="surfaceStyle" value={draft.surfaceStyle} />
       <input type="hidden" name="cornerRadius" value={draft.cornerRadius} />
+      <input type="hidden" name="motionLevel" value={draft.motionLevel} />
       <input type="hidden" name="maintenanceMessage" value={draft.maintenanceMessage} />
 
       <StudioCard
@@ -133,6 +175,24 @@ export function SiteSettingsForm({ settings: initial }: { settings: SiteSettings
               label={SITE_PALETTE_LABELS[palette]}
               description={SITE_PALETTE_NOTES[palette]}
               preview={<PalettePreview palette={palette} />}
+            />
+          ))}
+        </div>
+      </StudioCard>
+
+      <StudioCard
+        title="Motion"
+        description="Entrance animations on the public marketing site. Studio and portal are unchanged. Respects visitors’ reduced-motion preference."
+      >
+        <div className={SETTINGS_TILE_GRID}>
+          {SITE_MOTION_LEVELS.map((level) => (
+            <GridTile
+              key={level}
+              selected={draft.motionLevel === level}
+              onSelect={() => patch({ motionLevel: level })}
+              label={SITE_MOTION_LABELS[level]}
+              description={SITE_MOTION_DESCRIPTIONS[level]}
+              preview={<MotionPreview level={level} />}
             />
           ))}
         </div>

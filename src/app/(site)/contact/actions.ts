@@ -5,8 +5,6 @@ import { sendEmail } from "~/server/email/sendEmail";
 import { contactSchema, type ContactState } from "~/app/(site)/contact/schema";
 import { db } from "~/server/db";
 import { contactMessages } from "~/server/db/schema";
-import { parseMessageAttachmentsFromForm } from "~/lib/message-attachments";
-import { attachmentsHtmlBlock } from "~/server/messages/attachment-email";
 import { notifyFounders } from "~/server/notifications";
 
 function escapeHtml(value: string): string {
@@ -59,7 +57,6 @@ export async function submitContact(
   }
 
   const submittedAt = new Date().toLocaleString("en-US", { timeZone: "UTC" });
-  const attachments = parseMessageAttachmentsFromForm(formData);
 
   try {
     await db.insert(contactMessages).values({
@@ -68,7 +65,7 @@ export async function submitContact(
       company: data.company || null,
       service: data.service,
       message: data.message,
-      attachments,
+      attachments: [],
     });
 
     await notifyFounders({
@@ -91,7 +88,6 @@ export async function submitContact(
     <p><strong>Submitted:</strong> ${escapeHtml(submittedAt)} UTC</p>
     <hr />
     <p style="white-space: pre-wrap">${escapeHtml(data.message)}</p>
-    ${attachmentsHtmlBlock(attachments)}
   `;
 
   try {

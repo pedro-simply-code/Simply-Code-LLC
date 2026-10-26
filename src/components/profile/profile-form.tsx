@@ -119,7 +119,8 @@ export function ProfileForm({
                     <span className="text-sm leading-snug text-sc-ink">
                       <span className="font-semibold">List me on the public About page</span>
                       <span className="mt-1 block text-xs text-[#6f6a60]">
-                        For your own founder profile. Other team members are added from Studio → Team.
+                        Same setting as Hide / Show on About on your card in Studio → Team. Other
+                        members are listed there by a founder.
                       </span>
                     </span>
                   </label>

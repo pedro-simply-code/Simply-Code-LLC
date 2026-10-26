@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { normalizeColorPalette, SITE_COLOR_PALETTES } from "~/lib/site-palette";
+import { normalizeMotionLevel, SITE_MOTION_LEVELS } from "~/lib/site-motion";
 
 export const SITE_CORNER_RADIUS = ["none", "sm", "md", "lg"] as const;
 export type SiteCornerRadius = (typeof SITE_CORNER_RADIUS)[number];
@@ -55,6 +56,8 @@ export const siteSettingsSchema = z.object({
   surfaceStyle: z.enum(SITE_SURFACE_STYLES),
   cornerRadius: z.enum(SITE_CORNER_RADIUS),
   colorPalette: z.enum(SITE_COLOR_PALETTES),
+  /** Public marketing entrance motion (see `data-site-motion` on `<html>`). */
+  motionLevel: z.enum(SITE_MOTION_LEVELS),
   maintenanceMode: z.boolean(),
   maintenanceMessage: z.string().max(500),
 });
@@ -65,6 +68,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   surfaceStyle: "shadow",
   cornerRadius: "md",
   colorPalette: "orange",
+  motionLevel: "balanced",
   maintenanceMode: false,
   maintenanceMessage: "We are making improvements. Please check back soon.",
 };
@@ -78,6 +82,7 @@ function withNormalizedSiteSettingsInput(partial: unknown): unknown {
   const legacy = raw.roundedCorners;
   raw.cornerRadius = normalizeCornerRadius(raw.cornerRadius, legacy);
   delete raw.roundedCorners;
+  raw.motionLevel = normalizeMotionLevel(raw.motionLevel);
   return raw;
 }
 
@@ -95,6 +100,7 @@ export function mergeSiteSettings(partial: unknown): SiteSettings {
       ...loose.data,
       colorPalette: normalizeColorPalette(loose.data.colorPalette),
       cornerRadius: normalizeCornerRadius(loose.data.cornerRadius),
+      motionLevel: normalizeMotionLevel(loose.data.motionLevel),
     };
   }
   return DEFAULT_SITE_SETTINGS;
@@ -104,6 +110,7 @@ export type SiteSettingsHtmlProps = {
   "data-site-surface": SiteSettings["surfaceStyle"];
   "data-site-radius": SiteCornerRadius;
   "data-site-palette": SiteSettings["colorPalette"];
+  "data-site-motion": SiteSettings["motionLevel"];
 };
 
 export function siteSettingsHtmlProps(settings: SiteSettings): SiteSettingsHtmlProps {
@@ -111,5 +118,6 @@ export function siteSettingsHtmlProps(settings: SiteSettings): SiteSettingsHtmlP
     "data-site-surface": settings.surfaceStyle,
     "data-site-radius": settings.cornerRadius,
     "data-site-palette": settings.colorPalette,
+    "data-site-motion": settings.motionLevel,
   };
 }

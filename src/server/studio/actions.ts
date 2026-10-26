@@ -778,6 +778,41 @@ export async function setTeamMemberShowOnAbout(formData: FormData) {
   redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}updated=1`);
 }
 
+export async function cancelPendingInvite(formData: FormData) {
+  await requireFounder();
+  const inviteId = text(formData, "inviteId");
+  const returnTo = text(formData, "returnTo") || "/studio/team";
+  if (!isUuid(inviteId)) {
+    redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=validation`);
+  }
+
+  const [row] = await db
+    .select({
+      id: invites.id,
+      clientId: invites.clientId,
+      acceptedAt: invites.acceptedAt,
+    })
+    .from(invites)
+    .where(eq(invites.id, inviteId))
+    .limit(1);
+
+  if (!row || row.acceptedAt) {
+    redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=invite`);
+  }
+
+  await db
+    .delete(invites)
+    .where(and(eq(invites.id, inviteId), isNull(invites.acceptedAt)));
+
+  revalidatePath("/studio/team");
+  revalidatePath("/studio/clients");
+  if (row.clientId) {
+    revalidatePath(`/studio/clients/${row.clientId}`);
+  }
+
+  redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}cancelled=1`);
+}
+
 export async function createReview(formData: FormData) {
   const session = await requireFounder();
 

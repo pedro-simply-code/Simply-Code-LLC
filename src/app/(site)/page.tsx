@@ -19,6 +19,7 @@ import { WorkCard } from "~/components/work-card";
 import { PROJECTS } from "~/content/projects";
 import { SERVICES } from "~/content/services";
 import { TESTIMONIALS } from "~/content/testimonials";
+import { normalizeReviewSource } from "~/lib/reviews";
 import { getApprovedReviewsSafe, getPublicProjectsSafe } from "~/server/studio/queries";
 import {
   appEmptyState,
@@ -84,6 +85,7 @@ export default async function HomePage() {
         project: review.projectTitle ?? review.authorName,
         period: review.period ?? new Date(review.createdAt).getFullYear().toString(),
         rating: review.rating,
+        source: normalizeReviewSource(review.source),
       }))
     : TESTIMONIALS;
 
@@ -96,24 +98,31 @@ export default async function HomePage() {
         <div className="mx-auto max-w-[1400px] px-6 py-14 lg:py-20">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
             <div>
-              <div className={cn(appChip, "inline-flex items-center gap-2.5 px-3.5 py-2")}>
+              <div
+                className={cn(
+                  appChip,
+                  "site-hero-in site-hero-in-delay-1 inline-flex items-center gap-2.5 px-3.5 py-2",
+                )}
+              >
                 <span aria-hidden className="size-1.5 rounded-full bg-sc-accent-bright" />
                 <p className="text-[10px] font-bold tracking-[0.22em] text-sc-accent uppercase">
                   Web Development Agency
                 </p>
               </div>
 
-              <h1 className="mt-7 max-w-[26ch] text-[clamp(2.1rem,4vw,3.35rem)] leading-[1.06] font-black tracking-[-0.03em] uppercase">
+              <h1
+                className="site-hero-in site-hero-in-delay-2 mt-7 max-w-[26ch] text-[clamp(2.1rem,4vw,3.35rem)] leading-[1.06] font-black tracking-[-0.03em] uppercase"
+              >
                 We build high-performance <span className="text-sc-accent-bright">web solutions</span> that
                 drive results
               </h1>
 
-              <p className="mt-6 max-w-[34rem] text-[16px] leading-[1.7] text-[#57524a]">
+              <p className="site-hero-in site-hero-in-delay-3 mt-6 max-w-[34rem] text-[16px] leading-[1.7] text-[#57524a]">
                 A full-service digital agency specializing in UX design, custom Next.js applications,
                 WordPress solutions and scalable web platforms.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="site-hero-in site-hero-in-delay-3 mt-8 flex flex-wrap items-center gap-3">
                 <Link
                   href="#contact"
                   className={appPrimaryButtonMarketing}
@@ -130,7 +139,9 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9">
+            <div
+              className="site-hero-in site-hero-in-delay-2 site-motion-lift relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9"
+            >
               <div
                 aria-hidden
                 className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-sc-accent-bright/25 blur-3xl"
@@ -167,7 +178,7 @@ export default async function HomePage() {
       {/* SERVICES */}
       <section id="services" className="border-b border-[#15130f]/10 bg-sc-section py-20 lg:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
-          <div className="mb-16 max-w-2xl">
+          <div className="site-reveal mb-16 max-w-2xl">
             <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
               Our Services
             </p>
@@ -180,7 +191,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="site-stagger grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {CORE_SERVICES.map((service, index) => {
               const Icon = SERVICE_ICONS[index] ?? Palette;
               return (
@@ -189,7 +200,7 @@ export default async function HomePage() {
                   className={cn(
                     appPanelMuted,
                     appPanelHover,
-                    "group site-card-hover-accent p-8",
+                    "site-reveal site-motion-lift group site-card-hover-accent p-8",
                   )}
                 >
                   <div className="mb-6 flex size-14 items-center justify-center bg-[#15130f] text-white transition-colors group-hover:bg-sc-accent-bright group-hover:text-[#15130f]">
@@ -229,7 +240,9 @@ export default async function HomePage() {
           </div>
 
           {AGENCY_SERVICE ? (
-            <div className="mt-6 flex flex-col gap-6 rounded-lg bg-[#15130f] p-8 text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] lg:flex-row lg:items-center lg:justify-between">
+            <div
+              className="site-reveal site-motion-lift mt-6 flex flex-col gap-6 rounded-lg bg-[#15130f] p-8 text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] lg:flex-row lg:items-center lg:justify-between"
+            >
               <div className="flex items-start gap-5">
                 <div className="flex size-12 shrink-0 items-center justify-center bg-sc-accent-bright text-[#15130f]">
                   <Users className="size-5" />
@@ -260,7 +273,7 @@ export default async function HomePage() {
       {/* OUR WORK */}
       <section id="our-work" className="border-b border-[#15130f]/10 py-20 lg:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
-          <div className="mb-16 max-w-2xl">
+          <div className="site-reveal mb-16 max-w-2xl">
             <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
               Our Work
             </p>
@@ -274,7 +287,7 @@ export default async function HomePage() {
 
           {featuredWork.length > 0 ? (
             <>
-              <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
+              <div className="site-stagger grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
                 {featuredWork.map((project) => (
                   <WorkCard key={project.slug} project={project} />
                 ))}
@@ -304,7 +317,7 @@ export default async function HomePage() {
       <section className="border-b border-[#15130f]/10 py-20 lg:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
-            <div>
+            <div className="site-reveal">
               <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
                 Why Choose Us
               </p>
@@ -365,7 +378,9 @@ export default async function HomePage() {
                 Meet the team behind the work <ArrowUpRight className="size-3.5" />
               </Link>
             </div>
-            <div className="relative flex min-h-[360px] flex-col overflow-hidden rounded-lg bg-[#15130f] text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] sm:min-h-[390px] ring-1 ring-white/10">
+            <div
+              className="site-reveal site-motion-lift relative flex min-h-[360px] flex-col overflow-hidden rounded-lg bg-[#15130f] text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] sm:min-h-[390px] ring-1 ring-white/10"
+            >
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
                 <div className="flex items-center gap-2">
                   <span className="size-2.5 rounded-full bg-white/15" />
@@ -420,7 +435,7 @@ export default async function HomePage() {
       <section id="contact" className="scroll-mt-20 bg-sc-section py-20 lg:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start lg:gap-16">
-            <div>
+            <div className="site-reveal">
               <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
                 Contact Us
               </p>
@@ -442,7 +457,9 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <ContactForm />
+            <div className="site-reveal">
+              <ContactForm />
+            </div>
           </div>
         </div>
       </section>

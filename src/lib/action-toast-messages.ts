@@ -26,6 +26,7 @@ export const ACTION_ERROR_MESSAGES: Record<string, string> = {
   quote: "Review quote is required.",
   "request-reason": "A rejection reason is required.",
   expired: "This invitation link is invalid or has expired.",
+  invite: "That invitation is no longer pending.",
 };
 
 const LOGIN_AUTH_ERRORS: Record<string, { variant: AppToastVariant; message: string }> = {
@@ -66,6 +67,14 @@ export function resolveActionToast(
       message: savedMessage(pathname),
       clearParams: ["saved"],
       refreshSession: pathname.endsWith("/profile"),
+    };
+  }
+
+  if (params.get("cancelled") === "1") {
+    return {
+      variant: "success",
+      message: "Invitation cancelled.",
+      clearParams: ["cancelled"],
     };
   }
 

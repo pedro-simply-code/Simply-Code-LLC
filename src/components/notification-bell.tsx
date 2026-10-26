@@ -8,7 +8,12 @@ import { NotificationRowContent } from "~/components/notifications/notification-
 import { useNotificationsBell } from "~/hooks/use-notifications";
 import type { NotificationContext } from "~/lib/notifications-api";
 import type { NotificationDTO } from "~/server/notifications/types";
-import { appDropdown, appIconButton } from "~/lib/surface";
+import {
+  appDropdown,
+  appIconButton,
+  appNotificationCountBadge,
+  appNotificationUnreadRow,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 export function NotificationBell({
@@ -70,7 +75,10 @@ export function NotificationBell({
         <Bell className="size-4" />
         {feed.unread > 0 ? (
           <span
-            className="absolute -top-1.5 -right-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[#e2761b] px-1 text-[10px] font-bold text-white"
+            className={cn(
+              appNotificationCountBadge,
+              "absolute -top-1.5 -right-1.5 text-[10px]",
+            )}
             aria-live="polite"
           >
             {feed.unread > 9 ? "9+" : feed.unread}
@@ -103,7 +111,10 @@ export function NotificationBell({
               feed.items.map((item) => (
                 <li
                   key={item.id}
-                  className={`border-b border-[#15130f]/8 last:border-0 ${item.readAt ? "" : "bg-[#fffaf0]"}`}
+                  className={cn(
+                    "border-b border-[#15130f]/8 last:border-0",
+                    !item.readAt && appNotificationUnreadRow,
+                  )}
                 >
                   <Link
                     href={item.href ?? viewAllHref}

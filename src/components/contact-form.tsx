@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
-import { MessageAttachmentUpload } from "~/components/messages/message-attachment-upload";
 import { submitContact } from "~/app/(site)/contact/actions";
 import { INITIAL_CONTACT_STATE } from "~/app/(site)/contact/schema";
 import { SITE } from "~/content/site";
@@ -190,13 +189,6 @@ export function ContactForm() {
             The more context you share, the more useful our first reply will be.
           </p>
         )}
-      </div>
-
-      <div className="mt-5 space-y-2">
-        <p className="text-[11px] font-bold tracking-[0.16em] uppercase">Attachments</p>
-        <MessageAttachmentUpload
-          hint="Optional — images, PDF, Word, Excel, TXT or CSV (max 5 files, 8 MB each)."
-        />
       </div>
 
       <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

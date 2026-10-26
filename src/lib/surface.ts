@@ -74,6 +74,16 @@ export const appEmptyState =
 export const appDropdown =
   "site-elevated site-radius-lg bg-white ring-1 ring-[#15130f]/5";
 
+/** Unread count on bell, tabs, and project links — follows site palette accent. */
+export const appNotificationCountBadge =
+  "app-notification-badge inline-flex min-w-5 items-center justify-center rounded-full px-1 font-bold text-white";
+
+export const appNotificationCountBadgeSm =
+  "app-notification-badge inline-flex min-w-[1.125rem] items-center justify-center rounded-full px-1.5 text-[9px] font-bold text-white";
+
+/** Highlight for unread notification rows (dropdown + notifications page). */
+export const appNotificationUnreadRow = "app-notification-unread app-notification-unread-accent";
+
 export const appShellAside = "site-shell-aside bg-sc-section-alt text-sc-ink";
 
 export const appShellHeader =
