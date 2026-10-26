@@ -20,15 +20,19 @@ type WorkCardProps = {
   activeFilterTags?: string[];
 };
 
-export function WorkCard({ project, showSummary = true, activeFilterTags = [] }: WorkCardProps) {
+export function WorkCard({
+  project,
+  showSummary = true,
+  activeFilterTags = [],
+}: WorkCardProps) {
   const hasActiveFilters = activeFilterTags.length > 0;
   return (
     <article className="site-reveal group flex flex-col">
       <Link
         href={`/work/${project.slug}`}
-        className="flex flex-1 flex-col focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sc-accent"
+        className="focus-visible:outline-sc-accent flex flex-1 flex-col focus-visible:outline-2 focus-visible:outline-offset-4"
       >
-        <div className="relative aspect-[1000/560] overflow-hidden rounded-lg bg-gradient-to-br from-sc-accent-bright to-sc-accent shadow-[0_2px_12px_rgba(21,19,15,0.08)]">
+        <div className="from-sc-accent-bright to-sc-accent relative aspect-[1000/560] overflow-hidden rounded-lg bg-gradient-to-br shadow-[0_2px_12px_rgba(21,19,15,0.08)]">
           {project.image ? (
             <Image
               src={project.image}
@@ -46,10 +50,13 @@ export function WorkCard({ project, showSummary = true, activeFilterTags = [] }:
           )}
 
           <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-[#15130f] via-[#15130f]/85 to-transparent p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 pointer-coarse:hidden">
-            <p className="text-[10px] font-bold tracking-[0.22em] text-sc-accent-bright uppercase">Stack</p>
+            <p className="text-sc-accent-bright text-[10px] font-bold tracking-[0.22em] uppercase">
+              Stack
+            </p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {project.tags.map((tag) => {
-                const matched = hasActiveFilters && tagIsActiveFilter(tag, activeFilterTags);
+                const matched =
+                  hasActiveFilters && tagIsActiveFilter(tag, activeFilterTags);
                 return (
                   <li
                     key={tag}
@@ -74,7 +81,7 @@ export function WorkCard({ project, showSummary = true, activeFilterTags = [] }:
 
         <div className="mt-6 flex flex-1 flex-col">
           <div className="flex items-center justify-between gap-4">
-            <h3 className="text-lg font-bold tracking-tight transition-colors group-hover:text-sc-accent">
+            <h3 className="group-hover:text-sc-accent text-lg font-bold tracking-tight transition-colors">
               {project.title}
             </h3>
             <span className="shrink-0 text-[11px] font-semibold tracking-[0.12em] text-[#6f6a60] uppercase">
@@ -83,7 +90,9 @@ export function WorkCard({ project, showSummary = true, activeFilterTags = [] }:
           </div>
 
           {showSummary ? (
-            <p className="mt-3 text-[14px] leading-relaxed text-[#57524a]">{project.summary}</p>
+            <p className="mt-3 text-[14px] leading-relaxed text-[#57524a]">
+              {project.summary}
+            </p>
           ) : null}
 
           <ul
@@ -93,13 +102,15 @@ export function WorkCard({ project, showSummary = true, activeFilterTags = [] }:
             )}
           >
             {project.tags.map((tag) => {
-              const matched = hasActiveFilters && tagIsActiveFilter(tag, activeFilterTags);
+              const matched =
+                hasActiveFilters && tagIsActiveFilter(tag, activeFilterTags);
               return (
                 <li
                   key={tag}
                   className={cn(
                     appTag,
-                    matched && "bg-sc-accent-bright text-[#15130f] ring-1 ring-sc-accent/40",
+                    matched &&
+                      "bg-sc-accent-bright ring-sc-accent/40 text-[#15130f] ring-1",
                   )}
                 >
                   {tag}

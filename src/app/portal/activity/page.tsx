@@ -26,7 +26,9 @@ export default async function PortalActivityPage() {
 
       {items.length === 0 ? (
         <div className={cn(appPanel, "p-8")}>
-          <p className="text-sm text-[#6f6a60]">No activity yet. Open a project to get started.</p>
+          <p className="text-sm text-[#6f6a60]">
+            No activity yet. Open a project to get started.
+          </p>
         </div>
       ) : (
         <StudioCard title="Recent">
@@ -38,7 +40,10 @@ export default async function PortalActivityPage() {
           />
           <p className="mt-4 text-[11px] text-[#6f6a60]">
             Open a project from{" "}
-            <Link href="/portal" className="font-semibold text-sc-accent hover:underline">
+            <Link
+              href="/portal"
+              className="text-sc-accent font-semibold hover:underline"
+            >
               Projects
             </Link>{" "}
             for full detail.

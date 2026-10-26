@@ -14,11 +14,20 @@ import {
 } from "~/components/studio/studio-overview-column";
 import { StudioViewToggle } from "~/components/studio/studio-view-toggle";
 import { EmptyState } from "~/components/studio/ui";
-import { padStudioOverviewPreview, STUDIO_OVERVIEW_PREVIEW_SIZE } from "~/lib/studio-pagination";
+import {
+  padStudioOverviewPreview,
+  STUDIO_OVERVIEW_PREVIEW_SIZE,
+} from "~/lib/studio-pagination";
 import { normalizeRole } from "~/lib/roles";
 import type { StudioViewMode } from "~/lib/studio-view";
 import type { UserRole } from "~/server/db/schema";
-import { appAccentButtonLg, appChip, appGhostButtonLg, appPanel, appPanelHover } from "~/lib/surface";
+import {
+  appAccentButtonLg,
+  appChip,
+  appGhostButtonLg,
+  appPanel,
+  appPanelHover,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 function formatOverviewWhen(date: Date) {
@@ -42,35 +51,49 @@ export function StudioOverviewQuickLinks({
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap items-center gap-2">
-      <a
-        href="/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn("inline-flex items-center", appGhostButtonLg)}
-      >
-        View public site
-      </a>
-      <Link href="/work" className={cn("inline-flex items-center", appGhostButtonLg)}>
-        Portfolio
-      </Link>
-      <Link href="/studio/notifications" className={cn("inline-flex items-center", appGhostButtonLg)}>
-        Notifications
-        {unreadNotificationCount > 0 ? (
-          <span className="ml-1.5 rounded-full bg-sc-accent px-1.5 py-0.5 text-[9px] font-bold text-white">
-            {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
-          </span>
-        ) : null}
-      </Link>
-      {showSiteSettings ? (
-        <Link href="/studio/settings" className={cn("inline-flex items-center gap-2", appGhostButtonLg)}>
-          Site settings
-          {maintenanceMode ? (
-            <span className={cn(appChip, "bg-amber-100 px-1.5 py-0.5 text-[9px] text-amber-950")}>
-              Maintenance on
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn("inline-flex items-center", appGhostButtonLg)}
+        >
+          View public site
+        </a>
+        <Link
+          href="/work"
+          className={cn("inline-flex items-center", appGhostButtonLg)}
+        >
+          Portfolio
+        </Link>
+        <Link
+          href="/studio/notifications"
+          className={cn("inline-flex items-center", appGhostButtonLg)}
+        >
+          Notifications
+          {unreadNotificationCount > 0 ? (
+            <span className="bg-sc-accent ml-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold text-white">
+              {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
             </span>
           ) : null}
         </Link>
-      ) : null}
+        {showSiteSettings ? (
+          <Link
+            href="/studio/settings"
+            className={cn("inline-flex items-center gap-2", appGhostButtonLg)}
+          >
+            Site settings
+            {maintenanceMode ? (
+              <span
+                className={cn(
+                  appChip,
+                  "bg-amber-100 px-1.5 py-0.5 text-[9px] text-amber-950",
+                )}
+              >
+                Maintenance on
+              </span>
+            ) : null}
+          </Link>
+        ) : null}
       </div>
       <StudioViewToggle />
     </div>
@@ -115,7 +138,7 @@ export function StudioOverviewStats({
             <p className="text-[10px] font-bold tracking-[0.16em] text-[#57524a] uppercase sm:hidden">
               {stat.label}
             </p>
-            <p className="text-[28px] leading-none font-black tracking-[-0.03em] text-sc-accent sm:text-[32px]">
+            <p className="text-sc-accent text-[28px] leading-none font-black tracking-[-0.03em] sm:text-[32px]">
               {stat.value}
             </p>
             <p className="mt-2 hidden text-[10px] font-bold tracking-[0.16em] text-[#57524a] uppercase sm:block">
@@ -135,7 +158,7 @@ export function StudioOverviewStats({
             <p className="text-[10px] font-bold tracking-[0.16em] text-[#57524a] uppercase">
               {stat.label}
             </p>
-            <p className="text-[28px] leading-none font-black tracking-[-0.03em] text-sc-accent">
+            <p className="text-sc-accent text-[28px] leading-none font-black tracking-[-0.03em]">
               {stat.value}
             </p>
           </Link>
@@ -178,7 +201,13 @@ const overviewFeedGhostItem: StudioOverviewFeedItem = {
   createdAt: new Date(0),
 };
 
-function OverviewFeedMetaLine({ label, value }: { label: string; value: string }) {
+function OverviewFeedMetaLine({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <p className="line-clamp-1 text-[10px] leading-snug text-[#57524a]">
       <span className="font-bold text-[#15130f]">{label}:</span> {value}
@@ -202,15 +231,24 @@ function OverviewFeedCardContent({ item }: { item: StudioOverviewFeedItem }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-start justify-between gap-2">
-        <p className={cn(overviewFeedTitleClass, "min-w-0 flex-1")}>{item.title}</p>
-        <span className={cn(appChip, "shrink-0 px-1.5 py-0.5 text-[9px] uppercase")}>
+        <p className={cn(overviewFeedTitleClass, "min-w-0 flex-1")}>
+          {item.title}
+        </p>
+        <span
+          className={cn(appChip, "shrink-0 px-1.5 py-0.5 text-[9px] uppercase")}
+        >
           {item.badge}
         </span>
       </div>
-      <p className={cn(overviewFeedBodyClass, "mt-1")}>{item.body.trim() ? item.body : "\u00a0"}</p>
+      <p className={cn(overviewFeedBodyClass, "mt-1")}>
+        {item.body.trim() ? item.body : "\u00a0"}
+      </p>
       <div className="mt-1 space-y-0.5">
         {item.personLine ? (
-          <OverviewFeedMetaLine label={item.personLine.label} value={item.personLine.value} />
+          <OverviewFeedMetaLine
+            label={item.personLine.label}
+            value={item.personLine.value}
+          />
         ) : null}
         <OverviewFeedMetaLine label="Project" value={item.projectTitle} />
       </div>
@@ -249,13 +287,19 @@ function StudioOverviewFeedColumn({
   const slots = padStudioOverviewPreview(preview);
   const hasItems = preview.length > 0;
 
-  const renderListSlot = (item: StudioOverviewFeedItem | null, index: number) => {
+  const renderListSlot = (
+    item: StudioOverviewFeedItem | null,
+    index: number,
+  ) => {
     const key = item?.id ?? `feed-slot-${index}`;
     if (!item) {
       return (
         <li
           key={key}
-          className={cn(overviewPreviewListItemClass, "invisible pointer-events-none select-none")}
+          className={cn(
+            overviewPreviewListItemClass,
+            "pointer-events-none invisible select-none",
+          )}
           aria-hidden
         >
           <div className="block">
@@ -266,20 +310,29 @@ function StudioOverviewFeedColumn({
     }
     return (
       <li key={key} className={overviewPreviewListItemClass}>
-        <Link href={item.href} className="block transition-colors hover:text-sc-accent">
+        <Link
+          href={item.href}
+          className="hover:text-sc-accent block transition-colors"
+        >
           <OverviewFeedCardContent item={item} />
         </Link>
       </li>
     );
   };
 
-  const renderGridSlot = (item: StudioOverviewFeedItem | null, index: number) => {
+  const renderGridSlot = (
+    item: StudioOverviewFeedItem | null,
+    index: number,
+  ) => {
     const key = item?.id ?? `feed-grid-slot-${index}`;
     if (!item) {
       return (
         <div
           key={key}
-          className={cn(overviewGridCellClassName(), "invisible pointer-events-none select-none")}
+          className={cn(
+            overviewGridCellClassName(),
+            "pointer-events-none invisible select-none",
+          )}
           aria-hidden
         >
           <OverviewFeedCardContent item={ghostItem} />
@@ -290,7 +343,10 @@ function StudioOverviewFeedColumn({
       <Link
         key={key}
         href={item.href}
-        className={cn(overviewGridCellClassName(), "transition-colors hover:text-sc-accent")}
+        className={cn(
+          overviewGridCellClassName(),
+          "hover:text-sc-accent transition-colors",
+        )}
       >
         <OverviewFeedCardContent item={item} />
       </Link>
@@ -355,9 +411,14 @@ function overviewUpdatePersonLabel(
   return "Developer";
 }
 
-function toRequestFeedItems(items: StudioOverviewRequestItem[]): StudioOverviewFeedItem[] {
+function toRequestFeedItems(
+  items: StudioOverviewRequestItem[],
+): StudioOverviewFeedItem[] {
   return items.map((item) => {
-    const clientValue = formatOverviewClientMeta(item.authorName, item.clientName);
+    const clientValue = formatOverviewClientMeta(
+      item.authorName,
+      item.clientName,
+    );
     return {
       id: item.id,
       title: item.title,
@@ -371,7 +432,9 @@ function toRequestFeedItems(items: StudioOverviewRequestItem[]): StudioOverviewF
   });
 }
 
-function toUpdateFeedItems(items: StudioOverviewUpdateItem[]): StudioOverviewFeedItem[] {
+function toUpdateFeedItems(
+  items: StudioOverviewUpdateItem[],
+): StudioOverviewFeedItem[] {
   return items.map((item) => ({
     id: item.id,
     title: item.title,

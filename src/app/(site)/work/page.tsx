@@ -22,9 +22,9 @@ export default async function WorkPage() {
       <SiteNav />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
-        <section className="border-b border-[#15130f]/10 bg-sc-section-alt py-16 lg:py-24">
+        <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">
           <div className="mx-auto max-w-[1400px] px-6">
-            <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+            <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
               Portfolio
             </p>
             <h1 className="mt-5 max-w-4xl text-[clamp(2.5rem,6vw,5rem)] leading-[0.98] font-black tracking-[-0.045em] uppercase">
@@ -33,8 +33,9 @@ export default async function WorkPage() {
               For Itself
             </h1>
             <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-[#57524a]">
-              Platform rebuilds, custom WordPress themes and long-term partnerships. Every project
-              below was designed, built or led by our team — no stock work, no invented results.
+              Platform rebuilds, custom WordPress themes and long-term
+              partnerships. Every project below was designed, built or led by
+              our team — no stock work, no invented results.
             </p>
           </div>
         </section>

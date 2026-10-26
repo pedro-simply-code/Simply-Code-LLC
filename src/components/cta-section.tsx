@@ -13,14 +13,16 @@ export function CtaSection({
   description = "Tell us about your goals and we'll get back to you with a plan to bring your ideas to life. Direct communication with the developers building it — no middlemen.",
 }: CtaSectionProps) {
   return (
-    <section className="border-t border-[#15130f]/10 bg-sc-section py-20 lg:py-24">
+    <section className="bg-sc-section border-t border-[#15130f]/10 py-20 lg:py-24">
       <div className="mx-auto max-w-[1400px] px-6">
         <div className="grid gap-10 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
           <div className="site-reveal">
             <h2 className="max-w-3xl text-[clamp(2rem,4.8vw,3.6rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
               {title}
             </h2>
-            <p className="mt-6 max-w-xl text-[16px] leading-relaxed text-[#57524a]">{description}</p>
+            <p className="mt-6 max-w-xl text-[16px] leading-relaxed text-[#57524a]">
+              {description}
+            </p>
           </div>
 
           <div className="site-reveal flex flex-col items-start gap-4 lg:items-end">
@@ -29,7 +31,7 @@ export function CtaSection({
             </Link>
             <a
               href={`mailto:${SITE.email}`}
-              className="text-[14px] font-semibold text-[#15130f] underline underline-offset-8 transition-colors hover:text-sc-accent"
+              className="hover:text-sc-accent text-[14px] font-semibold text-[#15130f] underline underline-offset-8 transition-colors"
             >
               {SITE.email}
             </a>

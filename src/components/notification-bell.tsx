@@ -90,10 +90,15 @@ export function NotificationBell({
         <div
           role="dialog"
           aria-label="Notifications"
-          className={cn(appDropdown, "absolute right-0 z-50 mt-2 w-80 overflow-hidden")}
+          className={cn(
+            appDropdown,
+            "absolute right-0 z-50 mt-2 w-80 overflow-hidden",
+          )}
         >
           <div className="px-4 py-3 shadow-[0_1px_0_rgba(21,19,15,0.06)]">
-            <p className="text-[11px] font-bold tracking-[0.16em] uppercase">Notifications</p>
+            <p className="text-[11px] font-bold tracking-[0.16em] uppercase">
+              Notifications
+            </p>
           </div>
           <ul className="max-h-80 overflow-auto" aria-live="polite">
             {feed.isLoading ? (
@@ -101,12 +106,18 @@ export function NotificationBell({
             ) : feed.isError ? (
               <li className="px-4 py-6 text-sm text-[#9a3b2e]">
                 Failed to load.{" "}
-                <button type="button" className="underline" onClick={() => void feed.refetch()}>
+                <button
+                  type="button"
+                  className="underline"
+                  onClick={() => void feed.refetch()}
+                >
                   Retry
                 </button>
               </li>
             ) : feed.items.length === 0 ? (
-              <li className="px-4 py-6 text-sm text-[#6f6a60]">No notifications yet.</li>
+              <li className="px-4 py-6 text-sm text-[#6f6a60]">
+                No notifications yet.
+              </li>
             ) : (
               feed.items.map((item) => (
                 <li
@@ -119,7 +130,7 @@ export function NotificationBell({
                   <Link
                     href={item.href ?? viewAllHref}
                     onClick={(event) => void openNotification(event, item)}
-                    className="block px-4 py-3 hover:bg-sc-section-alt"
+                    className="hover:bg-sc-section-alt block px-4 py-3"
                   >
                     <NotificationRowContent item={item} compact />
                   </Link>
@@ -130,7 +141,7 @@ export function NotificationBell({
           <Link
             href={viewAllHref}
             onClick={() => setOpen(false)}
-            className="block border-t border-[#15130f]/10 px-4 py-3 text-center text-[10px] font-bold tracking-[0.14em] uppercase hover:text-sc-accent"
+            className="hover:text-sc-accent block border-t border-[#15130f]/10 px-4 py-3 text-center text-[10px] font-bold tracking-[0.14em] uppercase"
           >
             View all
           </Link>

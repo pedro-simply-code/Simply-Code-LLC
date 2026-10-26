@@ -32,9 +32,15 @@ function mapRow(row: typeof notifications.$inferSelect): NotificationRecord {
   };
 }
 
-function buildListConditions(userId: string, options: ListNotificationsOptions) {
+function buildListConditions(
+  userId: string,
+  options: ListNotificationsOptions,
+) {
   const types = allowedNotificationTypes(options.context);
-  const conditions = [eq(notifications.userId, userId), inArray(notifications.type, [...types])];
+  const conditions = [
+    eq(notifications.userId, userId),
+    inArray(notifications.type, [...types]),
+  ];
 
   if (options.unreadOnly) {
     conditions.push(isNull(notifications.readAt));
@@ -61,7 +67,10 @@ function buildListConditions(userId: string, options: ListNotificationsOptions) 
   return and(...conditions);
 }
 
-export async function countUnreadNotifications(userId: string, context: ListNotificationsOptions["context"]) {
+export async function countUnreadNotifications(
+  userId: string,
+  context: ListNotificationsOptions["context"],
+) {
   const types = allowedNotificationTypes(context);
   const [row] = await db
     .select({ value: count() })
@@ -126,7 +135,9 @@ export async function insertNotificationsForUsers(
     await db
       .insert(notifications)
       .values(values)
-      .onConflictDoNothing({ target: [notifications.userId, notifications.dedupeKey] });
+      .onConflictDoNothing({
+        target: [notifications.userId, notifications.dedupeKey],
+      });
     return;
   }
 
@@ -140,7 +151,10 @@ export async function markAllNotificationsRead(userId: string) {
     .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
 }
 
-export async function markNotificationRead(userId: string, notificationId: string) {
+export async function markNotificationRead(
+  userId: string,
+  notificationId: string,
+) {
   if (!UUID.test(notificationId)) return false;
 
   const updated = await db

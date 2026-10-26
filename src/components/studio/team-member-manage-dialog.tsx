@@ -12,9 +12,16 @@ import {
 import { MultiSelect } from "~/components/studio/multi-select";
 import { Field, StudioInput } from "~/components/studio/ui";
 import type { UserRole } from "~/server/db/schema";
-import { removeUserTechnology, updateTeamMember } from "~/server/studio/actions";
+import {
+  removeUserTechnology,
+  updateTeamMember,
+} from "~/server/studio/actions";
 import { roleLabel, normalizeRole } from "~/lib/roles";
-import { appChip, appGhostButtonLg, appPrimaryButtonStudioSubmit } from "~/lib/surface";
+import {
+  appChip,
+  appGhostButtonLg,
+  appPrimaryButtonStudioSubmit,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 const STUDIO_ROLES: UserRole[] = ["developer", "lead", "founder", "client"];
@@ -67,7 +74,9 @@ export function TeamMemberManageDialog({
   trigger?: "manage" | "role";
 }) {
   const displayName = person.name ?? person.email ?? "Team member";
-  const assignedIds = new Set(person.technologies.map((item) => item.technologyId));
+  const assignedIds = new Set(
+    person.technologies.map((item) => item.technologyId),
+  );
   const addOptions = technologyCatalog
     .filter((technology) => !assignedIds.has(technology.id))
     .map((technology) => ({
@@ -103,15 +112,16 @@ export function TeamMemberManageDialog({
             {roleLabel(person.role)}
           </button>
         ) : (
-          <button type="button" className={cn(appGhostButtonLg, "inline-flex items-center gap-2")}>
+          <button
+            type="button"
+            className={cn(appGhostButtonLg, "inline-flex items-center gap-2")}
+          >
             <Pencil className="size-3.5" />
             Manage
           </button>
         )}
       </DialogTrigger>
-      <DialogContent
-        className="max-h-[min(90vh,720px)] overflow-y-auto border-0 bg-white p-6 shadow-[0_8px_32px_rgba(21,19,15,0.14)] sm:max-w-lg"
-      >
+      <DialogContent className="max-h-[min(90vh,720px)] overflow-y-auto border-0 bg-white p-6 shadow-[0_8px_32px_rgba(21,19,15,0.14)] sm:max-w-lg">
         <DialogHeader className="text-left">
           <DialogTitle className="text-base font-black tracking-tight text-[#15130f] uppercase">
             {displayName}
@@ -126,15 +136,18 @@ export function TeamMemberManageDialog({
           <input type="hidden" name="returnTo" value={returnTo} />
 
           {canEditRole ? (
-            <Field label="Studio role" hint="Pick a role, then save at the bottom.">
+            <Field
+              label="Studio role"
+              hint="Pick a role, then save at the bottom."
+            >
               <div className="flex flex-wrap gap-2">
                 {STUDIO_ROLES.map((role) => (
                   <label
                     key={role}
                     className={cn(
-                      "cursor-pointer rounded-md border px-3 py-2 text-[10px] font-bold tracking-[0.1em] text-[#15130f] uppercase transition-colors has-[:checked]:border-sc-accent has-[:checked]:bg-sc-accent/15 has-[:checked]:text-[#15130f]",
+                      "has-[:checked]:border-sc-accent has-[:checked]:bg-sc-accent/15 cursor-pointer rounded-md border px-3 py-2 text-[10px] font-bold tracking-[0.1em] text-[#15130f] uppercase transition-colors has-[:checked]:text-[#15130f]",
                       normalizeRole(person.role) === normalizeRole(role)
-                        ? "border-[#15130f]/20 bg-sc-section-alt/50"
+                        ? "bg-sc-section-alt/50 border-[#15130f]/20"
                         : "border-[#15130f]/10 bg-white",
                     )}
                   >
@@ -142,7 +155,9 @@ export function TeamMemberManageDialog({
                       type="radio"
                       name="role"
                       value={role}
-                      defaultChecked={normalizeRole(person.role) === normalizeRole(role)}
+                      defaultChecked={
+                        normalizeRole(person.role) === normalizeRole(role)
+                      }
                       className="sr-only"
                     />
                     {roleLabel(role)}
@@ -152,10 +167,15 @@ export function TeamMemberManageDialog({
             </Field>
           ) : (
             <>
-              <input type="hidden" name="role" value={normalizeRole(person.role)} />
+              <input
+                type="hidden"
+                name="role"
+                value={normalizeRole(person.role)}
+              />
               <p className="text-xs text-[#6f6a60]">
-                Studio role: <strong>{roleLabel(person.role)}</strong> — another founder can change
-                this; you can still update title, skills, and About here.
+                Studio role: <strong>{roleLabel(person.role)}</strong> — another
+                founder can change this; you can still update title, skills, and
+                About here.
               </p>
             </>
           )}
@@ -171,10 +191,12 @@ export function TeamMemberManageDialog({
 
           <section className="space-y-3 border-y border-[#15130f]/10 py-5">
             <div>
-              <h3 className="text-[11px] font-bold tracking-[0.14em] uppercase">Skills</h3>
+              <h3 className="text-[11px] font-bold tracking-[0.14em] uppercase">
+                Skills
+              </h3>
               <p className="mt-1 text-xs text-[#6f6a60]">
-                Choose technologies from the catalog; they are assigned when you save. Remove
-                existing skills with ×.
+                Choose technologies from the catalog; they are assigned when you
+                save. Remove existing skills with ×.
               </p>
             </div>
 
@@ -185,7 +207,10 @@ export function TeamMemberManageDialog({
                 {person.technologies.map((skill) => (
                   <li
                     key={skill.technologyId}
-                    className={cn(appChip, "flex items-center gap-2 px-2.5 py-1 text-[11px]")}
+                    className={cn(
+                      appChip,
+                      "flex items-center gap-2 px-2.5 py-1 text-[11px]",
+                    )}
                   >
                     <span>{skill.name}</span>
                     <button
@@ -230,7 +255,11 @@ export function TeamMemberManageDialog({
             className="hidden"
           >
             <input type="hidden" name="userId" value={person.id} />
-            <input type="hidden" name="technologyId" value={skill.technologyId} />
+            <input
+              type="hidden"
+              name="technologyId"
+              value={skill.technologyId}
+            />
             <input type="hidden" name="returnTo" value={returnTo} />
           </form>
         ))}

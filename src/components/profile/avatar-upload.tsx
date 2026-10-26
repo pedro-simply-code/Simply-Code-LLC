@@ -122,7 +122,7 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
 
       <div className="flex flex-wrap items-center gap-5">
         <div
-          className="relative size-28 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-sc-accent-bright to-sc-accent shadow-[0_2px_12px_rgba(21,19,15,0.12)] ring-2 ring-white"
+          className="from-sc-accent-bright to-sc-accent relative size-28 shrink-0 overflow-hidden rounded-full bg-gradient-to-br shadow-[0_2px_12px_rgba(21,19,15,0.12)] ring-2 ring-white"
           onDragOver={(event) => {
             event.preventDefault();
             event.dataTransfer.dropEffect = "copy";
@@ -140,7 +140,9 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
               fill
               sizes="112px"
               className="object-cover"
-              unoptimized={previewSrc.startsWith("blob:") || previewSrc.startsWith("/")}
+              unoptimized={
+                previewSrc.startsWith("blob:") || previewSrc.startsWith("/")
+              }
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-[#15130f]/50">
@@ -153,10 +155,16 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
           <button
             type="button"
             disabled={isUploading}
-            onClick={() => document.getElementById("avatar-file-input")?.click()}
-            className="rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent disabled:opacity-60"
+            onClick={() =>
+              document.getElementById("avatar-file-input")?.click()
+            }
+            className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase disabled:opacity-60"
           >
-            {isUploading ? "Uploading…" : previewSrc ? "Choose another" : "Upload photo"}
+            {isUploading
+              ? "Uploading…"
+              : previewSrc
+                ? "Choose another"
+                : "Upload photo"}
           </button>
           {previewSrc ? (
             <button
@@ -169,11 +177,11 @@ export function AvatarUpload({ defaultUrl }: { defaultUrl?: string | null }) {
             </button>
           ) : null}
           {isUploading ? (
-            <span className="text-[10px] font-bold tracking-[0.1em] text-sc-muted uppercase">
+            <span className="text-sc-muted text-[10px] font-bold tracking-[0.1em] uppercase">
               Uploading to storage…
             </span>
           ) : isUnsaved ? (
-            <span className="text-[10px] font-bold tracking-[0.1em] text-sc-accent uppercase">
+            <span className="text-sc-accent text-[10px] font-bold tracking-[0.1em] uppercase">
               Unsaved — save profile to apply
             </span>
           ) : imageValue ? (

@@ -14,7 +14,11 @@ const ABOUT_TEAM_ROLE_ORDER: Record<AppRole, number> = {
 };
 
 export async function getUserProfile(userId: string) {
-  const [row] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  const [row] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
   return row ?? null;
 }
 
@@ -38,7 +42,9 @@ export async function getPublicAboutTeam(): Promise<TeamMember[]> {
 
   const teamRows = rows.filter((row) => isTeam(row.role));
   const anyOptedIn = teamRows.some((row) => row.showOnAbout);
-  const visibleTeam = anyOptedIn ? teamRows.filter((row) => row.showOnAbout) : teamRows;
+  const visibleTeam = anyOptedIn
+    ? teamRows.filter((row) => row.showOnAbout)
+    : teamRows;
   const teamIds = visibleTeam.map((row) => row.id);
 
   const assignmentRows =
@@ -50,7 +56,10 @@ export async function getPublicAboutTeam(): Promise<TeamMember[]> {
             name: technologies.name,
           })
           .from(userTechnologies)
-          .innerJoin(technologies, eq(technologies.id, userTechnologies.technologyId))
+          .innerJoin(
+            technologies,
+            eq(technologies.id, userTechnologies.technologyId),
+          )
           .where(inArray(userTechnologies.userId, teamIds));
 
   const skillsByUserId = new Map<string, string[]>();
@@ -66,7 +75,9 @@ export async function getPublicAboutTeam(): Promise<TeamMember[]> {
         ABOUT_TEAM_ROLE_ORDER[normalizeRole(a.role)] -
         ABOUT_TEAM_ROLE_ORDER[normalizeRole(b.role)];
       if (byRole !== 0) return byRole;
-      return (a.name ?? "").localeCompare(b.name ?? "", undefined, { sensitivity: "base" });
+      return (a.name ?? "").localeCompare(b.name ?? "", undefined, {
+        sensitivity: "base",
+      });
     })
     .map((row) => {
       const fromTechnologies = (skillsByUserId.get(row.id) ?? []).sort((a, b) =>

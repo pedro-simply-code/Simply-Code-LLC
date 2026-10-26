@@ -13,9 +13,14 @@ export function notificationTypeLabel(type: string): string {
   return type;
 }
 
-export function groupNotificationsByEntity<T extends { entityType: string | null; entityId: string | null; type: string; createdAt: Date | string }>(
-  rows: T[],
-): Array<T & { groupCount: number }> {
+export function groupNotificationsByEntity<
+  T extends {
+    entityType: string | null;
+    entityId: string | null;
+    type: string;
+    createdAt: Date | string;
+  },
+>(rows: T[]): Array<T & { groupCount: number }> {
   const result: Array<T & { groupCount: number }> = [];
   for (const row of rows) {
     const prev = result[result.length - 1];

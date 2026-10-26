@@ -45,7 +45,11 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       const url = file.ufsUrl ?? file.url;
       if (url) {
-        await registerUserUploadClaim(metadata.userId, url, "message_attachment");
+        await registerUserUploadClaim(
+          metadata.userId,
+          url,
+          "message_attachment",
+        );
       }
       return {
         uploadedBy: metadata.userId,
@@ -74,9 +78,17 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       const url = file.ufsUrl ?? file.url;
       if (url) {
-        await registerUserUploadClaim(metadata.userId, url, "project_deliverable");
+        await registerUserUploadClaim(
+          metadata.userId,
+          url,
+          "project_deliverable",
+        );
       }
-      return { uploadedBy: metadata.userId, projectId: metadata.projectId, url };
+      return {
+        uploadedBy: metadata.userId,
+        projectId: metadata.projectId,
+        url,
+      };
     }),
 } satisfies FileRouter;
 

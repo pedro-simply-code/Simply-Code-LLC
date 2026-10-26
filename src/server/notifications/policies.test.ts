@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { allowedNotificationTypes, isNotificationTypeAllowed } from "~/server/notifications/policies";
+import {
+  allowedNotificationTypes,
+  isNotificationTypeAllowed,
+} from "~/server/notifications/policies";
 
 describe("notification policies", () => {
   it("hides contact notifications in the portal", () => {

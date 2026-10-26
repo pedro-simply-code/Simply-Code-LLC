@@ -33,9 +33,9 @@ export function MessageConversationThread({
   return (
     <div className={cn(appPanel, "flex flex-col gap-3 p-4 sm:p-5")}>
       <div className="flex justify-start">
-        <div className="max-w-[min(100%,32rem)] rounded-2xl rounded-tl-sm border border-sc-accent/25 bg-sc-accent/8 px-4 py-3">
+        <div className="border-sc-accent/25 bg-sc-accent/8 max-w-[min(100%,32rem)] rounded-2xl rounded-tl-sm border px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[10px] font-bold tracking-[0.1em] text-sc-accent uppercase">
+            <p className="text-sc-accent text-[10px] font-bold tracking-[0.1em] uppercase">
               {clientLabel}
             </p>
             <time className="text-[10px] text-[#9a9488]">
@@ -45,7 +45,10 @@ export function MessageConversationThread({
           <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap text-[#57524a]">
             {enquiry.message}
           </p>
-          <MessageAttachmentsList attachments={enquiryAttachments} variant="incoming" />
+          <MessageAttachmentsList
+            attachments={enquiryAttachments}
+            variant="incoming"
+          />
         </div>
       </div>
 
@@ -62,7 +65,10 @@ export function MessageConversationThread({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[10px] font-bold tracking-[0.1em] text-white/80 uppercase">
                   {reply.sentByName ?? "Simply Code"}
-                  <span className="font-normal text-white/55"> · {channelLabel(reply.channel)}</span>
+                  <span className="font-normal text-white/55">
+                    {" "}
+                    · {channelLabel(reply.channel)}
+                  </span>
                 </p>
                 <time className="text-[10px] text-white/55">
                   {new Date(reply.createdAt).toLocaleString()}
@@ -71,7 +77,10 @@ export function MessageConversationThread({
               <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap text-white/95">
                 {reply.body}
               </p>
-              <MessageAttachmentsList attachments={reply.attachments} variant="outgoing" />
+              <MessageAttachmentsList
+                attachments={reply.attachments}
+                variant="outgoing"
+              />
             </div>
           </div>
         ))

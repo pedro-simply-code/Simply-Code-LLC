@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { DashboardShell, type DashboardNavItem } from "~/components/dashboard-shell";
+import {
+  DashboardShell,
+  type DashboardNavItem,
+} from "~/components/dashboard-shell";
 import { NotificationBell } from "~/components/notification-bell";
 import { SignOutButton } from "~/components/sign-out-button";
 import { auth } from "~/lib/auth";
@@ -14,25 +17,50 @@ export const metadata: Metadata = {
 };
 
 const NAV: DashboardNavItem[] = [
-  { href: "/portal", label: "Projects", icon: "projects", section: "Workspace" },
-  { href: "/portal/activity", label: "Activity", icon: "overview", section: "Workspace" },
-  { href: "/portal/messages", label: "Messages", icon: "messages", section: "Workspace" },
+  {
+    href: "/portal",
+    label: "Projects",
+    icon: "projects",
+    section: "Workspace",
+  },
+  {
+    href: "/portal/activity",
+    label: "Activity",
+    icon: "overview",
+    section: "Workspace",
+  },
+  {
+    href: "/portal/messages",
+    label: "Messages",
+    icon: "messages",
+    section: "Workspace",
+  },
   {
     href: "/portal/notifications",
     label: "Notifications",
     icon: "notifications",
     section: "Workspace",
   },
-  { href: "/portal/profile", label: "Profile", icon: "profile", section: "Workspace" },
+  {
+    href: "/portal/profile",
+    label: "Profile",
+    icon: "profile",
+    section: "Workspace",
+  },
 ];
 
-export default async function PortalLayout({ children }: { children: React.ReactNode }) {
+export default async function PortalLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/portal");
   if (isTeam(session.user.role)) redirect("/studio");
 
   const cookieStore = await cookies();
-  const defaultCollapsed = cookieStore.get(sidebarCookieName("portal"))?.value === "1";
+  const defaultCollapsed =
+    cookieStore.get(sidebarCookieName("portal"))?.value === "1";
 
   return (
     <DashboardShell
@@ -46,7 +74,10 @@ export default async function PortalLayout({ children }: { children: React.React
       }}
       actions={
         <>
-          <NotificationBell context="portal" viewAllHref="/portal/notifications" />
+          <NotificationBell
+            context="portal"
+            viewAllHref="/portal/notifications"
+          />
           <SignOutButton compact />
         </>
       }

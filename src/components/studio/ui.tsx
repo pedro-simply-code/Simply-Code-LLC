@@ -32,7 +32,9 @@ export function StudioHeader({
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex items-center gap-2">{actions}</div>
+      ) : null}
     </div>
   );
 }
@@ -52,9 +54,13 @@ export function StudioCard({
     <section className={cn(appPanel, "p-5", className)}>
       {title ? (
         <div className="mb-4">
-          <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">{title}</h2>
+          <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">
+            {title}
+          </h2>
           {description ? (
-            <p className="mt-1 text-xs leading-relaxed text-[#6f6a60]">{description}</p>
+            <p className="mt-1 text-xs leading-relaxed text-[#6f6a60]">
+              {description}
+            </p>
           ) : null}
         </div>
       ) : null}
@@ -83,7 +89,9 @@ export function Field({
         {label}
       </span>
       {children}
-      {hint ? <span className="block text-[11px] text-[#9a9488]">{hint}</span> : null}
+      {hint ? (
+        <span className="block text-[11px] text-[#9a9488]">{hint}</span>
+      ) : null}
     </Comp>
   );
 }
@@ -93,7 +101,12 @@ export function StudioInput(props: ComponentProps<"input">) {
 }
 
 export function StudioTextarea(props: ComponentProps<"textarea">) {
-  return <textarea {...props} className={cn(inputClass, "min-h-24", props.className)} />;
+  return (
+    <textarea
+      {...props}
+      className={cn(inputClass, "min-h-24", props.className)}
+    />
+  );
 }
 
 export function StudioSelect(props: ComponentProps<"select">) {

@@ -10,7 +10,11 @@ type PageMetadataInput = {
  * Per-page metadata with matching canonical, Open Graph and Twitter fields.
  * `metadataBase` is set once in the root layout, so paths stay relative.
  */
-export function pageMetadata({ title, description, path }: PageMetadataInput): Metadata {
+export function pageMetadata({
+  title,
+  description,
+  path,
+}: PageMetadataInput): Metadata {
   return {
     title,
     description,

@@ -39,11 +39,11 @@ export function ClientProof({
   return (
     <section
       id="reviews"
-      className="border-b border-[#15130f]/10 bg-sc-section py-20 lg:py-24"
+      className="bg-sc-section border-b border-[#15130f]/10 py-20 lg:py-24"
     >
       <div className="mx-auto max-w-[1400px] px-6">
         <div className="site-reveal mb-14 max-w-2xl">
-          <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+          <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
             {hasQuotes ? "Client Feedback" : "Client Outcomes"}
           </p>
           <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
@@ -57,7 +57,10 @@ export function ClientProof({
         </div>
 
         {hasQuotes ? (
-          <TestimonialsCarousel testimonials={testimonials} fillLast={fillLast} />
+          <TestimonialsCarousel
+            testimonials={testimonials}
+            fillLast={fillLast}
+          />
         ) : (
           <div className="site-stagger grid gap-6 md:grid-cols-3">
             {OUTCOMES.map((outcome) => (
@@ -70,7 +73,7 @@ export function ClientProof({
                   "site-reveal site-motion-lift group flex flex-col p-8",
                 )}
               >
-                <p className="text-[42px] leading-none font-black tracking-[-0.03em] text-sc-accent">
+                <p className="text-sc-accent text-[42px] leading-none font-black tracking-[-0.03em]">
                   {outcome.value}
                 </p>
                 <p className="mt-4 text-[11px] font-bold tracking-[0.18em] text-[#15130f] uppercase">
@@ -79,7 +82,7 @@ export function ClientProof({
                 <p className="mt-3 flex-1 text-[14px] leading-relaxed text-[#57524a]">
                   {outcome.body}
                 </p>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase transition-colors group-hover:text-sc-accent">
+                <span className="group-hover:text-sc-accent mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase transition-colors">
                   View case study <ArrowUpRight className="size-3" />
                 </span>
               </Link>

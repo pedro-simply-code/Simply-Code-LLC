@@ -14,7 +14,7 @@ export default async function StudioProfilePage({
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const statusCode = params.saved === "1" ? "saved" : params.error ?? null;
+  const statusCode = params.saved === "1" ? "saved" : (params.error ?? null);
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/studio/profile");
   if (!isTeam(session.user.role)) redirect("/portal/profile");
@@ -23,7 +23,7 @@ export default async function StudioProfilePage({
   if (!user) redirect("/studio");
 
   return (
-    <div className="flex w-full min-h-0 flex-col">
+    <div className="flex min-h-0 w-full flex-col">
       <StudioHeader
         title="Your profile"
         description="Account details, contact preferences, and your public About page presence."

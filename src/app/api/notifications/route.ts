@@ -27,7 +27,10 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const context = resolveContext(session.user.role, searchParams.get("context"));
+  const context = resolveContext(
+    session.user.role,
+    searchParams.get("context"),
+  );
   if (!context) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -81,7 +84,9 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  const context: NotificationContext = isTeam(session.user.role) ? "studio" : "portal";
+  const context: NotificationContext = isTeam(session.user.role)
+    ? "studio"
+    : "portal";
   await markNotificationReadForUser(session.user.id, id);
   const { getUnreadNotificationCount } = await import("~/server/notifications");
   const unread = await getUnreadNotificationCount(session.user.id, context);

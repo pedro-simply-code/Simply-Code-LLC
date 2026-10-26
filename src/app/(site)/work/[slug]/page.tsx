@@ -34,7 +34,9 @@ export function generateStaticParams() {
   return PROJECTS.map((project) => ({ slug: project.slug }));
 }
 
-export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
   const project = (await getPublicProjectSafe(slug)) ?? getProject(slug);
 
@@ -50,7 +52,9 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
       title: `${project.title} — Work`,
       description: project.summary,
       type: "article",
-      ...(project.image ? { images: [{ url: project.image, alt: project.title }] } : {}),
+      ...(project.image
+        ? { images: [{ url: project.image, alt: project.title }] }
+        : {}),
     },
   };
 }
@@ -70,9 +74,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const allProjects = (await getPublicProjectsSafe()) ?? PROJECTS;
   const index = allProjects.findIndex((item) => item.slug === project.slug);
   const previous =
-    index > 0 ? allProjects[index - 1] : allProjects[allProjects.length - 1] ?? project;
+    index > 0
+      ? allProjects[index - 1]
+      : (allProjects[allProjects.length - 1] ?? project);
   const next =
-    index >= 0 && index < allProjects.length - 1 ? allProjects[index + 1] : allProjects[0] ?? project;
+    index >= 0 && index < allProjects.length - 1
+      ? allProjects[index + 1]
+      : (allProjects[0] ?? project);
   const fallbackAdjacent = getAdjacentProjects(project.slug);
   const previousProject = previous ?? fallbackAdjacent.previous ?? project;
   const nextProject = next ?? fallbackAdjacent.next ?? project;
@@ -85,14 +93,21 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     description: project.summary,
     url,
     creator: { "@type": "Organization", name: "Simply Code" },
-    ...(project.image ? { image: projectImageAbsolute(project.image, env.NEXT_PUBLIC_SITE_URL) } : {}),
+    ...(project.image
+      ? { image: projectImageAbsolute(project.image, env.NEXT_PUBLIC_SITE_URL) }
+      : {}),
   };
 
   const breadcrumbs = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Work", item: `${env.NEXT_PUBLIC_SITE_URL}/work` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Work",
+        item: `${env.NEXT_PUBLIC_SITE_URL}/work`,
+      },
       {
         "@type": "ListItem",
         position: 2,
@@ -106,37 +121,43 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbs).replace(/</g, "\\u003c"),
+        }}
       />
 
       <SiteNav />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
-        <section className="border-b border-[#15130f]/10 bg-sc-section-alt pt-8 pb-16 lg:pb-20">
+        <section className="bg-sc-section-alt border-b border-[#15130f]/10 pt-8 pb-16 lg:pb-20">
           <div className="mx-auto max-w-[1400px] px-6">
             <Link
               href="/work"
-              className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-[#6f6a60] uppercase transition-colors hover:text-sc-accent"
+              className="hover:text-sc-accent inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-[#6f6a60] uppercase transition-colors"
             >
               <ArrowLeft className="size-3.5" /> All Work
             </Link>
 
             <div className="mt-10 max-w-4xl">
-              <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+              <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
                 {project.client}
               </p>
               <h1 className="mt-4 text-[clamp(2.2rem,5.2vw,4.2rem)] leading-[0.98] font-black tracking-[-0.045em] uppercase">
                 {project.title}
               </h1>
-              <p className="mt-6 text-[17px] leading-relaxed text-[#57524a]">{project.summary}</p>
+              <p className="mt-6 text-[17px] leading-relaxed text-[#57524a]">
+                {project.summary}
+              </p>
             </div>
 
             <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,900px)_minmax(0,1fr)] lg:items-start lg:gap-10">
-              <div className="relative aspect-[1000/560] w-full max-w-[900px] overflow-hidden border border-[#15130f]/10 bg-gradient-to-br from-sc-accent-bright to-sc-accent">
+              <div className="from-sc-accent-bright to-sc-accent relative aspect-[1000/560] w-full max-w-[900px] overflow-hidden border border-[#15130f]/10 bg-gradient-to-br">
                 {project.image ? (
                   <Image
                     src={project.image}
@@ -194,10 +215,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                           href={project.liveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-[14px] font-semibold text-[#15130f] underline decoration-sc-accent/50 underline-offset-4 transition-colors hover:text-sc-accent"
+                          className="decoration-sc-accent/50 hover:text-sc-accent inline-flex items-center gap-2 text-[14px] font-semibold text-[#15130f] underline underline-offset-4 transition-colors"
                         >
                           {liveSiteLabel(project.liveUrl)}
-                          <ArrowUpRight className="size-3.5 shrink-0" aria-hidden />
+                          <ArrowUpRight
+                            className="size-3.5 shrink-0"
+                            aria-hidden
+                          />
                         </a>
                       </dd>
                     </div>
@@ -209,7 +233,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       </dt>
                       <dd className="mt-3 space-y-3">
                         <div
-                          className="flex items-center gap-0.5 text-sc-accent-bright"
+                          className="text-sc-accent-bright flex items-center gap-0.5"
                           aria-label={`Rated ${clientReview.rating} out of 5`}
                         >
                           {Array.from({ length: 5 }).map((_, index) => (
@@ -229,7 +253,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         </blockquote>
                         <p className="text-[13px] font-semibold text-[#15130f]">
                           {clientReview.authorName}
-                          <span className="font-normal text-[#6f6a60]"> · {project.client}</span>
+                          <span className="font-normal text-[#6f6a60]">
+                            {" "}
+                            · {project.client}
+                          </span>
                         </p>
                       </dd>
                     </div>
@@ -240,7 +267,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </section>
 
-        <nav aria-label="Project navigation" className="border-y border-[#15130f]/10 bg-sc-section-alt">
+        <nav
+          aria-label="Project navigation"
+          className="bg-sc-section-alt border-y border-[#15130f]/10"
+        >
           <div className="mx-auto grid max-w-[1400px] divide-y divide-[#15130f]/10 px-6 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
             <Link
               href={`/work/${previousProject.slug}`}
@@ -251,7 +281,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 <p className="text-[10px] font-bold tracking-[0.2em] text-[#6f6a60] uppercase">
                   Previous
                 </p>
-                <p className="mt-1 text-[15px] font-bold tracking-tight uppercase transition-colors group-hover:text-sc-accent">
+                <p className="group-hover:text-sc-accent mt-1 text-[15px] font-bold tracking-tight uppercase transition-colors">
                   {previousProject.title}
                 </p>
               </div>
@@ -264,7 +294,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 <p className="text-[10px] font-bold tracking-[0.2em] text-[#6f6a60] uppercase">
                   Next
                 </p>
-                <p className="mt-1 text-[15px] font-bold tracking-tight uppercase transition-colors group-hover:text-sc-accent">
+                <p className="group-hover:text-sc-accent mt-1 text-[15px] font-bold tracking-tight uppercase transition-colors">
                   {nextProject.title}
                 </p>
               </div>
@@ -282,7 +312,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="mx-auto max-w-[1400px] px-6">
             <Link
               href="/work"
-              className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-[#15130f] uppercase underline underline-offset-8 hover:text-sc-accent"
+              className="hover:text-sc-accent inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-[#15130f] uppercase underline underline-offset-8"
             >
               Browse all work <ArrowUpRight className="size-3.5" />
             </Link>

@@ -68,7 +68,8 @@ export async function submitContact(
   if (!contactAllowed) {
     return {
       status: "error",
-      message: "Too many messages from your network. Please try again in about an hour.",
+      message:
+        "Too many messages from your network. Please try again in about an hour.",
     };
   }
 
@@ -123,6 +124,7 @@ export async function submitContact(
 
   return {
     status: "success",
-    message: "Thanks — your message is on its way. We reply within one business day.",
+    message:
+      "Thanks — your message is on its way. We reply within one business day.",
   };
 }

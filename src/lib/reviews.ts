@@ -1,7 +1,10 @@
 /** Review moderation states stored in `reviews.status`. */
 export type ReviewStatus = "pending" | "approved" | "hidden";
 
-export function reviewStatusLabel(status: string, audience: "studio" | "portal" = "studio"): string {
+export function reviewStatusLabel(
+  status: string,
+  audience: "studio" | "portal" = "studio",
+): string {
   if (audience === "portal") {
     switch (status) {
       case "pending":
@@ -30,7 +33,12 @@ export function reviewStatusLabel(status: string, audience: "studio" | "portal" 
 export type ReviewSource = "upwork" | "client" | "manual" | "google";
 
 export function normalizeReviewSource(source: unknown): ReviewSource {
-  if (source === "client" || source === "manual" || source === "google" || source === "upwork") {
+  if (
+    source === "client" ||
+    source === "manual" ||
+    source === "google" ||
+    source === "upwork"
+  ) {
     return source;
   }
   return "manual";
@@ -53,21 +61,33 @@ export function reviewSourceLabel(source: string): string {
 
 /** Public site: bundled static testimonials omit `source` and are treated as Upwork. */
 export function testimonialDisplaySource(source?: string): ReviewSource {
-  if (source === "client" || source === "manual" || source === "google" || source === "upwork") {
+  if (
+    source === "client" ||
+    source === "manual" ||
+    source === "google" ||
+    source === "upwork"
+  ) {
     return source;
   }
   return "upwork";
 }
 
 /** Public marketing carousel / testimonial cards. */
-export function testimonialRatingScreenReader(rating: number, source?: string): string {
+export function testimonialRatingScreenReader(
+  rating: number,
+  source?: string,
+): string {
   const normalized = testimonialDisplaySource(source);
   if (normalized === "upwork") return `Rated ${rating} out of 5 on Upwork.`;
   if (normalized === "google") return `Rated ${rating} out of 5 on Google.`;
   return `Rated ${rating} out of 5.`;
 }
 
-export function testimonialRatingMeta(rating: number, period: string, source?: string): string {
+export function testimonialRatingMeta(
+  rating: number,
+  period: string,
+  source?: string,
+): string {
   const normalized = testimonialDisplaySource(source);
   const score = rating.toFixed(2);
   if (normalized === "upwork") return `${score} on Upwork · ${period}`;
@@ -75,8 +95,12 @@ export function testimonialRatingMeta(rating: number, period: string, source?: s
   return `${score} · ${period}`;
 }
 
-export function testimonialsIncludeUpwork(testimonials: { source?: string }[]): boolean {
-  return testimonials.some((item) => testimonialDisplaySource(item.source) === "upwork");
+export function testimonialsIncludeUpwork(
+  testimonials: { source?: string }[],
+): boolean {
+  return testimonials.some(
+    (item) => testimonialDisplaySource(item.source) === "upwork",
+  );
 }
 
 export function clientProofIntro(
@@ -87,7 +111,9 @@ export function clientProofIntro(
     return "Verified reviews from our founder's public Upwork profile — published as written. Client names stay private on Upwork.";
   }
 
-  const sources = new Set(testimonials.map((item) => testimonialDisplaySource(item.source)));
+  const sources = new Set(
+    testimonials.map((item) => testimonialDisplaySource(item.source)),
+  );
   if (sources.size === 1 && sources.has("client")) {
     return "Feedback from clients on completed projects, submitted through our portal and published with their approval.";
   }

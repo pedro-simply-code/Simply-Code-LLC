@@ -17,7 +17,8 @@ export function isUploadThingImageUrl(url: string): boolean {
     const { hostname } = new URL(url);
     if (hostname === "utfs.io") return true;
     if (hostname.endsWith(".ufs.sh") || hostname === "ufs.sh") return true;
-    if (hostname.endsWith(".uploadthing.com") || hostname === "uploadthing.com") return true;
+    if (hostname.endsWith(".uploadthing.com") || hostname === "uploadthing.com")
+      return true;
     return false;
   } catch {
     return false;
@@ -36,7 +37,10 @@ export function projectImageAbsolute(image: string, siteUrl: string): string {
   return image.startsWith("/") ? `${base}${image}` : `${base}/${image}`;
 }
 
-export function projectImageFromForm(value: string, existing: string | null): string | null {
+export function projectImageFromForm(
+  value: string,
+  existing: string | null,
+): string | null {
   const raw = value.trim();
   if (!raw) return null;
   if (isStoredProjectImageUrl(raw)) return raw;

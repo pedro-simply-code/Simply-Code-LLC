@@ -9,7 +9,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
 
   return (
@@ -21,13 +25,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
               Dashboard
             </Link>
             {session?.user.role === "admin" ? (
-              <Link href="/dashboard/admin" className="text-muted-foreground hover:text-foreground">
+              <Link
+                href="/dashboard/admin"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 Admin
               </Link>
             ) : null}
           </nav>
           <div className="flex items-center gap-2">
-            <span className="hidden text-sm text-muted-foreground sm:inline">{session?.user.email}</span>
+            <span className="text-muted-foreground hidden text-sm sm:inline">
+              {session?.user.email}
+            </span>
             <ThemeToggle />
             <SignOutButton />
           </div>

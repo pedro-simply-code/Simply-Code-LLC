@@ -35,7 +35,9 @@ export async function requireFounder(): Promise<AuthSession> {
 }
 
 /** Founder or project lead for the given project. */
-export async function requireProjectManager(projectId: string): Promise<AuthSession> {
+export async function requireProjectManager(
+  projectId: string,
+): Promise<AuthSession> {
   const session = await requireTeam();
   if (isUuid(projectId)) {
     if (isFounder(session.user.role)) return session;
@@ -56,7 +58,9 @@ export async function requireProjectManager(projectId: string): Promise<AuthSess
 }
 
 /** Any assigned team member (or founder). */
-export async function requireProjectTeamMember(projectId: string): Promise<AuthSession> {
+export async function requireProjectTeamMember(
+  projectId: string,
+): Promise<AuthSession> {
   const session = await requireTeam();
   if (!isUuid(projectId)) redirect("/studio/projects");
 
@@ -66,7 +70,10 @@ export async function requireProjectTeamMember(projectId: string): Promise<AuthS
     .select({ projectRole: projectMembers.projectRole })
     .from(projectMembers)
     .where(
-      and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, session.user.id)),
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.userId, session.user.id),
+      ),
     )
     .limit(1);
 

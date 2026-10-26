@@ -15,7 +15,7 @@ export function AuthScreen({
   footer?: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-sc-canvas px-4 py-12 text-sc-ink">
+    <main className="bg-sc-canvas text-sc-ink flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div
         className={cn(
           appPanel,
@@ -28,7 +28,9 @@ export function AuthScreen({
             {title}
           </h1>
           {description ? (
-            <p className="mt-2 text-sm leading-relaxed text-[#57524a]">{description}</p>
+            <p className="mt-2 text-sm leading-relaxed text-[#57524a]">
+              {description}
+            </p>
           ) : null}
         </div>
         {children}
@@ -63,7 +65,7 @@ export function AuthLink({
   return (
     <a
       href={href}
-      className="font-semibold text-[#15130f] underline-offset-4 transition-colors hover:text-sc-accent hover:underline"
+      className="hover:text-sc-accent font-semibold text-[#15130f] underline-offset-4 transition-colors hover:underline"
     >
       {children}
     </a>

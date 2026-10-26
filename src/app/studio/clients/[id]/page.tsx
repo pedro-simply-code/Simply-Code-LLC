@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CancelInviteForm } from "~/components/studio/cancel-invite-form";
 import { StudioFormDialog } from "~/components/studio/studio-form-dialog";
-import { Field, StudioCard, StudioHeader, StudioInput } from "~/components/studio/ui";
+import {
+  Field,
+  StudioCard,
+  StudioHeader,
+  StudioInput,
+} from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
 import { isFounder } from "~/lib/roles";
 import { addClientMember, updateClient } from "~/server/studio/actions";
@@ -17,7 +22,12 @@ export default async function ClientDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string; saved?: string; invited?: string; error?: string }>;
+  searchParams: Promise<{
+    created?: string;
+    saved?: string;
+    invited?: string;
+    error?: string;
+  }>;
 }) {
   const session = await auth();
   if (!isFounder(session?.user.role)) redirect("/studio");
@@ -69,14 +79,25 @@ export default async function ClientDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="space-y-6 lg:col-span-2">
-          <StudioCard title="Company details" description="Internal label and primary contact.">
+          <StudioCard
+            title="Company details"
+            description="Internal label and primary contact."
+          >
             <form action={updateClient} className="grid gap-4">
               <input type="hidden" name="clientId" value={client.id} />
               <input type="hidden" name="returnTo" value={returnTo} />
               <Field label="Organization name">
-                <StudioInput name="name" required defaultValue={client.name} maxLength={160} />
+                <StudioInput
+                  name="name"
+                  required
+                  defaultValue={client.name}
+                  maxLength={160}
+                />
               </Field>
-              <Field label="Contact email" hint="Billing or main point of contact (not portal login).">
+              <Field
+                label="Contact email"
+                hint="Billing or main point of contact (not portal login)."
+              >
                 <StudioInput
                   name="contactEmail"
                   type="email"
@@ -86,7 +107,7 @@ export default async function ClientDetailPage({
               </Field>
               <button
                 type="submit"
-                className="w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+                className="hover:bg-sc-accent w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
               >
                 Save details
               </button>
@@ -110,26 +131,41 @@ export default async function ClientDetailPage({
                   <input type="hidden" name="clientId" value={client.id} />
                   <input type="hidden" name="returnTo" value={returnTo} />
                   <Field label="Email">
-                    <StudioInput name="email" type="email" required placeholder="name@company.com" />
+                    <StudioInput
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="name@company.com"
+                    />
                   </Field>
                   <button
                     type="submit"
-                    className="w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+                    className="hover:bg-sc-accent w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
                   >
                     Send invitation
                   </button>
                 </form>
               </StudioFormDialog>
             </div>
-            {client.members.length === 0 && client.pendingInvites.length === 0 ? (
-              <p className="text-sm text-[#6f6a60]">No portal users yet. Send an invitation to get started.</p>
+            {client.members.length === 0 &&
+            client.pendingInvites.length === 0 ? (
+              <p className="text-sm text-[#6f6a60]">
+                No portal users yet. Send an invitation to get started.
+              </p>
             ) : (
               <ul className="divide-y divide-[#15130f]/10">
                 {client.members.map((member) => (
-                  <li key={member.userId} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                  <li
+                    key={member.userId}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3"
+                  >
                     <div>
-                      <p className="text-sm font-semibold">{member.name ?? member.email}</p>
-                      <p className="text-[11px] text-[#6f6a60]">{member.email}</p>
+                      <p className="text-sm font-semibold">
+                        {member.name ?? member.email}
+                      </p>
+                      <p className="text-[11px] text-[#6f6a60]">
+                        {member.email}
+                      </p>
                     </div>
                     <span className="text-[10px] font-bold tracking-[0.1em] text-[#2e7d32] uppercase">
                       Active
@@ -137,15 +173,22 @@ export default async function ClientDetailPage({
                   </li>
                 ))}
                 {client.pendingInvites.map((invite) => (
-                  <li key={invite.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                  <li
+                    key={invite.id}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3"
+                  >
                     <div>
                       <p className="text-sm font-semibold">{invite.email}</p>
-                      <p className="text-[11px] text-[#6f6a60]">Invitation pending</p>
+                      <p className="text-[11px] text-[#6f6a60]">
+                        Invitation pending
+                      </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                       <span className="text-[10px] text-[#9a9488]">
                         Expires{" "}
-                        {invite.expiresAt.toLocaleDateString(undefined, { dateStyle: "medium" })}
+                        {invite.expiresAt.toLocaleDateString(undefined, {
+                          dateStyle: "medium",
+                        })}
                       </span>
                       <CancelInviteForm
                         inviteId={invite.id}
@@ -159,10 +202,14 @@ export default async function ClientDetailPage({
             )}
           </StudioCard>
 
-          <StudioCard title="Projects" description="Studio projects linked to this organization.">
+          <StudioCard
+            title="Projects"
+            description="Studio projects linked to this organization."
+          >
             {client.projects.length === 0 ? (
               <p className="text-sm text-[#6f6a60]">
-                No linked projects. Assign this organization when editing a project.
+                No linked projects. Assign this organization when editing a
+                project.
               </p>
             ) : (
               <ul className={cn(appPanel, "divide-y divide-[#15130f]/10")}>
@@ -170,9 +217,11 @@ export default async function ClientDetailPage({
                   <li key={project.id}>
                     <Link
                       href={`/studio/projects/${project.id}`}
-                      className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 hover:bg-sc-section-alt/40"
+                      className="hover:bg-sc-section-alt/40 flex flex-wrap items-center justify-between gap-2 px-4 py-3"
                     >
-                      <span className="text-sm font-semibold">{project.title}</span>
+                      <span className="text-sm font-semibold">
+                        {project.title}
+                      </span>
                       <span className="text-[10px] font-bold tracking-[0.1em] text-[#9a9488] uppercase">
                         {project.status}
                       </span>
@@ -181,7 +230,10 @@ export default async function ClientDetailPage({
                 ))}
               </ul>
             )}
-            <Link href="/studio/projects" className={cn(appGhostButtonLg, "mt-4 inline-flex")}>
+            <Link
+              href="/studio/projects"
+              className={cn(appGhostButtonLg, "mt-4 inline-flex")}
+            >
               All projects
             </Link>
           </StudioCard>

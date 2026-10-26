@@ -57,6 +57,10 @@ describe("buildProjectActivityFeed", () => {
       "portal",
     );
 
-    expect(feed.map((item) => item.title)).toEqual(["Done", "Public", "Client file"]);
+    expect(feed.map((item) => item.title)).toEqual([
+      "Done",
+      "Public",
+      "Client file",
+    ]);
   });
 });

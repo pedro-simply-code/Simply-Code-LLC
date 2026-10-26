@@ -3,7 +3,13 @@ import {
   deleteProjectMilestone,
   updateProjectMilestone,
 } from "~/server/projects/actions";
-import { Field, StudioCard, StudioInput, StudioSelect, StudioTextarea } from "~/components/studio/ui";
+import {
+  Field,
+  StudioCard,
+  StudioInput,
+  StudioSelect,
+  StudioTextarea,
+} from "~/components/studio/ui";
 
 type Milestone = {
   id: string;
@@ -36,7 +42,9 @@ export function ProjectMilestonesPanel({
 }) {
   const completed = milestones.filter((m) => m.status === "completed").length;
   const progress =
-    milestones.length > 0 ? Math.round((completed / milestones.length) * 100) : null;
+    milestones.length > 0
+      ? Math.round((completed / milestones.length) * 100)
+      : null;
 
   return (
     <div className="space-y-6">
@@ -56,7 +64,7 @@ export function ProjectMilestonesPanel({
             </div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#15130f]/10">
               <div
-                className="h-full rounded-full bg-sc-accent transition-all"
+                className="bg-sc-accent h-full rounded-full transition-all"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -88,19 +96,38 @@ export function ProjectMilestonesPanel({
                     </p>
                   </div>
                   {isMember ? (
-                    <form action={updateProjectMilestone} className="flex flex-wrap items-end gap-2">
+                    <form
+                      action={updateProjectMilestone}
+                      className="flex flex-wrap items-end gap-2"
+                    >
                       <input type="hidden" name="projectId" value={projectId} />
-                      <input type="hidden" name="milestoneId" value={milestone.id} />
-                      <input type="hidden" name="title" value={milestone.title} />
-                      <input type="hidden" name="description" value={milestone.description} />
-                      <StudioSelect name="status" defaultValue={milestone.status} className="min-w-[9rem]">
+                      <input
+                        type="hidden"
+                        name="milestoneId"
+                        value={milestone.id}
+                      />
+                      <input
+                        type="hidden"
+                        name="title"
+                        value={milestone.title}
+                      />
+                      <input
+                        type="hidden"
+                        name="description"
+                        value={milestone.description}
+                      />
+                      <StudioSelect
+                        name="status"
+                        defaultValue={milestone.status}
+                        className="min-w-[9rem]"
+                      >
                         <option value="pending">Pending</option>
                         <option value="in_progress">In progress</option>
                         <option value="completed">Completed</option>
                       </StudioSelect>
                       <button
                         type="submit"
-                        className="rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
+                        className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
                       >
                         Save
                       </button>
@@ -110,7 +137,11 @@ export function ProjectMilestonesPanel({
                 {canManage ? (
                   <form action={deleteProjectMilestone} className="mt-2">
                     <input type="hidden" name="projectId" value={projectId} />
-                    <input type="hidden" name="milestoneId" value={milestone.id} />
+                    <input
+                      type="hidden"
+                      name="milestoneId"
+                      value={milestone.id}
+                    />
                     <button
                       type="submit"
                       className="text-[10px] font-bold tracking-[0.12em] text-[#9a3b2e] uppercase hover:underline"
@@ -141,7 +172,7 @@ export function ProjectMilestonesPanel({
             </Field>
             <button
               type="submit"
-              className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+              className="hover:bg-sc-accent rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
             >
               Add milestone
             </button>

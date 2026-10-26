@@ -22,9 +22,7 @@ async function main() {
   const users = `${prefix}_users`;
   const projects = `${prefix}_projects`;
 
-  await run(
-    `ALTER TABLE "${users}" ADD COLUMN IF NOT EXISTS totp_secret text`,
-  );
+  await run(`ALTER TABLE "${users}" ADD COLUMN IF NOT EXISTS totp_secret text`);
   await run(
     `ALTER TABLE "${users}" ADD COLUMN IF NOT EXISTS totp_enabled boolean NOT NULL DEFAULT false`,
   );

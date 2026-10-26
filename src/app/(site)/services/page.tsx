@@ -1,12 +1,24 @@
 import Link from "next/link";
-import { ArrowRight, Check, Code2, Handshake, Palette, PenTool } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Code2,
+  Handshake,
+  Palette,
+  PenTool,
+} from "lucide-react";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNav } from "~/components/site-nav";
 import { ENGAGEMENT_MODELS, SERVICES } from "~/content/services";
 import { SITE } from "~/content/site";
 import { pageMetadata } from "~/lib/seo";
-import { appAccentBrightButtonMarketingSm, appChip, appGhostButton, appPanel } from "~/lib/surface";
+import {
+  appAccentBrightButtonMarketingSm,
+  appChip,
+  appGhostButton,
+  appPanel,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 export const metadata = pageMetadata({
@@ -29,9 +41,9 @@ export default function ServicesPage() {
       <SiteNav />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
-        <section className="border-b border-[#15130f]/10 bg-sc-section-alt py-16 lg:py-24">
+        <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">
           <div className="mx-auto max-w-[1400px] px-6">
-            <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+            <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
               Services
             </p>
             <h1 className="mt-5 max-w-4xl text-[clamp(2.5rem,6vw,5rem)] leading-[0.98] font-black tracking-[-0.045em] uppercase">
@@ -40,8 +52,9 @@ export default function ServicesPage() {
               And Everything Between
             </h1>
             <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-[#57524a]">
-              We are a small, senior team. The people who scope your project are the people who
-              design and build it — from the first flow to the final deploy.
+              We are a small, senior team. The people who scope your project are
+              the people who design and build it — from the first flow to the
+              final deploy.
             </p>
 
             <nav aria-label="Services" className="mt-10 flex flex-wrap gap-2">
@@ -62,7 +75,9 @@ export default function ServicesPage() {
         </section>
 
         {SERVICES.map((service, index) => {
-          const Icon = SERVICE_ICONS[service.slug as keyof typeof SERVICE_ICONS] ?? Palette;
+          const Icon =
+            SERVICE_ICONS[service.slug as keyof typeof SERVICE_ICONS] ??
+            Palette;
 
           return (
             <section
@@ -75,7 +90,7 @@ export default function ServicesPage() {
               <div className="mx-auto grid max-w-[1400px] gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
                 <div>
                   <div className="flex items-center gap-4">
-                    <span className="flex size-12 items-center justify-center bg-[#15130f] text-sc-accent-bright">
+                    <span className="text-sc-accent-bright flex size-12 items-center justify-center bg-[#15130f]">
                       <Icon className="size-5" />
                     </span>
                     <span className="text-[11px] font-bold tracking-[0.22em] text-[#6f6a60] uppercase">
@@ -98,15 +113,15 @@ export default function ServicesPage() {
                           href={tool.href}
                           target="_blank"
                           rel="noreferrer"
-                          className={cn(appGhostButton, "transition-colors hover:text-sc-accent")}
+                          className={cn(
+                            appGhostButton,
+                            "hover:text-sc-accent transition-colors",
+                          )}
                         >
                           {tool.label}
                         </a>
                       ) : (
-                        <span
-                          key={tool.label}
-                          className={appGhostButton}
-                        >
+                        <span key={tool.label} className={appGhostButton}>
                           {tool.label}
                         </span>
                       ),
@@ -115,21 +130,23 @@ export default function ServicesPage() {
                 </div>
 
                 <div className={cn(appPanel, "p-8")}>
-                  <p className="text-[11px] font-bold tracking-[0.2em] text-sc-accent uppercase">
+                  <p className="text-sc-accent text-[11px] font-bold tracking-[0.2em] uppercase">
                     What you get
                   </p>
                   <ul className="mt-5 space-y-3.5">
                     {service.deliverables.map((item) => (
                       <li key={item} className="flex items-start gap-3">
-                        <Check className="mt-0.5 size-4 shrink-0 text-sc-accent" />
-                        <span className="text-[15px] leading-relaxed text-[#57524a]">{item}</span>
+                        <Check className="text-sc-accent mt-0.5 size-4 shrink-0" />
+                        <span className="text-[15px] leading-relaxed text-[#57524a]">
+                          {item}
+                        </span>
                       </li>
                     ))}
                   </ul>
 
                   <Link
                     href="/contact"
-                    className="mt-8 inline-flex items-center gap-2 rounded-md bg-[#15130f] px-6 py-3 text-[11px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-sc-accent"
+                    className="hover:bg-sc-accent mt-8 inline-flex items-center gap-2 rounded-md bg-[#15130f] px-6 py-3 text-[11px] font-bold tracking-[0.16em] text-white uppercase transition-colors"
                   >
                     Discuss this service <ArrowRight className="size-4" />
                   </Link>
@@ -141,15 +158,15 @@ export default function ServicesPage() {
 
         <section className="bg-[#15130f] py-16 text-white lg:py-24">
           <div className="mx-auto max-w-[1400px] px-6">
-            <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent-bright uppercase">
+            <p className="text-sc-accent-bright text-[11px] font-bold tracking-[0.24em] uppercase">
               How We Work
             </p>
             <h2 className="mt-5 max-w-3xl text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
               Three Ways To Work Together
             </h2>
             <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-white/60">
-              No hourly surprises and no open-ended scopes. Pick the model that matches how your
-              team already works.
+              No hourly surprises and no open-ended scopes. Pick the model that
+              matches how your team already works.
             </p>
 
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
@@ -158,10 +175,12 @@ export default function ServicesPage() {
                   key={model.title}
                   className="flex flex-col rounded-lg bg-white/[0.03] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.2)] ring-1 ring-white/10"
                 >
-                  <span className="text-[11px] font-bold tracking-[0.2em] text-sc-accent-bright">
+                  <span className="text-sc-accent-bright text-[11px] font-bold tracking-[0.2em]">
                     0{index + 1}
                   </span>
-                  <h3 className="mt-4 text-xl font-black tracking-tight uppercase">{model.title}</h3>
+                  <h3 className="mt-4 text-xl font-black tracking-tight uppercase">
+                    {model.title}
+                  </h3>
                   <p className="mt-4 flex-1 text-[14px] leading-relaxed text-white/60">
                     {model.description}
                   </p>
@@ -176,12 +195,15 @@ export default function ServicesPage() {
             </div>
 
             <div className="mt-12 flex flex-wrap items-center gap-5">
-              <Link href="/contact" className={appAccentBrightButtonMarketingSm}>
+              <Link
+                href="/contact"
+                className={appAccentBrightButtonMarketingSm}
+              >
                 Request a quote <ArrowRight className="size-4" />
               </Link>
               <a
                 href={`mailto:${SITE.email}`}
-                className="text-[14px] font-semibold text-white/70 underline underline-offset-8 transition-colors hover:text-sc-accent-bright"
+                className="hover:text-sc-accent-bright text-[14px] font-semibold text-white/70 underline underline-offset-8 transition-colors"
               >
                 {SITE.email}
               </a>

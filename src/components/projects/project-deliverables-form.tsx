@@ -3,7 +3,12 @@
 import { useState } from "react";
 import type { MessageAttachment } from "~/lib/message-attachments";
 import { ProjectDeliverableUpload } from "~/components/projects/project-deliverable-upload";
-import { Field, StudioInput, StudioSelect, StudioTextarea } from "~/components/studio/ui";
+import {
+  Field,
+  StudioInput,
+  StudioSelect,
+  StudioTextarea,
+} from "~/components/studio/ui";
 
 export function ProjectDeliverablesForm({
   projectId,
@@ -17,7 +22,10 @@ export function ProjectDeliverablesForm({
   const [file, setFile] = useState<MessageAttachment | null>(null);
 
   return (
-    <form action={action} className="mt-4 space-y-3 border-t border-[#15130f]/10 pt-4">
+    <form
+      action={action}
+      className="mt-4 space-y-3 border-t border-[#15130f]/10 pt-4"
+    >
       <input type="hidden" name="projectId" value={projectId} />
       <input
         type="hidden"
@@ -41,14 +49,14 @@ export function ProjectDeliverablesForm({
       </Field>
       {!canPublishToClient ? (
         <p className="text-[11px] text-[#6f6a60]">
-          Client-visible deliverables require a project lead or founder. Use internal or ask your
-          lead to publish.
+          Client-visible deliverables require a project lead or founder. Use
+          internal or ask your lead to publish.
         </p>
       ) : null}
       <button
         type="submit"
         disabled={!file}
-        className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent disabled:opacity-50"
+        className="hover:bg-sc-accent rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase disabled:opacity-50"
       >
         Add deliverable
       </button>

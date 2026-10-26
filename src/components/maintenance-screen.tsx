@@ -5,6 +5,10 @@ export function MaintenanceScreen({ message }: { message: string }) {
     message.trim() || "We are making improvements. Please check back soon.";
 
   return (
-    <SiteStatusPage eyebrow="Maintenance" title="We'll be right back" description={text} />
+    <SiteStatusPage
+      eyebrow="Maintenance"
+      title="We'll be right back"
+      description={text}
+    />
   );
 }

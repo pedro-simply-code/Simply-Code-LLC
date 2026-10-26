@@ -7,7 +7,11 @@ import { filterStudioProjects } from "~/lib/studio-projects-filter";
 import { canCreateProjects, roleLabel } from "~/lib/roles";
 import { studioProjectPanel } from "~/lib/studio-project-surface";
 import { StudioPagination } from "~/components/studio/studio-pagination";
-import { paginateStudio, parseStudioPage, studioPageSummary } from "~/lib/studio-pagination";
+import {
+  paginateStudio,
+  parseStudioPage,
+  studioPageSummary,
+} from "~/lib/studio-pagination";
 import { parseStudioView } from "~/lib/studio-view";
 import { getStudioProjects } from "~/server/studio/queries";
 
@@ -16,14 +20,26 @@ export const dynamic = "force-dynamic";
 export default async function StudioProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; view?: string; page?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    view?: string;
+    page?: string;
+  }>;
 }) {
-  const { q = "", status = "all", view: viewParam, page: pageParam } = await searchParams;
+  const {
+    q = "",
+    status = "all",
+    view: viewParam,
+    page: pageParam,
+  } = await searchParams;
   const view = parseStudioView(viewParam);
   const page = parseStudioPage(pageParam);
   const session = await auth();
   const canCreate = canCreateProjects(session?.user.role);
-  const allProjects = await getStudioProjects(canCreate ? undefined : session?.user.id);
+  const allProjects = await getStudioProjects(
+    canCreate ? undefined : session?.user.id,
+  );
   const projects = filterStudioProjects(allProjects, q, status);
   const paginated = paginateStudio(projects, page);
   const hasFilters = Boolean(q.trim()) || status !== "all";
@@ -41,7 +57,7 @@ export default async function StudioProjectsPage({
           canCreate ? (
             <Link
               href="/studio/projects/new"
-              className="inline-flex items-center rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+              className="hover:bg-sc-accent inline-flex items-center rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
             >
               New project
             </Link>
@@ -69,14 +85,20 @@ export default async function StudioProjectsPage({
       ) : paginated.total === 0 ? (
         <p className={`px-4 py-8 text-sm text-[#6f6a60] ${studioProjectPanel}`}>
           No projects match your filters.{" "}
-          <Link href="/studio/projects" className="font-semibold text-sc-accent hover:underline">
+          <Link
+            href="/studio/projects"
+            className="text-sc-accent font-semibold hover:underline"
+          >
             Clear filters
           </Link>
         </p>
       ) : (
         <>
           <StudioProjectsList projects={paginated.items} view={view} />
-          <StudioPagination page={paginated.page} totalPages={paginated.totalPages} />
+          <StudioPagination
+            page={paginated.page}
+            totalPages={paginated.totalPages}
+          />
         </>
       )}
 

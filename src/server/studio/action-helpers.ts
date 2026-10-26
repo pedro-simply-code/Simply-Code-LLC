@@ -2,12 +2,20 @@ import "server-only";
 
 import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
-import { env } from "~/env";
+import { inviteAcceptUrl } from "~/lib/public-site-url";
 import { isFounder } from "~/lib/roles";
 import { slugify } from "~/lib/slug";
 import { db } from "~/server/db";
-import { projectMembers, projects, users, type UserRole } from "~/server/db/schema";
-import { notifyProjectClients, withProjectEntity } from "~/server/notifications";
+import {
+  projectMembers,
+  projects,
+  users,
+  type UserRole,
+} from "~/server/db/schema";
+import {
+  notifyProjectClients,
+  withProjectEntity,
+} from "~/server/notifications";
 
 export function formText(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -18,10 +26,7 @@ export function formChecked(formData: FormData, key: string): boolean {
 }
 
 export function inviteLink(token: string): string {
-  const base = env.AUTH_URL ?? env.NEXT_PUBLIC_SITE_URL;
-  const url = new URL("/accept-invite", base);
-  url.searchParams.set("token", token);
-  return url.toString();
+  return inviteAcceptUrl(token);
 }
 
 export function escapeHtml(value: string): string {
@@ -37,7 +42,9 @@ export function escapeHtml(value: string): string {
   });
 }
 
-export function projectStatusValue(value: string): "draft" | "published" | "completed" {
+export function projectStatusValue(
+  value: string,
+): "draft" | "published" | "completed" {
   if (value === "published") return "published";
   if (value === "completed") return "completed";
   return "draft";
@@ -52,7 +59,10 @@ export async function fetchProjectTitle(projectId: string): Promise<string> {
   return row?.title ?? "Project";
 }
 
-export async function uniqueProjectSlug(base: string, excludeId?: string): Promise<string> {
+export async function uniqueProjectSlug(
+  base: string,
+  excludeId?: string,
+): Promise<string> {
   const root = slugify(base) || "project";
   let candidate = root;
   let attempt = 1;
@@ -83,14 +93,22 @@ export async function syncUserLeadRole(userId: string) {
   const [lead] = await db
     .select({ projectId: projectMembers.projectId })
     .from(projectMembers)
-    .where(and(eq(projectMembers.userId, userId), eq(projectMembers.projectRole, "lead")))
+    .where(
+      and(
+        eq(projectMembers.userId, userId),
+        eq(projectMembers.projectRole, "lead"),
+      ),
+    )
     .limit(1);
 
   if (lead && (user.role === "developer" || user.role === "user")) {
     await db.update(users).set({ role: "lead" }).where(eq(users.id, userId));
   }
   if (!lead && user.role === "lead") {
-    await db.update(users).set({ role: "developer" }).where(eq(users.id, userId));
+    await db
+      .update(users)
+      .set({ role: "developer" })
+      .where(eq(users.id, userId));
   }
 }
 

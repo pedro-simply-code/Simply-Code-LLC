@@ -26,7 +26,7 @@ function StatusBadge({ status }: { status: string }) {
       className={
         published
           ? "rounded-md bg-[#e8f5e9] px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-[#2e7d32] uppercase"
-          : "rounded-md bg-sc-section-alt px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-[#6f6a60] uppercase shadow-[0_1px_2px_rgba(21,19,15,0.05)]"
+          : "bg-sc-section-alt rounded-md px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-[#6f6a60] uppercase shadow-[0_1px_2px_rgba(21,19,15,0.05)]"
       }
     >
       {status}
@@ -35,7 +35,8 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function ProjectActions({ project }: { project: StudioProjectRow }) {
-  const isPublic = project.status === "published" || project.status === "completed";
+  const isPublic =
+    project.status === "published" || project.status === "completed";
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -59,7 +60,7 @@ function ProjectActions({ project }: { project: StudioProjectRow }) {
       </Link>
       <Link
         href={`/studio/projects/${project.id}`}
-        className="inline-flex items-center gap-1.5 rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
+        className="hover:bg-sc-accent inline-flex items-center gap-1.5 rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
       >
         Open
         <ArrowRight className="size-3" />
@@ -75,23 +76,31 @@ function ProjectGridCard({ project }: { project: StudioProjectRow }) {
         <div className="min-w-0">
           <Link
             href={`/studio/projects/${project.id}`}
-            className="font-semibold hover:text-sc-accent"
+            className="hover:text-sc-accent font-semibold"
           >
             {project.title}
           </Link>
-          <p className="mt-0.5 truncate text-[11px] text-[#9a9488]">/work/{project.slug}</p>
+          <p className="mt-0.5 truncate text-[11px] text-[#9a9488]">
+            /work/{project.slug}
+          </p>
         </div>
         <StatusBadge status={project.status} />
       </div>
       <dl className="mt-4 grid gap-2 text-[11px]">
         <div>
-          <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">Stack</dt>
+          <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">
+            Stack
+          </dt>
           <dd className="mt-0.5 text-[#57524a]">{project.stackLabel || "—"}</dd>
         </div>
         <div>
-          <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">Lead</dt>
+          <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">
+            Lead
+          </dt>
           <dd className="mt-0.5 text-[#57524a]">
-            {project.leadName ?? <span className="text-sc-accent">Unassigned</span>}
+            {project.leadName ?? (
+              <span className="text-sc-accent">Unassigned</span>
+            )}
           </dd>
         </div>
       </dl>
@@ -154,11 +163,13 @@ export function StudioProjectsList({
                 <td className="px-4 py-3">
                   <Link
                     href={`/studio/projects/${project.id}`}
-                    className="font-semibold hover:text-sc-accent"
+                    className="hover:text-sc-accent font-semibold"
                   >
                     {project.title}
                   </Link>
-                  <p className="mt-0.5 text-[11px] text-[#9a9488]">/work/{project.slug}</p>
+                  <p className="mt-0.5 text-[11px] text-[#9a9488]">
+                    /work/{project.slug}
+                  </p>
                 </td>
                 <td className="px-4 py-3 text-[#57524a]">
                   <span
@@ -169,8 +180,13 @@ export function StudioProjectsList({
                   </span>
                 </td>
                 <td className="px-4 py-3 text-[#57524a]">
-                  <span className="block truncate" title={project.leadName ?? undefined}>
-                    {project.leadName ?? <span className="text-sc-accent">Unassigned</span>}
+                  <span
+                    className="block truncate"
+                    title={project.leadName ?? undefined}
+                  >
+                    {project.leadName ?? (
+                      <span className="text-sc-accent">Unassigned</span>
+                    )}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -190,28 +206,38 @@ export function StudioProjectsList({
         </table>
       </div>
 
-      <ul className={`divide-y divide-[#15130f]/8 md:hidden ${studioProjectPanel}`}>
+      <ul
+        className={`divide-y divide-[#15130f]/8 md:hidden ${studioProjectPanel}`}
+      >
         {projects.map((project) => (
           <li key={project.id} className="p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Link
                   href={`/studio/projects/${project.id}`}
-                  className="font-semibold hover:text-sc-accent"
+                  className="hover:text-sc-accent font-semibold"
                 >
                   {project.title}
                 </Link>
-                <p className="mt-0.5 text-[11px] text-[#9a9488]">/work/{project.slug}</p>
+                <p className="mt-0.5 text-[11px] text-[#9a9488]">
+                  /work/{project.slug}
+                </p>
               </div>
               <StatusBadge status={project.status} />
             </div>
             <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
               <div>
-                <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">Stack</dt>
-                <dd className="mt-0.5 text-[#57524a]">{project.stackLabel || "—"}</dd>
+                <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">
+                  Stack
+                </dt>
+                <dd className="mt-0.5 text-[#57524a]">
+                  {project.stackLabel || "—"}
+                </dd>
               </div>
               <div>
-                <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">Lead</dt>
+                <dt className="font-bold tracking-[0.1em] text-[#9a9488] uppercase">
+                  Lead
+                </dt>
                 <dd className="mt-0.5 text-[#57524a]">
                   {project.leadName ?? "Unassigned"}
                 </dd>

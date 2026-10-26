@@ -35,7 +35,9 @@ export function StudioFormDialog({
         <button
           type="button"
           className={cn(
-            triggerVariant === "ghost" ? appGhostButtonLg : appPrimaryButtonStudio,
+            triggerVariant === "ghost"
+              ? appGhostButtonLg
+              : appPrimaryButtonStudio,
           )}
         >
           {triggerLabel}

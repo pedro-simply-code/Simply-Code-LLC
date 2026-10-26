@@ -1,4 +1,9 @@
-export const SITE_MOTION_LEVELS = ["none", "subtle", "balanced", "bold"] as const;
+export const SITE_MOTION_LEVELS = [
+  "none",
+  "subtle",
+  "balanced",
+  "bold",
+] as const;
 export type SiteMotionLevel = (typeof SITE_MOTION_LEVELS)[number];
 
 export const SITE_MOTION_LABELS: Record<SiteMotionLevel, string> = {

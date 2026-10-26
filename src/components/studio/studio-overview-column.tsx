@@ -17,14 +17,22 @@ export function StudioOverviewColumn({
   className?: string;
 }) {
   return (
-    <section className={cn(appPanel, "flex h-full min-w-0 flex-col p-5", className)}>
+    <section
+      className={cn(appPanel, "flex h-full min-w-0 flex-col p-5", className)}
+    >
       <div className="mb-4 min-w-0">
-        <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">{title}</h2>
+        <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">
+          {title}
+        </h2>
         {description ? (
-          <p className="mt-1 text-xs leading-relaxed text-[#6f6a60]">{description}</p>
+          <p className="mt-1 text-xs leading-relaxed text-[#6f6a60]">
+            {description}
+          </p>
         ) : null}
       </div>
-      <div className="flex min-h-0 flex-1 flex-col justify-start">{children}</div>
+      <div className="flex min-h-0 flex-1 flex-col justify-start">
+        {children}
+      </div>
       <div className="mt-auto shrink-0 pt-4">{footer}</div>
     </section>
   );
@@ -41,6 +49,8 @@ export const overviewPreviewListClass =
 export const overviewPreviewListMobileOnlyClass =
   "flex min-h-0 flex-1 flex-col divide-y divide-[#15130f]/10 sm:hidden";
 
-export const overviewPreviewListItemClass = "flex min-h-0 flex-1 flex-col justify-center py-3";
+export const overviewPreviewListItemClass =
+  "flex min-h-0 flex-1 flex-col justify-center py-3";
 
-export const overviewPreviewSlotsShellClass = "relative flex min-h-0 flex-1 flex-col";
+export const overviewPreviewSlotsShellClass =
+  "relative flex min-h-0 flex-1 flex-col";

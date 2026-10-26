@@ -33,9 +33,9 @@ describe("canManageProject", () => {
 
 describe("canViewStudioProject", () => {
   it("allows any assigned member", () => {
-    expect(canViewStudioProject("developer", { projectRole: "developer" })).toBe(
-      true,
-    );
+    expect(
+      canViewStudioProject("developer", { projectRole: "developer" }),
+    ).toBe(true);
   });
 
   it("denies unassigned non-founders", () => {

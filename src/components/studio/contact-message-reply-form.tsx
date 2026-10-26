@@ -30,8 +30,10 @@ export function ContactMessageReplyForm({
           <>
             <p className="font-semibold">Portal client</p>
             <p className="mt-1">
-              {recipient.portalUsers.map((user) => user.name ?? "Client").join(", ")} can read this
-              in the client portal
+              {recipient.portalUsers
+                .map((user) => user.name ?? "Client")
+                .join(", ")}{" "}
+              can read this in the client portal
               {recipient.portalUsers[0]?.clientNames.length
                 ? ` (${recipient.portalUsers[0].clientNames.join(", ")})`
                 : ""}
@@ -42,8 +44,8 @@ export function ContactMessageReplyForm({
           <>
             <p className="font-semibold">Email only</p>
             <p className="mt-1">
-              No portal account matches <strong>{recipient.email}</strong>. Your reply will be sent
-              by email.
+              No portal account matches <strong>{recipient.email}</strong>. Your
+              reply will be sent by email.
             </p>
           </>
         )}
@@ -56,19 +58,23 @@ export function ContactMessageReplyForm({
         <StudioTextarea name="body" required rows={6} className="min-h-0" />
       </Field>
 
-      <Field label="Attachments" hint="Optional. Same limits as the public contact form.">
+      <Field
+        label="Attachments"
+        hint="Optional. Same limits as the public contact form."
+      >
         <MessageAttachmentUpload />
       </Field>
 
       {usePortal ? (
-        <label className="flex cursor-pointer items-start gap-3 text-sm text-sc-ink">
+        <label className="text-sc-ink flex cursor-pointer items-start gap-3 text-sm">
           <input
             type="checkbox"
             name="alsoEmail"
-            className="mt-0.5 size-4 accent-sc-accent"
+            className="accent-sc-accent mt-0.5 size-4"
           />
           <span>
-            Also send by email to <strong>{recipient.email}</strong> (recommended for first reply)
+            Also send by email to <strong>{recipient.email}</strong>{" "}
+            (recommended for first reply)
           </span>
         </label>
       ) : null}

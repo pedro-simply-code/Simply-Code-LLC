@@ -8,14 +8,19 @@ type BrandLogoProps = {
   className?: string;
 };
 
-export function BrandLogo({ href = "/", subtitle, compact = false, className }: BrandLogoProps) {
+export function BrandLogo({
+  href = "/",
+  subtitle,
+  compact = false,
+  className,
+}: BrandLogoProps) {
   return (
     <Link
       href={href}
       aria-label={subtitle ? `Simply Code ${subtitle}` : "Simply Code"}
       className={cn("flex min-w-0 items-center gap-3", className)}
     >
-      <span className="flex size-10 shrink-0 items-center justify-center bg-sc-accent-bright font-mono leading-none font-bold tracking-[-0.08em] text-[#15130f]">
+      <span className="bg-sc-accent-bright flex size-10 shrink-0 items-center justify-center font-mono leading-none font-bold tracking-[-0.08em] text-[#15130f]">
         <span className="inline-block -rotate-45 text-[18px]">{"</>"}</span>
       </span>
       {compact ? null : (

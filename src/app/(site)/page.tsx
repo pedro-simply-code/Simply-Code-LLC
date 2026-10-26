@@ -20,7 +20,10 @@ import { PROJECTS } from "~/content/projects";
 import { SERVICES } from "~/content/services";
 import { TESTIMONIALS } from "~/content/testimonials";
 import { normalizeReviewSource } from "~/lib/reviews";
-import { getApprovedReviewsSafe, getPublicProjectsSafe } from "~/server/studio/queries";
+import {
+  getApprovedReviewsSafe,
+  getPublicProjectsSafe,
+} from "~/server/studio/queries";
 import {
   appEmptyState,
   appOutlineButton,
@@ -83,14 +86,18 @@ export default async function HomePage() {
     ? dbReviews.map((review) => ({
         quote: review.quote,
         project: review.projectTitle ?? review.authorName,
-        period: review.period ?? new Date(review.createdAt).getFullYear().toString(),
+        period:
+          review.period ?? new Date(review.createdAt).getFullYear().toString(),
         rating: review.rating,
         source: normalizeReviewSource(review.source),
       }))
     : TESTIMONIALS;
 
   return (
-    <div id="main" className="min-h-screen bg-sc-canvas text-sc-ink antialiased">
+    <div
+      id="main"
+      className="bg-sc-canvas text-sc-ink min-h-screen antialiased"
+    >
       <SiteNav />
 
       {/* HERO */}
@@ -104,29 +111,29 @@ export default async function HomePage() {
                   "site-hero-in site-hero-in-delay-1 inline-flex items-center gap-2.5 px-3.5 py-2",
                 )}
               >
-                <span aria-hidden className="size-1.5 rounded-full bg-sc-accent-bright" />
-                <p className="text-[10px] font-bold tracking-[0.22em] text-sc-accent uppercase">
+                <span
+                  aria-hidden
+                  className="bg-sc-accent-bright size-1.5 rounded-full"
+                />
+                <p className="text-sc-accent text-[10px] font-bold tracking-[0.22em] uppercase">
                   Web Development Agency
                 </p>
               </div>
 
-              <h1
-                className="site-hero-in site-hero-in-delay-2 mt-7 max-w-[26ch] text-[clamp(2.1rem,4vw,3.35rem)] leading-[1.06] font-black tracking-[-0.03em] uppercase"
-              >
-                We build high-performance <span className="text-sc-accent-bright">web solutions</span> that
-                drive results
+              <h1 className="site-hero-in site-hero-in-delay-2 mt-7 max-w-[26ch] text-[clamp(2.1rem,4vw,3.35rem)] leading-[1.06] font-black tracking-[-0.03em] uppercase">
+                We build high-performance{" "}
+                <span className="text-sc-accent-bright">web solutions</span>{" "}
+                that drive results
               </h1>
 
               <p className="site-hero-in site-hero-in-delay-3 mt-6 max-w-[34rem] text-[16px] leading-[1.7] text-[#57524a]">
-                A full-service digital agency specializing in UX design, custom Next.js applications,
-                WordPress solutions and scalable web platforms.
+                A full-service digital agency specializing in UX design, custom
+                Next.js applications, WordPress solutions and scalable web
+                platforms.
               </p>
 
               <div className="site-hero-in site-hero-in-delay-3 mt-8 flex flex-wrap items-center gap-3">
-                <Link
-                  href="#contact"
-                  className={appPrimaryButtonMarketing}
-                >
+                <Link href="#contact" className={appPrimaryButtonMarketing}>
                   Start Your Project <ArrowRight className="size-4" />
                 </Link>
                 <Link href="/work" className={cn("gap-2", appOutlineButton)}>
@@ -134,17 +141,15 @@ export default async function HomePage() {
                 </Link>
               </div>
 
-              <p className="mt-9 border-l-2 border-sc-accent-bright pl-4 text-[11px] leading-relaxed font-bold tracking-[0.14em] text-sc-muted uppercase">
+              <p className="border-sc-accent-bright text-sc-muted mt-9 border-l-2 pl-4 text-[11px] leading-relaxed font-bold tracking-[0.14em] uppercase">
                 From first contact to production deploy
               </p>
             </div>
 
-            <div
-              className="site-hero-in site-hero-in-delay-2 site-motion-lift relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9"
-            >
+            <div className="site-hero-in site-hero-in-delay-2 site-motion-lift relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9">
               <div
                 aria-hidden
-                className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-sc-accent-bright/25 blur-3xl"
+                className="bg-sc-accent-bright/25 pointer-events-none absolute -top-16 -right-16 size-48 rounded-full blur-3xl"
               />
               <div className="relative">
                 <div className="flex items-center justify-between">
@@ -160,7 +165,7 @@ export default async function HomePage() {
                 <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-7 border-t border-white/10 pt-8">
                   {STATS.map((stat) => (
                     <div key={stat.label}>
-                      <p className="text-[34px] leading-none font-black tracking-[-0.02em] text-sc-accent-bright lg:text-[40px]">
+                      <p className="text-sc-accent-bright text-[34px] leading-none font-black tracking-[-0.02em] lg:text-[40px]">
                         {stat.value}
                       </p>
                       <p className="mt-2.5 text-[10px] font-bold tracking-[0.16em] text-white/50 uppercase">
@@ -176,18 +181,22 @@ export default async function HomePage() {
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="border-b border-[#15130f]/10 bg-sc-section py-20 lg:py-24">
+      <section
+        id="services"
+        className="bg-sc-section border-b border-[#15130f]/10 py-20 lg:py-24"
+      >
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="site-reveal mb-16 max-w-2xl">
-            <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+            <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
               Our Services
             </p>
             <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
               What We Do Best
             </h2>
             <p className="mt-6 text-[16px] leading-relaxed text-[#57524a]">
-              From product design and prototyping to full-stack builds, we deliver comprehensive digital
-              services tailored to your business needs.
+              From product design and prototyping to full-stack builds, we
+              deliver comprehensive digital services tailored to your business
+              needs.
             </p>
           </div>
 
@@ -203,10 +212,12 @@ export default async function HomePage() {
                     "site-reveal site-motion-lift group site-card-hover-accent p-8",
                   )}
                 >
-                  <div className="mb-6 flex size-14 items-center justify-center bg-[#15130f] text-white transition-colors group-hover:bg-sc-accent-bright group-hover:text-[#15130f]">
+                  <div className="group-hover:bg-sc-accent-bright mb-6 flex size-14 items-center justify-center bg-[#15130f] text-white transition-colors group-hover:text-[#15130f]">
                     <Icon className="size-6" />
                   </div>
-                  <h3 className="text-lg font-black tracking-tight uppercase">{service.title}</h3>
+                  <h3 className="text-lg font-black tracking-tight uppercase">
+                    {service.title}
+                  </h3>
                   <p className="mt-3 text-[14px] leading-relaxed text-[#57524a]">
                     {service.summary}
                   </p>
@@ -218,7 +229,7 @@ export default async function HomePage() {
                             href={tool.href}
                             target="_blank"
                             rel="noreferrer noopener"
-                            className="underline-offset-2 transition-colors hover:text-sc-accent hover:underline"
+                            className="hover:text-sc-accent underline-offset-2 transition-colors hover:underline"
                           >
                             {tool.label}
                           </a>
@@ -230,7 +241,7 @@ export default async function HomePage() {
                   </ul>
                   <Link
                     href={`/services#${service.slug}`}
-                    className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase underline underline-offset-4 transition-colors hover:text-sc-accent"
+                    className="hover:text-sc-accent mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase underline underline-offset-4 transition-colors"
                   >
                     Learn more <ArrowUpRight className="size-3" />
                   </Link>
@@ -240,15 +251,13 @@ export default async function HomePage() {
           </div>
 
           {AGENCY_SERVICE ? (
-            <div
-              className="site-reveal site-motion-lift mt-6 flex flex-col gap-6 rounded-lg bg-[#15130f] p-8 text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] lg:flex-row lg:items-center lg:justify-between"
-            >
+            <div className="site-reveal site-motion-lift mt-6 flex flex-col gap-6 rounded-lg bg-[#15130f] p-8 text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-5">
-                <div className="flex size-12 shrink-0 items-center justify-center bg-sc-accent-bright text-[#15130f]">
+                <div className="bg-sc-accent-bright flex size-12 shrink-0 items-center justify-center text-[#15130f]">
                   <Users className="size-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold tracking-[0.2em] text-sc-accent-bright uppercase">
+                  <p className="text-sc-accent-bright text-[10px] font-bold tracking-[0.2em] uppercase">
                     For agencies
                   </p>
                   <h3 className="mt-2 text-lg font-black tracking-tight uppercase">
@@ -261,7 +270,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href={`/services#${AGENCY_SERVICE.slug}`}
-                className="inline-flex shrink-0 items-center gap-2 self-start border-b-2 border-white/30 pb-1 text-[10px] font-bold tracking-[0.16em] uppercase transition-colors hover:border-sc-accent-bright hover:text-sc-accent-bright lg:self-auto"
+                className="hover:border-sc-accent-bright hover:text-sc-accent-bright inline-flex shrink-0 items-center gap-2 self-start border-b-2 border-white/30 pb-1 text-[10px] font-bold tracking-[0.16em] uppercase transition-colors lg:self-auto"
               >
                 Explore partnership <ArrowUpRight className="size-3.5" />
               </Link>
@@ -271,17 +280,21 @@ export default async function HomePage() {
       </section>
 
       {/* OUR WORK */}
-      <section id="our-work" className="border-b border-[#15130f]/10 py-20 lg:py-24">
+      <section
+        id="our-work"
+        className="border-b border-[#15130f]/10 py-20 lg:py-24"
+      >
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="site-reveal mb-16 max-w-2xl">
-            <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+            <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
               Our Work
             </p>
             <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
               Featured Projects
             </h2>
             <p className="mt-6 text-[16px] leading-relaxed text-[#57524a]">
-              A selection of our recent work showcasing the quality and diversity of solutions we deliver.
+              A selection of our recent work showcasing the quality and
+              diversity of solutions we deliver.
             </p>
           </div>
 
@@ -296,14 +309,19 @@ export default async function HomePage() {
               <div className="mt-12 text-center">
                 <Link
                   href="/work"
-                  className="inline-flex items-center gap-2 rounded-md bg-[#15130f] px-8 py-4 text-[12px] font-bold tracking-[0.18em] text-white uppercase transition-colors hover:bg-sc-accent"
+                  className="hover:bg-sc-accent inline-flex items-center gap-2 rounded-md bg-[#15130f] px-8 py-4 text-[12px] font-bold tracking-[0.18em] text-white uppercase transition-colors"
                 >
                   See All Our Work <ArrowRight className="size-4" />
                 </Link>
               </div>
             </>
           ) : (
-            <p className={cn(appEmptyState, "bg-white/60 px-6 py-16 text-center text-[15px] text-[#57524a]")}>
+            <p
+              className={cn(
+                appEmptyState,
+                "bg-white/60 px-6 py-16 text-center text-[15px] text-[#57524a]",
+              )}
+            >
               New case studies are on the way.
             </p>
           )}
@@ -318,7 +336,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
             <div className="site-reveal">
-              <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+              <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
                 Why Choose Us
               </p>
               <h2 className="mt-5 text-[clamp(1.85rem,4.1vw,3.05rem)] leading-[1.04] font-black tracking-[-0.03em] uppercase">
@@ -327,9 +345,10 @@ export default async function HomePage() {
                 Designed For Growth
               </h2>
               <p className="mt-6 text-[16px] leading-relaxed text-[#57524a]">
-                We don&apos;t just build websites—we create digital solutions that perform. With direct
-                communication to developers, proven processes, and a focus on clean code, we deliver
-                results that last.
+                We don&apos;t just build websites—we create digital solutions
+                that perform. With direct communication to developers, proven
+                processes, and a focus on clean code, we deliver results that
+                last.
               </p>
 
               <div className="mt-10 space-y-6">
@@ -338,10 +357,13 @@ export default async function HomePage() {
                     <Ruler className="size-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold tracking-tight">Pixel-Perfect From Design</h3>
+                    <h3 className="font-bold tracking-tight">
+                      Pixel-Perfect From Design
+                    </h3>
                     <p className="text-[14px] leading-relaxed text-[#57524a]">
-                      Your designs built exactly as drawn. No drift, no surprises — exact fidelity
-                      has been our specialty since day one.
+                      Your designs built exactly as drawn. No drift, no
+                      surprises — exact fidelity has been our specialty since
+                      day one.
                     </p>
                   </div>
                 </div>
@@ -350,10 +372,12 @@ export default async function HomePage() {
                     <Layers className="size-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold tracking-tight">Clean, Scalable Code</h3>
+                    <h3 className="font-bold tracking-tight">
+                      Clean, Scalable Code
+                    </h3>
                     <p className="text-[14px] leading-relaxed text-[#57524a]">
-                      Built with best practices and modern technologies for long-term
-                      maintainability and growth.
+                      Built with best practices and modern technologies for
+                      long-term maintainability and growth.
                     </p>
                   </div>
                 </div>
@@ -362,10 +386,12 @@ export default async function HomePage() {
                     <Zap className="size-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold tracking-tight">Direct Communication</h3>
+                    <h3 className="font-bold tracking-tight">
+                      Direct Communication
+                    </h3>
                     <p className="text-[14px] leading-relaxed text-[#57524a]">
-                      Talk directly to the developers building your project. No middlemen, no
-                      miscommunication.
+                      Talk directly to the developers building your project. No
+                      middlemen, no miscommunication.
                     </p>
                   </div>
                 </div>
@@ -373,14 +399,13 @@ export default async function HomePage() {
 
               <Link
                 href="/about#team"
-                className="mt-8 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] uppercase underline underline-offset-4 transition-colors hover:text-sc-accent"
+                className="hover:text-sc-accent mt-8 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] uppercase underline underline-offset-4 transition-colors"
               >
-                Meet the team behind the work <ArrowUpRight className="size-3.5" />
+                Meet the team behind the work{" "}
+                <ArrowUpRight className="size-3.5" />
               </Link>
             </div>
-            <div
-              className="site-reveal site-motion-lift relative flex min-h-[360px] flex-col overflow-hidden rounded-lg bg-[#15130f] text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] sm:min-h-[390px] ring-1 ring-white/10"
-            >
+            <div className="site-reveal site-motion-lift relative flex min-h-[360px] flex-col overflow-hidden rounded-lg bg-[#15130f] text-white shadow-[0_8px_32px_rgba(21,19,15,0.2)] ring-1 ring-white/10 sm:min-h-[390px]">
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
                 <div className="flex items-center gap-2">
                   <span className="size-2.5 rounded-full bg-white/15" />
@@ -388,7 +413,7 @@ export default async function HomePage() {
                   <span className="size-2.5 rounded-full bg-white/15" />
                 </div>
                 <p className="flex items-center gap-2 text-[10px] font-bold tracking-[0.16em] text-white/45 uppercase">
-                  <span className="size-1.5 animate-pulse rounded-full bg-sc-accent-bright" />
+                  <span className="bg-sc-accent-bright size-1.5 animate-pulse rounded-full" />
                   Build In Progress
                 </p>
               </div>
@@ -404,7 +429,9 @@ export default async function HomePage() {
                         <span
                           className={cn(
                             "min-w-0 flex-1 break-words",
-                            step.status === "queued" ? "text-white/40" : "text-white",
+                            step.status === "queued"
+                              ? "text-white/40"
+                              : "text-white",
                           )}
                         >
                           {step.label}
@@ -423,7 +450,7 @@ export default async function HomePage() {
                 </ul>
                 <div className="mt-4 flex items-center gap-3">
                   <span className="shrink-0 text-white/30">$</span>
-                  <span className="inline-block h-4 w-2 animate-pulse bg-sc-accent-bright" />
+                  <span className="bg-sc-accent-bright inline-block h-4 w-2 animate-pulse" />
                 </div>
               </div>
             </div>
@@ -432,11 +459,14 @@ export default async function HomePage() {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="scroll-mt-20 bg-sc-section py-20 lg:py-24">
+      <section
+        id="contact"
+        className="bg-sc-section scroll-mt-20 py-20 lg:py-24"
+      >
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start lg:gap-16">
             <div className="site-reveal">
-              <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+              <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
                 Contact Us
               </p>
               <h2 className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
@@ -445,12 +475,13 @@ export default async function HomePage() {
                 Your Project
               </h2>
               <p className="mt-6 max-w-lg text-[16px] leading-relaxed text-[#57524a]">
-                Ready to start your next web project? Tell us about your goals and we&apos;ll get back to
-                you with a plan to bring your ideas to life.
+                Ready to start your next web project? Tell us about your goals
+                and we&apos;ll get back to you with a plan to bring your ideas
+                to life.
               </p>
               <Link
                 href="/faq"
-                className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] uppercase underline underline-offset-4 transition-colors hover:text-sc-accent"
+                className="hover:text-sc-accent mt-5 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] uppercase underline underline-offset-4 transition-colors"
               >
                 Questions about scope, timeline or pricing? Read the FAQ
                 <ArrowUpRight className="size-3.5" />

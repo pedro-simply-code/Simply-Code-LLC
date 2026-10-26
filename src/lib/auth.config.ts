@@ -33,7 +33,8 @@ export default {
       if (user) {
         token.sub = user.id;
         if (user.role) token.role = normalizeRole(user.role);
-        token.totpRequired = !!(user as { totpRequired?: boolean }).totpRequired;
+        token.totpRequired = !!(user as { totpRequired?: boolean })
+          .totpRequired;
       }
       return refreshAuthTokenFromDb(token);
     },

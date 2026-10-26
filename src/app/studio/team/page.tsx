@@ -20,7 +20,11 @@ import {
   StudioSelect,
 } from "~/components/studio/ui";
 import { StudioPagination } from "~/components/studio/studio-pagination";
-import { paginateStudio, parseStudioPage, studioPageSummary } from "~/lib/studio-pagination";
+import {
+  paginateStudio,
+  parseStudioPage,
+  studioPageSummary,
+} from "~/lib/studio-pagination";
 import { parseStudioView } from "~/lib/studio-view";
 import { CancelInviteForm } from "~/components/studio/cancel-invite-form";
 import { appGhostButtonLg } from "~/lib/surface";
@@ -56,7 +60,9 @@ export default async function TeamPage({
     getPendingInvites(),
     getTechnologies(),
   ]);
-  const assignmentsByUser = await getTechnologyAssignmentsForUsers(team.map((member) => member.id));
+  const assignmentsByUser = await getTechnologyAssignmentsForUsers(
+    team.map((member) => member.id),
+  );
   const teamWithStack = team.map((member) => ({
     ...member,
     technologies: assignmentsByUser.get(member.id) ?? [],
@@ -104,13 +110,16 @@ export default async function TeamPage({
                 </Field>
                 <button
                   type="submit"
-                  className="w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+                  className="hover:bg-sc-accent w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
                 >
                   Send invitation
                 </button>
               </form>
             </StudioFormDialog>
-            <Link href="/studio/technologies" className={cn("inline-flex", appGhostButtonLg)}>
+            <Link
+              href="/studio/technologies"
+              className={cn("inline-flex", appGhostButtonLg)}
+            >
               Technologies
             </Link>
           </div>
@@ -124,7 +133,8 @@ export default async function TeamPage({
       ) : null}
       {query.error === "self" ? (
         <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-[#9a3b2e]">
-          You cannot change your own role here. Ask another founder or use Profile for your details.
+          You cannot change your own role here. Ask another founder or use
+          Profile for your details.
         </p>
       ) : null}
       {query.error === "last-founder" ? (
@@ -134,8 +144,16 @@ export default async function TeamPage({
       ) : null}
 
       <StudioViewToolbar
-        summary={<span className="font-semibold text-[#15130f]">{team.length} team members</span>}
-        pageSummary={studioPageSummary(paginated.page, paginated.pageSize, paginated.total)}
+        summary={
+          <span className="font-semibold text-[#15130f]">
+            {team.length} team members
+          </span>
+        }
+        pageSummary={studioPageSummary(
+          paginated.page,
+          paginated.pageSize,
+          paginated.total,
+        )}
       />
       <TeamMembersView
         team={paginated.items}
@@ -145,10 +163,16 @@ export default async function TeamPage({
         technologyCatalog={catalogOptions}
         canManageAbout={isFounder(session!.user.role)}
       />
-      <StudioPagination page={paginated.page} totalPages={paginated.totalPages} />
+      <StudioPagination
+        page={paginated.page}
+        totalPages={paginated.totalPages}
+      />
 
       {pending.length > 0 ? (
-        <StudioCard title={`Pending invitations (${pending.length})`} className="mt-6">
+        <StudioCard
+          title={`Pending invitations (${pending.length})`}
+          className="mt-6"
+        >
           <ul className="divide-y divide-[#15130f]/10">
             {pending.map((invite) => (
               <li
@@ -156,7 +180,9 @@ export default async function TeamPage({
                 className="flex flex-wrap items-center justify-between gap-3 py-3"
               >
                 <div>
-                  <p className="text-sm font-semibold">{invite.name ?? invite.email}</p>
+                  <p className="text-sm font-semibold">
+                    {invite.name ?? invite.email}
+                  </p>
                   <p className="text-[11px] text-[#6f6a60]">
                     {invite.email} · {roleLabel(invite.role)}
                     {invite.title ? ` · ${invite.title}` : ""}

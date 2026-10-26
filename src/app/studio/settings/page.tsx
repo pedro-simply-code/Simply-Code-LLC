@@ -36,9 +36,15 @@ export default async function StudioSettingsPage() {
       />
 
       {settings.maintenanceMode ? (
-        <p className="mb-6 rounded-lg bg-sc-accent/10 px-4 py-3 text-sm font-medium text-sc-accent-deep ring-1 ring-sc-accent/30">
-          Maintenance mode is <strong>on</strong> — public pages show the maintenance screen at{" "}
-          <a href="/" className="underline hover:text-sc-ink" target="_blank" rel="noreferrer">
+        <p className="bg-sc-accent/10 text-sc-accent-deep ring-sc-accent/30 mb-6 rounded-lg px-4 py-3 text-sm font-medium ring-1">
+          Maintenance mode is <strong>on</strong> — public pages show the
+          maintenance screen at{" "}
+          <a
+            href="/"
+            className="hover:text-sc-ink underline"
+            target="_blank"
+            rel="noreferrer"
+          >
             /
           </a>
           .

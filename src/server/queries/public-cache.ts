@@ -20,7 +20,10 @@ export function getCachedPublicProject(slug: string) {
   return unstable_cache(
     async (): Promise<ContentProject | null> => getPublicProject(slug),
     ["public-project", slug],
-    { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects", `public-project:${slug}`] },
+    {
+      revalidate: PUBLIC_REVALIDATE_SECONDS,
+      tags: ["public-projects", `public-project:${slug}`],
+    },
   )();
 }
 
@@ -28,11 +31,16 @@ export function getCachedApprovedReviewForProjectSlug(slug: string) {
   return unstable_cache(
     async () => getApprovedReviewForProjectSlug(slug),
     ["public-project-review", slug],
-    { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects", `public-project:${slug}`] },
+    {
+      revalidate: PUBLIC_REVALIDATE_SECONDS,
+      tags: ["public-projects", `public-project:${slug}`],
+    },
   )();
 }
 
-export async function getPublicProjectsSafe(): Promise<ContentProject[] | null> {
+export async function getPublicProjectsSafe(): Promise<
+  ContentProject[] | null
+> {
   try {
     const rows = await getCachedPublicProjects();
     return rows.length > 0 ? rows : null;
@@ -41,7 +49,9 @@ export async function getPublicProjectsSafe(): Promise<ContentProject[] | null> 
   }
 }
 
-export async function getPublicProjectSafe(slug: string): Promise<ContentProject | null> {
+export async function getPublicProjectSafe(
+  slug: string,
+): Promise<ContentProject | null> {
   try {
     return await getCachedPublicProject(slug);
   } catch {

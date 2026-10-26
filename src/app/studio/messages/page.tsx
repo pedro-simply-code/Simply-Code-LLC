@@ -26,7 +26,9 @@ export default async function MessagesPage() {
   if (!isFounder(session?.user.role)) redirect("/studio");
 
   const messages = await getContactMessages();
-  const recipients = await resolveContactRecipientsByEmail(messages.map((row) => row.email));
+  const recipients = await resolveContactRecipientsByEmail(
+    messages.map((row) => row.email),
+  );
 
   return (
     <div>
@@ -40,7 +42,9 @@ export default async function MessagesPage() {
           <p className={cn(appEmptyState, "p-8")}>No contact messages yet.</p>
         ) : (
           messages.map((message) => {
-            const recipient = recipients.get(message.email.trim().toLowerCase()) ?? {
+            const recipient = recipients.get(
+              message.email.trim().toLowerCase(),
+            ) ?? {
               email: message.email,
               channel: "email" as const,
               portalUsers: [],
@@ -86,13 +90,13 @@ export default async function MessagesPage() {
                     </span>
                     <Link
                       href={`/studio/messages/${message.id}`}
-                      className="rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
+                      className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
                     >
                       {message.status === "replied" ? "View thread" : "Reply"}
                     </Link>
                   </div>
                 </div>
-                <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-[#57524a] line-clamp-4">
+                <p className="mt-4 line-clamp-4 text-sm leading-relaxed whitespace-pre-wrap text-[#57524a]">
                   {message.message}
                 </p>
               </article>

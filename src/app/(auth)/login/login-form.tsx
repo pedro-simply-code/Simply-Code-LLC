@@ -57,7 +57,9 @@ export function LoginForm() {
           {...form.register("email")}
         />
         {form.formState.errors.email ? (
-          <p className="text-xs text-[#9a3b2e]">{form.formState.errors.email.message}</p>
+          <p className="text-xs text-[#9a3b2e]">
+            {form.formState.errors.email.message}
+          </p>
         ) : null}
       </Field>
 
@@ -70,14 +72,19 @@ export function LoginForm() {
           {...form.register("password")}
         />
         {form.formState.errors.password ? (
-          <p className="text-xs text-[#9a3b2e]">{form.formState.errors.password.message}</p>
+          <p className="text-xs text-[#9a3b2e]">
+            {form.formState.errors.password.message}
+          </p>
         ) : null}
       </Field>
 
       <button
         type="submit"
         disabled={form.formState.isSubmitting}
-        className={cn(appPrimaryButtonStudioSubmit, "w-full disabled:opacity-50")}
+        className={cn(
+          appPrimaryButtonStudioSubmit,
+          "w-full disabled:opacity-50",
+        )}
       >
         {form.formState.isSubmitting ? "Signing in…" : "Sign in with email"}
       </button>
@@ -97,7 +104,10 @@ export function LoginForm() {
         type="button"
         disabled={form.formState.isSubmitting}
         onClick={() => void signIn("google", { callbackUrl })}
-        className={cn(appGhostButtonLg, "w-full justify-center disabled:opacity-50")}
+        className={cn(
+          appGhostButtonLg,
+          "w-full justify-center disabled:opacity-50",
+        )}
       >
         Continue with Google
       </button>

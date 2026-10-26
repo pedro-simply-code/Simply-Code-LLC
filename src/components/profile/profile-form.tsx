@@ -1,6 +1,12 @@
 import type { users } from "~/server/db/schema";
 import { AvatarUpload } from "~/components/profile/avatar-upload";
-import { Field, StudioCard, StudioInput, StudioSelect, StudioTextarea } from "~/components/studio/ui";
+import {
+  Field,
+  StudioCard,
+  StudioInput,
+  StudioSelect,
+  StudioTextarea,
+} from "~/components/studio/ui";
 import { PROFILE_TIMEZONES } from "~/lib/profile";
 import { appPrimaryButtonStudioSubmit } from "~/lib/surface";
 import { cn } from "~/lib/utils";
@@ -28,10 +34,13 @@ export function ProfileForm({
               ? "Shown on the public About page when your profile is listed there."
               : "Your photo in the client portal and on messages from your team."
           }
-          className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 lg:self-start"
+          className="lg:sticky lg:top-24 lg:col-span-4 lg:self-start xl:col-span-3"
         >
           <div className="flex justify-center lg:justify-start">
-            <AvatarUpload key={user.image ?? "no-avatar"} defaultUrl={user.image} />
+            <AvatarUpload
+              key={user.image ?? "no-avatar"}
+              defaultUrl={user.image}
+            />
           </div>
         </StudioCard>
 
@@ -43,10 +52,19 @@ export function ProfileForm({
                 hint="Your display name across studio, portal, and the site."
                 className="md:col-span-2"
               >
-                <StudioInput name="name" defaultValue={user.name ?? ""} required />
+                <StudioInput
+                  name="name"
+                  defaultValue={user.name ?? ""}
+                  required
+                />
               </Field>
               <Field label="Email" className="md:col-span-2">
-                <StudioInput value={user.email ?? ""} readOnly disabled className="opacity-70" />
+                <StudioInput
+                  value={user.email ?? ""}
+                  readOnly
+                  disabled
+                  className="opacity-70"
+                />
               </Field>
             </div>
           </StudioCard>
@@ -68,8 +86,14 @@ export function ProfileForm({
                   placeholder="+1 555 000 0000"
                 />
               </Field>
-              <Field label="Timezone" hint="Used for meeting invites and portal timestamps.">
-                <StudioSelect name="timezone" defaultValue={user.timezone ?? ""}>
+              <Field
+                label="Timezone"
+                hint="Used for meeting invites and portal timestamps."
+              >
+                <StudioSelect
+                  name="timezone"
+                  defaultValue={user.timezone ?? ""}
+                >
                   {PROFILE_TIMEZONES.map((zone) => (
                     <option key={zone.value || "unset"} value={zone.value}>
                       {zone.label}
@@ -109,25 +133,28 @@ export function ProfileForm({
             >
               <div className="flex flex-col gap-6">
                 {canEditAboutVisibility ? (
-                  <label className="flex cursor-pointer items-start gap-3 rounded-md bg-sc-section-alt/80 px-4 py-3 ring-1 ring-[#15130f]/8">
+                  <label className="bg-sc-section-alt/80 flex cursor-pointer items-start gap-3 rounded-md px-4 py-3 ring-1 ring-[#15130f]/8">
                     <input
                       type="checkbox"
                       name="showOnAbout"
                       defaultChecked={user.showOnAbout}
-                      className="mt-0.5 size-4 accent-sc-accent"
+                      className="accent-sc-accent mt-0.5 size-4"
                     />
-                    <span className="text-sm leading-snug text-sc-ink">
-                      <span className="font-semibold">List me on the public About page</span>
+                    <span className="text-sc-ink text-sm leading-snug">
+                      <span className="font-semibold">
+                        List me on the public About page
+                      </span>
                       <span className="mt-1 block text-xs text-[#6f6a60]">
-                        Same setting as Hide / Show on About on your card in Studio → Team. Other
-                        members are listed there by a founder.
+                        Same setting as Hide / Show on About on your card in
+                        Studio → Team. Other members are listed there by a
+                        founder.
                       </span>
                     </span>
                   </label>
                 ) : (
-                  <p className="rounded-md bg-sc-section-alt/80 px-4 py-3 text-xs leading-relaxed text-[#6f6a60] ring-1 ring-[#15130f]/8">
-                    Whether you appear on the public About page is managed by a founder in Studio →
-                    Team.
+                  <p className="bg-sc-section-alt/80 rounded-md px-4 py-3 text-xs leading-relaxed text-[#6f6a60] ring-1 ring-[#15130f]/8">
+                    Whether you appear on the public About page is managed by a
+                    founder in Studio → Team.
                   </p>
                 )}
 
@@ -161,7 +188,8 @@ export function ProfileForm({
                       Professional links
                     </h3>
                     <p className="mt-1 text-xs leading-relaxed text-[#6f6a60]">
-                      Optional links on your About card. Use full URLs (https://…).
+                      Optional links on your About card. Use full URLs
+                      (https://…).
                     </p>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -181,7 +209,10 @@ export function ProfileForm({
                         placeholder="https://github.com/you"
                       />
                     </Field>
-                    <Field label="Portfolio or website" className="md:col-span-2">
+                    <Field
+                      label="Portfolio or website"
+                      className="md:col-span-2"
+                    >
                       <StudioInput
                         name="portfolioUrl"
                         type="url"
@@ -200,12 +231,13 @@ export function ProfileForm({
       <div
         className={cn(
           "sticky bottom-0 z-10 -mx-4 mt-auto flex flex-wrap items-center justify-end gap-3",
-          "border-t border-[#15130f]/10 bg-sc-canvas/95 px-4 py-4 backdrop-blur-md",
+          "bg-sc-canvas/95 border-t border-[#15130f]/10 px-4 py-4 backdrop-blur-md",
           "lg:-mx-8 lg:px-8",
         )}
       >
         <p className="mr-auto hidden text-xs text-[#6f6a60] sm:block">
-          Changes apply after you save. Email is managed by your account administrator.
+          Changes apply after you save. Email is managed by your account
+          administrator.
         </p>
         <button type="submit" className={appPrimaryButtonStudioSubmit}>
           Save profile

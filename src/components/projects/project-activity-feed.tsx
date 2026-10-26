@@ -23,7 +23,7 @@ export function ProjectActivityFeed({
       {items.map((item) => (
         <li key={item.id} className="py-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold tracking-[0.12em] text-sc-accent uppercase">
+            <span className="text-sc-accent text-[10px] font-bold tracking-[0.12em] uppercase">
               {KIND_LABEL[item.kind]}
             </span>
             {projectTitle ? (
@@ -32,7 +32,9 @@ export function ProjectActivityFeed({
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-sm font-semibold text-[#15130f]">{item.title}</p>
+          <p className="mt-1 text-sm font-semibold text-[#15130f]">
+            {item.title}
+          </p>
           {item.body ? (
             <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap text-[#57524a]">
               {item.body}

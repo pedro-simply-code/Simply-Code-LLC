@@ -29,7 +29,12 @@ import {
 import type { getProjectById } from "~/server/studio/queries";
 
 type ProjectDetail = NonNullable<Awaited<ReturnType<typeof getProjectById>>>;
-type Person = { id: string; name: string | null; email: string | null; role: UserRole };
+type Person = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  role: UserRole;
+};
 type Technology = { id: string; name: string; category: string };
 type Client = { id: string; name: string };
 
@@ -53,11 +58,16 @@ export function ProjectWorkspace({
   founder: boolean;
 }) {
   const { project } = detail;
-  const openRequests = detail.requests.filter((request) => request.status === "open").length;
-  const isPublic = project.status === "published" || project.status === "completed";
+  const openRequests = detail.requests.filter(
+    (request) => request.status === "open",
+  ).length;
+  const isPublic =
+    project.status === "published" || project.status === "completed";
   const projectPath = `/studio/projects/${project.id}`;
   const canPublishToClient = founder || isManager;
-  const completedMilestones = detail.milestones.filter((m) => m.status === "completed").length;
+  const completedMilestones = detail.milestones.filter(
+    (m) => m.status === "completed",
+  ).length;
   const milestoneProgress =
     detail.milestones.length > 0
       ? Math.round((completedMilestones / detail.milestones.length) * 100)
@@ -69,7 +79,7 @@ export function ProjectWorkspace({
         {isManager ? (
           <Link
             href={`${projectPath}?tab=edit`}
-            className="inline-flex items-center gap-1.5 rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
+            className="hover:bg-sc-accent inline-flex items-center gap-1.5 rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
           >
             <Pencil className="size-3" />
             Edit project
@@ -113,9 +123,7 @@ export function ProjectWorkspace({
         >
           Requests
           {openRequests > 0 ? (
-            <span className={appNotificationCountBadgeSm}>
-              {openRequests}
-            </span>
+            <span className={appNotificationCountBadgeSm}>{openRequests}</span>
           ) : null}
           <ArrowRight className="size-3" />
         </Link>
@@ -133,8 +141,8 @@ export function ProjectWorkspace({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StudioCard title="Lead">
           <p className="text-sm font-semibold">
-            {detail.members.find((member) => member.projectRole === "lead")?.name ??
-              "Unassigned — founder gets email"}
+            {detail.members.find((member) => member.projectRole === "lead")
+              ?.name ?? "Unassigned — founder gets email"}
           </p>
         </StudioCard>
         <StudioCard title="Public status">
@@ -142,7 +150,10 @@ export function ProjectWorkspace({
           {isManager ? (
             <p className="mt-2 text-[11px] leading-snug text-[#6f6a60]">
               Change in{" "}
-              <Link href={`${projectPath}?tab=edit`} className="font-bold text-sc-accent hover:underline">
+              <Link
+                href={`${projectPath}?tab=edit`}
+                className="text-sc-accent font-bold hover:underline"
+              >
                 Edit → Publishing
               </Link>
               .
@@ -154,18 +165,24 @@ export function ProjectWorkspace({
         </StudioCard>
         <StudioCard title="Technologies">
           <p className="text-sm font-semibold">
-            {detail.technologies.map((technology) => technology.name).join(", ") || "None"}
+            {detail.technologies
+              .map((technology) => technology.name)
+              .join(", ") || "None"}
           </p>
         </StudioCard>
       </div>
 
       <StudioCard title="Summary">
-        <p className="text-sm leading-relaxed text-[#57524a]">{project.summary || "No summary yet."}</p>
+        <p className="text-sm leading-relaxed text-[#57524a]">
+          {project.summary || "No summary yet."}
+        </p>
       </StudioCard>
 
       {milestoneProgress !== null ? (
         <StudioCard title="Milestone progress">
-          <p className="text-2xl font-black tracking-tight">{milestoneProgress}%</p>
+          <p className="text-2xl font-black tracking-tight">
+            {milestoneProgress}%
+          </p>
           <p className="mt-1 text-xs text-[#6f6a60]">
             {completedMilestones} of {detail.milestones.length} completed
           </p>
@@ -205,7 +222,9 @@ export function ProjectWorkspace({
     />
   ) : (
     <StudioCard title="Project details">
-      <p className="text-sm leading-relaxed text-[#57524a]">{project.summary}</p>
+      <p className="text-sm leading-relaxed text-[#57524a]">
+        {project.summary}
+      </p>
       <p className="mt-3 text-xs text-[#6f6a60]">
         Only project leads and founders can edit project settings.
       </p>
@@ -218,10 +237,15 @@ export function ProjectWorkspace({
         title="Visibility"
         description="Draft is hidden on the site. Published and completed are public. Completed unlocks the client review form."
       >
-        <p className="text-sm font-semibold capitalize">Current status: {project.status}</p>
+        <p className="text-sm font-semibold capitalize">
+          Current status: {project.status}
+        </p>
         <p className="mt-2 text-xs leading-relaxed text-[#6f6a60]">
           Update status, featured flag, cover, and permalink in{" "}
-          <Link href={`${projectPath}?tab=edit`} className="font-bold text-sc-accent hover:underline">
+          <Link
+            href={`${projectPath}?tab=edit`}
+            className="text-sc-accent font-bold hover:underline"
+          >
             Edit project → Publishing
           </Link>
           , then save changes.
@@ -238,12 +262,19 @@ export function ProjectWorkspace({
       >
         <ul className="divide-y divide-[#15130f]/10">
           {detail.members.length === 0 ? (
-            <li className="py-3 text-sm text-[#6f6a60]">No team assigned yet.</li>
+            <li className="py-3 text-sm text-[#6f6a60]">
+              No team assigned yet.
+            </li>
           ) : (
             detail.members.map((member) => (
-              <li key={member.userId} className="flex items-center justify-between gap-3 py-3">
+              <li
+                key={member.userId}
+                className="flex items-center justify-between gap-3 py-3"
+              >
                 <div>
-                  <p className="text-sm font-semibold">{member.name ?? member.email}</p>
+                  <p className="text-sm font-semibold">
+                    {member.name ?? member.email}
+                  </p>
                   <p className="text-[11px] text-[#6f6a60]">
                     {member.projectRole} · {roleLabel(member.role)}
                   </p>
@@ -282,7 +313,7 @@ export function ProjectWorkspace({
           </StudioSelect>
           <button
             type="submit"
-            className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+            className="hover:bg-sc-accent rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
           >
             Assign
           </button>
@@ -294,7 +325,9 @@ export function ProjectWorkspace({
       <ul className="divide-y divide-[#15130f]/10">
         {detail.members.map((member) => (
           <li key={member.userId} className="py-3">
-            <p className="text-sm font-semibold">{member.name ?? member.email}</p>
+            <p className="text-sm font-semibold">
+              {member.name ?? member.email}
+            </p>
             <p className="text-[11px] text-[#6f6a60]">
               {member.projectRole} · {roleLabel(member.role)}
             </p>
@@ -305,7 +338,10 @@ export function ProjectWorkspace({
   );
 
   const updatesPanel = (
-    <StudioCard title="Progress updates" description="Client-visible updates appear in the portal.">
+    <StudioCard
+      title="Progress updates"
+      description="Client-visible updates appear in the portal."
+    >
       {detail.updates.length === 0 ? (
         <p className="text-sm text-[#6f6a60]">No updates yet.</p>
       ) : (
@@ -324,7 +360,8 @@ export function ProjectWorkspace({
                 </p>
               ) : null}
               <p className="mt-1 text-[10px] text-[#9a9488]">
-                {update.authorName ?? "Studio"} · {new Date(update.createdAt).toLocaleString()}
+                {update.authorName ?? "Studio"} ·{" "}
+                {new Date(update.createdAt).toLocaleString()}
               </p>
             </li>
           ))}
@@ -332,7 +369,10 @@ export function ProjectWorkspace({
       )}
 
       {isMember || founder ? (
-        <form action={createProjectUpdate} className="mt-4 space-y-3 border-t border-[#15130f]/10 pt-4">
+        <form
+          action={createProjectUpdate}
+          className="mt-4 space-y-3 border-t border-[#15130f]/10 pt-4"
+        >
           <input type="hidden" name="projectId" value={project.id} />
           <Field label="Update title">
             <StudioInput name="title" required />
@@ -348,7 +388,7 @@ export function ProjectWorkspace({
           </Field>
           <button
             type="submit"
-            className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+            className="hover:bg-sc-accent rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
           >
             Post update
           </button>
@@ -378,7 +418,10 @@ export function ProjectWorkspace({
   );
 
   const activityPanel = (
-    <StudioCard title="Activity" description="Updates, requests, deliverables, and milestones.">
+    <StudioCard
+      title="Activity"
+      description="Updates, requests, deliverables, and milestones."
+    >
       <ProjectActivityFeed items={detail.activity} />
     </StudioCard>
   );
@@ -405,8 +448,12 @@ export function ProjectWorkspace({
                         : "text-[#6f6a60]"
                   }`}
                 >
-                  {request.status === "completed" ? <Check className="size-3" /> : null}
-                  {request.status === "rejected" ? <X className="size-3" /> : null}
+                  {request.status === "completed" ? (
+                    <Check className="size-3" />
+                  ) : null}
+                  {request.status === "rejected" ? (
+                    <X className="size-3" />
+                  ) : null}
                   {request.status}
                 </span>
               </div>
@@ -424,13 +471,16 @@ export function ProjectWorkspace({
                   }
                 >
                   <strong>
-                    {request.status === "rejected" ? "Rejected reason: " : "Note: "}
+                    {request.status === "rejected"
+                      ? "Rejected reason: "
+                      : "Note: "}
                   </strong>
                   {request.resolutionNote}
                 </p>
               ) : null}
               <p className="mt-1 text-[10px] text-[#9a9488]">
-                {request.type} · {request.priority} · {new Date(request.createdAt).toLocaleString()}
+                {request.type} · {request.priority} ·{" "}
+                {new Date(request.createdAt).toLocaleString()}
                 {request.resolvedAt
                   ? ` · resolved ${new Date(request.resolvedAt).toLocaleString()}`
                   : ""}
@@ -442,18 +492,23 @@ export function ProjectWorkspace({
                     <input type="hidden" name="projectId" value={project.id} />
                     <input type="hidden" name="requestId" value={request.id} />
                     <input type="hidden" name="status" value="open" />
-                    <button
-                      type="submit"
-                      className={appGhostButton}
-                    >
+                    <button type="submit" className={appGhostButton}>
                       Reopen request
                     </button>
                   </form>
                 ) : request.status === "open" ? (
                   <div className="mt-3 grid gap-3 border-t border-[#15130f]/10 pt-3">
                     <form action={setProjectRequestStatus}>
-                      <input type="hidden" name="projectId" value={project.id} />
-                      <input type="hidden" name="requestId" value={request.id} />
+                      <input
+                        type="hidden"
+                        name="projectId"
+                        value={project.id}
+                      />
+                      <input
+                        type="hidden"
+                        name="requestId"
+                        value={request.id}
+                      />
                       <input type="hidden" name="status" value="completed" />
                       <button
                         type="submit"
@@ -462,9 +517,20 @@ export function ProjectWorkspace({
                         <Check className="size-3" /> Mark completed
                       </button>
                     </form>
-                    <form action={setProjectRequestStatus} className="grid gap-2">
-                      <input type="hidden" name="projectId" value={project.id} />
-                      <input type="hidden" name="requestId" value={request.id} />
+                    <form
+                      action={setProjectRequestStatus}
+                      className="grid gap-2"
+                    >
+                      <input
+                        type="hidden"
+                        name="projectId"
+                        value={project.id}
+                      />
+                      <input
+                        type="hidden"
+                        name="requestId"
+                        value={request.id}
+                      />
                       <input type="hidden" name="status" value="rejected" />
                       <StudioTextarea
                         name="resolutionNote"
@@ -527,5 +593,7 @@ export function ProjectWorkspace({
         },
       ];
 
-  return <StudioTabs items={tabs} defaultTab={isManager ? "edit" : "overview"} />;
+  return (
+    <StudioTabs items={tabs} defaultTab={isManager ? "edit" : "overview"} />
+  );
 }

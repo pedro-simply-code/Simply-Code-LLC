@@ -1,6 +1,9 @@
 import { ProjectDeliverablesForm } from "~/components/projects/project-deliverables-form";
 import { StudioCard } from "~/components/studio/ui";
-import { addProjectDeliverable, removeProjectDeliverable } from "~/server/projects/actions";
+import {
+  addProjectDeliverable,
+  removeProjectDeliverable,
+} from "~/server/projects/actions";
 
 type Deliverable = {
   id: string;
@@ -60,7 +63,9 @@ export function ProjectDeliverablesPanel({
                 <div>
                   <p className="text-sm font-semibold">{item.title}</p>
                   {item.description ? (
-                    <p className="mt-1 text-xs leading-relaxed text-[#57524a]">{item.description}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#57524a]">
+                      {item.description}
+                    </p>
                   ) : null}
                   <p className="mt-2 text-[10px] text-[#9a9488]">
                     {item.fileName} · {formatBytes(item.fileSize)}
@@ -72,7 +77,7 @@ export function ProjectDeliverablesPanel({
                   href={item.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
+                  className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
                 >
                   Download
                 </a>

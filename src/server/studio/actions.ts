@@ -4,7 +4,6 @@ import { randomBytes } from "node:crypto";
 import { and, eq, inArray, isNull, ne } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { env } from "~/env";
 import {
   canPublishClientVisibleUpdate,
   requireFounder,
@@ -15,9 +14,14 @@ import {
 } from "~/server/authz";
 import { logAuditEvent } from "~/server/audit/log";
 import { resolveProjectImageFromForm } from "~/server/uploadthing-storage";
+import { inviteAcceptUrl } from "~/lib/public-site-url";
 import { isFounder, isTeam, normalizeRole } from "~/lib/roles";
 import { slugify } from "~/lib/slug";
-import { acceptInviteSchema, clientInviteSchema, inviteSchema } from "~/schemas/auth";
+import {
+  acceptInviteSchema,
+  clientInviteSchema,
+  inviteSchema,
+} from "~/schemas/auth";
 import { hashPassword } from "~/server/auth/password";
 import { db } from "~/server/db";
 import {
@@ -63,10 +67,7 @@ function checked(formData: FormData, key: string): boolean {
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function inviteLink(token: string): string {
-  const base = env.AUTH_URL ?? env.NEXT_PUBLIC_SITE_URL;
-  const url = new URL("/accept-invite", base);
-  url.searchParams.set("token", token);
-  return url.toString();
+  return inviteAcceptUrl(token);
 }
 
 function escapeHtml(value: string): string {
@@ -118,7 +119,11 @@ async function sendInviteEmail(input: {
   await sendEmail({
     to: input.email,
     subject: "You're invited to Simply Code",
-    html: inviteEmailHtml({ link, role: input.role, clientName: input.clientName }),
+    html: inviteEmailHtml({
+      link,
+      role: input.role,
+      clientName: input.clientName,
+    }),
   });
 }
 
@@ -137,7 +142,10 @@ async function projectTitle(projectId: string): Promise<string> {
   return row?.title ?? "Project";
 }
 
-async function uniqueProjectSlug(base: string, excludeId?: string): Promise<string> {
+async function uniqueProjectSlug(
+  base: string,
+  excludeId?: string,
+): Promise<string> {
   const root = slugify(base) || "project";
   let candidate = root;
   let attempt = 1;
@@ -169,7 +177,10 @@ async function syncUserLeadRole(userId: string) {
     .select({ projectId: projectMembers.projectId })
     .from(projectMembers)
     .where(
-      and(eq(projectMembers.userId, userId), eq(projectMembers.projectRole, "lead")),
+      and(
+        eq(projectMembers.userId, userId),
+        eq(projectMembers.projectRole, "lead"),
+      ),
     )
     .limit(1);
 
@@ -177,7 +188,10 @@ async function syncUserLeadRole(userId: string) {
     await db.update(users).set({ role: "lead" }).where(eq(users.id, userId));
   }
   if (!lead && user.role === "lead") {
-    await db.update(users).set({ role: "developer" }).where(eq(users.id, userId));
+    await db
+      .update(users)
+      .set({ role: "developer" })
+      .where(eq(users.id, userId));
   }
 }
 
@@ -214,7 +228,11 @@ export async function createProject(formData: FormData) {
   const status = statusValue(text(formData, "status"));
   const requestedLead = text(formData, "leadId");
   const leadId = isFounder(session.user.role) ? requestedLead : session.user.id;
-  const resolvedImage = await resolveProjectImageFromForm(formData, null, text(formData, "image"));
+  const resolvedImage = await resolveProjectImageFromForm(
+    formData,
+    null,
+    text(formData, "image"),
+  );
   if (!resolvedImage.ok) redirect("/studio/projects/new?error=cover-upload");
   const image = resolvedImage.image;
 
@@ -224,7 +242,9 @@ export async function createProject(formData: FormData) {
       slug,
       title,
       clientName: text(formData, "clientName"),
-      clientId: isUuid(text(formData, "clientId")) ? text(formData, "clientId") : null,
+      clientId: isUuid(text(formData, "clientId"))
+        ? text(formData, "clientId")
+        : null,
       year: "",
       summary: text(formData, "summary"),
       image,
@@ -237,19 +257,31 @@ export async function createProject(formData: FormData) {
 
   if (!created) redirect("/studio/projects/new?error=create");
 
-  const technologyIds = formData.getAll("technologyIds").map(String).filter(isUuid);
+  const technologyIds = formData
+    .getAll("technologyIds")
+    .map(String)
+    .filter(isUuid);
   if (technologyIds.length > 0) {
     await db
       .insert(projectTechnologies)
-      .values(technologyIds.map((technologyId) => ({ projectId: created.id, technologyId })))
+      .values(
+        technologyIds.map((technologyId) => ({
+          projectId: created.id,
+          technologyId,
+        })),
+      )
       .onConflictDoNothing();
   }
 
-  const memberIds = [...new Set(formData.getAll("memberIds").map(String).filter(isUuid))];
-  const assignments: { userId: string; projectRole: "lead" | "developer" }[] = [];
+  const memberIds = [
+    ...new Set(formData.getAll("memberIds").map(String).filter(isUuid)),
+  ];
+  const assignments: { userId: string; projectRole: "lead" | "developer" }[] =
+    [];
   if (isUuid(leadId)) assignments.push({ userId: leadId, projectRole: "lead" });
   for (const userId of memberIds) {
-    if (userId !== leadId) assignments.push({ userId, projectRole: "developer" });
+    if (userId !== leadId)
+      assignments.push({ userId, projectRole: "developer" });
   }
 
   if (assignments.length > 0) {
@@ -273,7 +305,8 @@ export async function createProject(formData: FormData) {
         type: "project",
         title: `Assigned to ${created.title}`,
         body:
-          assignments.find((assignment) => assignment.userId === leadId)?.projectRole === "lead"
+          assignments.find((assignment) => assignment.userId === leadId)
+            ?.projectRole === "lead"
             ? "You are the project lead."
             : "You were added as a developer.",
         href: `/studio/projects/${created.id}`,
@@ -297,11 +330,18 @@ export async function createProject(formData: FormData) {
 export async function updateProject(formData: FormData) {
   const projectId = text(formData, "projectId");
   await requireProjectManager(projectId);
-  const [existing] = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
+  const [existing] = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
   if (!existing) redirect("/studio/projects");
 
   const title = text(formData, "title") || existing.title;
-  const slug = await uniqueProjectSlug(text(formData, "slug") || existing.slug, projectId);
+  const slug = await uniqueProjectSlug(
+    text(formData, "slug") || existing.slug,
+    projectId,
+  );
   const resolvedImage = await resolveProjectImageFromForm(
     formData,
     existing.image,
@@ -318,7 +358,9 @@ export async function updateProject(formData: FormData) {
       title,
       slug,
       clientName: text(formData, "clientName"),
-      clientId: isUuid(text(formData, "clientId")) ? text(formData, "clientId") : null,
+      clientId: isUuid(text(formData, "clientId"))
+        ? text(formData, "clientId")
+        : null,
       summary: text(formData, "summary"),
       image,
       liveUrl: text(formData, "liveUrl") || null,
@@ -327,18 +369,33 @@ export async function updateProject(formData: FormData) {
       updatedAt: new Date(),
     })
     .where(eq(projects.id, projectId))
-    .returning({ id: projects.id, slug: projects.slug, status: projects.status });
+    .returning({
+      id: projects.id,
+      slug: projects.slug,
+      status: projects.status,
+    });
 
-  const technologyIds = formData.getAll("technologyIds").map(String).filter(isUuid);
-  await db.delete(projectTechnologies).where(eq(projectTechnologies.projectId, projectId));
+  const technologyIds = formData
+    .getAll("technologyIds")
+    .map(String)
+    .filter(isUuid);
+  await db
+    .delete(projectTechnologies)
+    .where(eq(projectTechnologies.projectId, projectId));
   if (technologyIds.length > 0) {
     await db
       .insert(projectTechnologies)
-      .values(technologyIds.map((technologyId) => ({ projectId, technologyId })))
+      .values(
+        technologyIds.map((technologyId) => ({ projectId, technologyId })),
+      )
       .onConflictDoNothing();
   }
 
-  if (updated && existing.status !== "published" && updated.status === "published") {
+  if (
+    updated &&
+    existing.status !== "published" &&
+    updated.status === "published"
+  ) {
     await sendProjectEmail(
       projectId,
       `Project published: ${title}`,
@@ -346,7 +403,11 @@ export async function updateProject(formData: FormData) {
     );
   }
 
-  if (updated && existing.status !== "completed" && updated.status === "completed") {
+  if (
+    updated &&
+    existing.status !== "completed" &&
+    updated.status === "completed"
+  ) {
     await notifyProjectCompleted(projectId, title);
     revalidatePath("/portal");
     revalidatePath(`/portal/projects/${projectId}`);
@@ -365,11 +426,19 @@ export async function assignProjectMember(formData: FormData) {
   // Leads can add developers to their project, but only founders can change
   // who leads it.
   const projectRole: "lead" | "developer" =
-    requestedRole === "lead" && isFounder(session.user.role) ? "lead" : "developer";
-  if (!isUuid(projectId) || !isUuid(userId)) redirect(`/studio/projects/${projectId}`);
+    requestedRole === "lead" && isFounder(session.user.role)
+      ? "lead"
+      : "developer";
+  if (!isUuid(projectId) || !isUuid(userId))
+    redirect(`/studio/projects/${projectId}`);
 
   const [target] = await db
-    .select({ id: users.id, name: users.name, email: users.email, role: users.role })
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+    })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
@@ -381,13 +450,23 @@ export async function assignProjectMember(formData: FormData) {
   const previousLeads = await db
     .select({ userId: projectMembers.userId })
     .from(projectMembers)
-    .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.projectRole, "lead")));
+    .where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.projectRole, "lead"),
+      ),
+    );
 
   if (projectRole === "lead") {
     await db
       .update(projectMembers)
       .set({ projectRole: "developer" })
-      .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.projectRole, "lead")));
+      .where(
+        and(
+          eq(projectMembers.projectId, projectId),
+          eq(projectMembers.projectRole, "lead"),
+        ),
+      );
   }
 
   await db
@@ -452,11 +531,21 @@ export async function removeProjectMember(formData: FormData) {
   const [removed] = await db
     .select({ projectRole: projectMembers.projectRole })
     .from(projectMembers)
-    .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, userId)))
+    .where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.userId, userId),
+      ),
+    )
     .limit(1);
   await db
     .delete(projectMembers)
-    .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, userId)));
+    .where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.userId, userId),
+      ),
+    );
   if (removed?.projectRole === "lead") await syncUserLeadRole(userId);
   revalidateProject(projectId);
   redirect(`/studio/projects/${projectId}`);
@@ -470,12 +559,22 @@ export async function setProjectLead(formData: FormData) {
   const previousLeads = await db
     .select({ userId: projectMembers.userId })
     .from(projectMembers)
-    .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.projectRole, "lead")));
+    .where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.projectRole, "lead"),
+      ),
+    );
 
   await db
     .update(projectMembers)
     .set({ projectRole: "developer" })
-    .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.projectRole, "lead")));
+    .where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.projectRole, "lead"),
+      ),
+    );
 
   await db
     .insert(projectMembers)
@@ -543,20 +642,24 @@ export async function createProjectUpdate(formData: FormData) {
     )
     .limit(1);
 
-  if (!membership && !isFounder(session.user.role)) redirect(`/studio/projects/${projectId}`);
+  if (!membership && !isFounder(session.user.role))
+    redirect(`/studio/projects/${projectId}`);
 
   const title = text(formData, "title");
   if (!title) redirect(`/studio/projects/${projectId}?error=update`);
 
   const visibility =
-    text(formData, "visibility") === "internal" ? "internal" : ("client" as const);
+    text(formData, "visibility") === "internal"
+      ? "internal"
+      : ("client" as const);
   if (
     visibility === "client" &&
     !canPublishClientVisibleUpdate(
       session.user.role,
       membership
         ? {
-            projectRole: membership.projectRole === "lead" ? "lead" : "developer",
+            projectRole:
+              membership.projectRole === "lead" ? "lead" : "developer",
           }
         : null,
     )
@@ -572,7 +675,10 @@ export async function createProjectUpdate(formData: FormData) {
     visibility,
   });
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, projectId));
+  await db
+    .update(projects)
+    .set({ updatedAt: new Date() })
+    .where(eq(projects.id, projectId));
 
   if (visibility !== "internal") {
     const name = await projectTitle(projectId);
@@ -723,16 +829,23 @@ export async function updateTeamMember(formData: FormData) {
   const role = text(formData, "role");
   const returnTo = text(formData, "returnTo") || "/studio/team";
   const allowed: UserRole[] = ["founder", "lead", "developer", "client"];
-  if (!isUuid(userId) || !allowed.includes(role as UserRole)) redirect(returnTo);
-  if (userId === session.user.id) redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=self`);
+  if (!isUuid(userId) || !allowed.includes(role as UserRole))
+    redirect(returnTo);
+  if (userId === session.user.id)
+    redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=self`);
 
   if (role !== "founder") {
     const founders = await db
       .select({ id: users.id })
       .from(users)
       .where(inArray(users.role, ["founder", "admin"]));
-    if (founders.length <= 1 && founders.some((founder) => founder.id === userId)) {
-      redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=last-founder`);
+    if (
+      founders.length <= 1 &&
+      founders.some((founder) => founder.id === userId)
+    ) {
+      redirect(
+        `${returnTo}${returnTo.includes("?") ? "&" : "?"}error=last-founder`,
+      );
     }
   }
 
@@ -790,7 +903,9 @@ export async function cancelPendingInvite(formData: FormData) {
   const inviteId = text(formData, "inviteId");
   const returnTo = text(formData, "returnTo") || "/studio/team";
   if (!isUuid(inviteId)) {
-    redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=validation`);
+    redirect(
+      `${returnTo}${returnTo.includes("?") ? "&" : "?"}error=validation`,
+    );
   }
 
   const [row] = await db
@@ -833,7 +948,9 @@ export async function createReview(formData: FormData) {
   const quote = text(formData, "quote");
   if (!quote) redirect("/studio/reviews?error=quote");
 
-  const source = ["upwork", "client", "manual", "google"].includes(text(formData, "source"))
+  const source = ["upwork", "client", "manual", "google"].includes(
+    text(formData, "source"),
+  )
     ? text(formData, "source")
     : "manual";
 
@@ -843,7 +960,9 @@ export async function createReview(formData: FormData) {
     authorRole: text(formData, "authorRole") || null,
     company: text(formData, "company") || null,
     projectTitle: text(formData, "projectTitle") || null,
-    projectId: isUuid(text(formData, "projectId")) ? text(formData, "projectId") : null,
+    projectId: isUuid(text(formData, "projectId"))
+      ? text(formData, "projectId")
+      : null,
     rating: Math.min(5, Math.max(1, Number(text(formData, "rating")) || 5)),
     source,
     sourceUrl: text(formData, "sourceUrl") || null,
@@ -861,7 +980,10 @@ export async function setReviewStatus(formData: FormData) {
   await requireFounder();
   const reviewId = text(formData, "reviewId");
   const status = text(formData, "status");
-  if (!isUuid(reviewId) || !["pending", "approved", "hidden"].includes(status)) {
+  if (
+    !isUuid(reviewId) ||
+    !["pending", "approved", "hidden"].includes(status)
+  ) {
     redirect("/studio/reviews");
   }
   await db.update(reviews).set({ status }).where(eq(reviews.id, reviewId));
@@ -899,7 +1021,9 @@ export async function createClient(formData: FormData) {
     .returning({ id: clients.id });
 
   revalidatePath("/studio/clients");
-  redirect(created ? `/studio/clients/${created.id}?created=1` : "/studio/clients");
+  redirect(
+    created ? `/studio/clients/${created.id}?created=1` : "/studio/clients",
+  );
 }
 
 export async function updateClient(formData: FormData) {
@@ -926,8 +1050,11 @@ export async function addClientMember(formData: FormData) {
   const session = await requireFounder();
   const clientId = text(formData, "clientId");
   const returnTo = text(formData, "returnTo") || `/studio/clients/${clientId}`;
-  const parsed = clientInviteSchema.safeParse({ email: text(formData, "email") });
-  if (!isUuid(clientId) || !parsed.success) redirect(`${returnTo}?error=member`);
+  const parsed = clientInviteSchema.safeParse({
+    email: text(formData, "email"),
+  });
+  if (!isUuid(clientId) || !parsed.success)
+    redirect(`${returnTo}?error=member`);
 
   const [client] = await db
     .select({ name: clients.name })
@@ -975,9 +1102,7 @@ export async function addClientMember(formData: FormData) {
 
     revalidatePath("/studio/clients");
     revalidatePath(`/studio/clients/${clientId}`);
-    redirect(
-      emailFailed ? `${returnTo}?error=email` : `${returnTo}?invited=1`,
-    );
+    redirect(emailFailed ? `${returnTo}?error=email` : `${returnTo}?invited=1`);
   }
 
   await db
@@ -1054,7 +1179,8 @@ export async function acceptInvite(formData: FormData) {
   }
 
   if (invite.role === "client") {
-    const { backfillClientInboxForPortalUser } = await import("~/server/messages/inbox");
+    const { backfillClientInboxForPortalUser } =
+      await import("~/server/messages/inbox");
     await backfillClientInboxForPortalUser(account.id, email);
   }
 
@@ -1082,7 +1208,11 @@ export async function markAllNotificationsRead() {
   await markAllNotificationsReadForUser(session.user.id);
   revalidatePath("/studio/notifications");
   revalidatePath("/portal/notifications");
-  redirect(isTeam(session.user.role) ? "/studio/notifications" : "/portal/notifications");
+  redirect(
+    isTeam(session.user.role)
+      ? "/studio/notifications"
+      : "/portal/notifications",
+  );
 }
 
 export async function createPortalRequest(formData: FormData) {
@@ -1103,7 +1233,9 @@ export async function createPortalRequest(formData: FormData) {
     title,
     description: text(formData, "description"),
     type: text(formData, "type") === "change" ? "change" : "request",
-    priority: ["low", "normal", "high", "urgent"].includes(text(formData, "priority"))
+    priority: ["low", "normal", "high", "urgent"].includes(
+      text(formData, "priority"),
+    )
       ? text(formData, "priority")
       : "normal",
   });
@@ -1138,7 +1270,10 @@ export async function setProjectRequestStatus(formData: FormData) {
   const requestId = text(formData, "requestId");
   const status = text(formData, "status");
   const resolutionNote = text(formData, "resolutionNote");
-  if (!isUuid(requestId) || !["open", "completed", "rejected"].includes(status)) {
+  if (
+    !isUuid(requestId) ||
+    !["open", "completed", "rejected"].includes(status)
+  ) {
     redirect(`/studio/projects/${projectId}`);
   }
   if (status === "rejected" && !resolutionNote) {
@@ -1152,7 +1287,12 @@ export async function setProjectRequestStatus(formData: FormData) {
       status: projectRequests.status,
     })
     .from(projectRequests)
-    .where(and(eq(projectRequests.id, requestId), eq(projectRequests.projectId, projectId)))
+    .where(
+      and(
+        eq(projectRequests.id, requestId),
+        eq(projectRequests.projectId, projectId),
+      ),
+    )
     .limit(1);
   if (!request) redirect(`/studio/projects/${projectId}`);
 
@@ -1169,7 +1309,12 @@ export async function setProjectRequestStatus(formData: FormData) {
       resolvedAt: resolved ? new Date() : null,
       updatedAt: new Date(),
     })
-    .where(and(eq(projectRequests.id, requestId), eq(projectRequests.projectId, projectId)));
+    .where(
+      and(
+        eq(projectRequests.id, requestId),
+        eq(projectRequests.projectId, projectId),
+      ),
+    );
 
   if (request.status !== status && resolved) {
     const name = await projectTitle(projectId);
@@ -1181,7 +1326,10 @@ export async function setProjectRequestStatus(formData: FormData) {
           status === "completed"
             ? `Request completed: ${request.title}`
             : `Request rejected: ${request.title}`,
-        body: status === "completed" ? "Your request has been completed." : resolutionNote,
+        body:
+          status === "completed"
+            ? "Your request has been completed."
+            : resolutionNote,
         href: `/portal/projects/${projectId}`,
         projectTitle: name,
       }),
@@ -1208,7 +1356,10 @@ export async function createClientReview(formData: FormData) {
   }
   if (detail.review) redirect(`/portal/projects/${projectId}`);
 
-  const rating = Math.min(5, Math.max(1, Number(text(formData, "rating")) || 5));
+  const rating = Math.min(
+    5,
+    Math.max(1, Number(text(formData, "rating")) || 5),
+  );
 
   await db.insert(reviews).values({
     quote,

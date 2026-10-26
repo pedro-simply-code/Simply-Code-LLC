@@ -10,7 +10,7 @@ export function DashboardNote() {
     <div className="rounded-lg border p-4">
       <p className="text-sm font-medium">Jotai example</p>
       <input
-        className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm"
+        className="bg-background mt-2 w-full rounded-md border px-3 py-2 text-sm"
         value={note}
         onChange={(e) => setNote(e.target.value)}
       />

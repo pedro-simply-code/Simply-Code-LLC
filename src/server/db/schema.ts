@@ -16,7 +16,9 @@ import {
 import { env } from "~/env";
 
 /** All app tables are prefixed via `DB_TABLE_PREFIX` (multi-app Neon clusters). */
-export const createTable = pgTableCreator((name) => `${env.DB_TABLE_PREFIX}_${name}`);
+export const createTable = pgTableCreator(
+  (name) => `${env.DB_TABLE_PREFIX}_${name}`,
+);
 
 /**
  * Team roles inherit downwards:
@@ -58,7 +60,10 @@ export const users = createTable("users", {
   githubUrl: text("github_url"),
   portfolioUrl: text("portfolio_url"),
   /** Shown as skill chips on the public About team section. */
-  profileSkills: jsonb("profile_skills").$type<string[]>().notNull().default([]),
+  profileSkills: jsonb("profile_skills")
+    .$type<string[]>()
+    .notNull()
+    .default([]),
   /** When true, team members appear on /about#team (founder, lead, developer only). */
   showOnAbout: boolean("show_on_about").notNull().default(false),
   /** Base32 TOTP secret for founder 2FA (studio access). */
@@ -78,7 +83,9 @@ export const accounts = createTable(
       .references(() => users.id, { onDelete: "cascade" }),
     type: varchar("type", { length: 255 }).notNull(),
     provider: varchar("provider", { length: 255 }).notNull(),
-    providerAccountId: varchar("provider_account_id", { length: 255 }).notNull(),
+    providerAccountId: varchar("provider_account_id", {
+      length: 255,
+    }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
     expires_at: integer("expires_at"),
@@ -88,10 +95,9 @@ export const accounts = createTable(
     session_state: varchar("session_state", { length: 255 }),
   },
   (table) => ({
-    providerAccountUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_accounts_provider_account_unique`).on(
-      table.provider,
-      table.providerAccountId,
-    ),
+    providerAccountUnique: uniqueIndex(
+      `${env.DB_TABLE_PREFIX}_accounts_provider_account_unique`,
+    ).on(table.provider, table.providerAccountId),
   }),
 );
 
@@ -128,7 +134,9 @@ export const technologies = createTable(
       .notNull(),
   },
   (table) => ({
-    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_technologies_slug_unique`).on(table.slug),
+    slugUnique: uniqueIndex(
+      `${env.DB_TABLE_PREFIX}_technologies_slug_unique`,
+    ).on(table.slug),
   }),
 );
 
@@ -161,7 +169,9 @@ export const clients = createTable(
       .notNull(),
   },
   (table) => ({
-    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_clients_slug_unique`).on(table.slug),
+    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_clients_slug_unique`).on(
+      table.slug,
+    ),
   }),
 );
 
@@ -198,8 +208,12 @@ export const invites = createTable(
     name: text("name"),
     role: userRoleEnum("role").notNull().default("developer"),
     title: text("title"),
-    clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }),
-    invitedById: uuid("invited_by_id").references(() => users.id, { onDelete: "set null" }),
+    clientId: uuid("client_id").references(() => clients.id, {
+      onDelete: "cascade",
+    }),
+    invitedById: uuid("invited_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -207,7 +221,9 @@ export const invites = createTable(
       .notNull(),
   },
   (table) => ({
-    tokenUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_invites_token_unique`).on(table.token),
+    tokenUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_invites_token_unique`).on(
+      table.token,
+    ),
     emailIdx: index(`${env.DB_TABLE_PREFIX}_invites_email_idx`).on(table.email),
   }),
 );
@@ -220,7 +236,9 @@ export const projects = createTable(
     title: text("title").notNull(),
     category: text("category").notNull().default("Next.js"),
     clientName: text("client_name").notNull().default(""),
-    clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
+    clientId: uuid("client_id").references(() => clients.id, {
+      onDelete: "set null",
+    }),
     year: text("year").notNull().default(""),
     summary: text("summary").notNull().default(""),
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
@@ -229,7 +247,9 @@ export const projects = createTable(
     liveUrl: text("live_url"),
     status: text("status").notNull().default("draft"),
     featured: boolean("featured").notNull().default(false),
-    createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+    createdById: uuid("created_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -238,8 +258,12 @@ export const projects = createTable(
       .notNull(),
   },
   (table) => ({
-    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_projects_slug_unique`).on(table.slug),
-    statusIdx: index(`${env.DB_TABLE_PREFIX}_projects_status_idx`).on(table.status),
+    slugUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_projects_slug_unique`).on(
+      table.slug,
+    ),
+    statusIdx: index(`${env.DB_TABLE_PREFIX}_projects_status_idx`).on(
+      table.status,
+    ),
   }),
 );
 
@@ -286,7 +310,9 @@ export const projectUpdates = createTable("project_updates", {
   projectId: uuid("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+  authorId: uuid("author_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   body: text("body").notNull().default(""),
   /** `client` is visible in the portal; `internal` is studio-only. */
@@ -315,10 +341,9 @@ export const projectMilestones = createTable(
       .notNull(),
   },
   (table) => ({
-    projectIdx: index(`${env.DB_TABLE_PREFIX}_project_milestones_project_idx`).on(
-      table.projectId,
-      table.sortOrder,
-    ),
+    projectIdx: index(
+      `${env.DB_TABLE_PREFIX}_project_milestones_project_idx`,
+    ).on(table.projectId, table.sortOrder),
   }),
 );
 
@@ -337,16 +362,17 @@ export const projectDeliverables = createTable(
     contentType: text("content_type").notNull(),
     /** client = portal; internal = studio only */
     visibility: text("visibility").notNull().default("client"),
-    uploadedById: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
+    uploadedById: uuid("uploaded_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
   },
   (table) => ({
-    projectIdx: index(`${env.DB_TABLE_PREFIX}_project_deliverables_project_idx`).on(
-      table.projectId,
-      table.createdAt,
-    ),
+    projectIdx: index(
+      `${env.DB_TABLE_PREFIX}_project_deliverables_project_idx`,
+    ).on(table.projectId, table.createdAt),
   }),
 );
 
@@ -355,8 +381,12 @@ export const projectRequests = createTable("project_requests", {
   projectId: uuid("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
-  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  clientId: uuid("client_id").references(() => clients.id, {
+    onDelete: "set null",
+  }),
+  createdById: uuid("created_by_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
   type: text("type").notNull().default("request"),
@@ -381,7 +411,9 @@ export const reviews = createTable("reviews", {
   authorRole: text("author_role"),
   company: text("company"),
   projectTitle: text("project_title"),
-  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  projectId: uuid("project_id").references(() => projects.id, {
+    onDelete: "set null",
+  }),
   rating: integer("rating").notNull().default(5),
   /** `upwork` | `client` | `manual` | `google` */
   source: text("source").notNull().default("manual"),
@@ -389,8 +421,12 @@ export const reviews = createTable("reviews", {
   period: text("period"),
   /** `pending` | `approved` | `hidden` */
   status: text("status").notNull().default("pending"),
-  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
-  clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
+  createdById: uuid("created_by_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  clientId: uuid("client_id").references(() => clients.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -422,11 +458,12 @@ export const notifications = createTable(
       table.userId,
       table.readAt,
     ),
-    userCreatedIdx: index(`${env.DB_TABLE_PREFIX}_notifications_user_created_idx`).on(
-      table.userId,
-      table.createdAt,
-    ),
-    userDedupeIdx: uniqueIndex(`${env.DB_TABLE_PREFIX}_notifications_user_dedupe_idx`)
+    userCreatedIdx: index(
+      `${env.DB_TABLE_PREFIX}_notifications_user_created_idx`,
+    ).on(table.userId, table.createdAt),
+    userDedupeIdx: uniqueIndex(
+      `${env.DB_TABLE_PREFIX}_notifications_user_dedupe_idx`,
+    )
       .on(table.userId, table.dedupeKey)
       .where(sql`${table.dedupeKey} is not null`),
   }),
@@ -456,10 +493,15 @@ export const clientInboxMessages = createTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     /** Null when the reply was email-only (studio history still kept on the enquiry). */
-    recipientUserId: uuid("recipient_user_id").references(() => users.id, { onDelete: "cascade" }),
-    contactMessageId: uuid("contact_message_id").references(() => contactMessages.id, {
-      onDelete: "set null",
+    recipientUserId: uuid("recipient_user_id").references(() => users.id, {
+      onDelete: "cascade",
     }),
+    contactMessageId: uuid("contact_message_id").references(
+      () => contactMessages.id,
+      {
+        onDelete: "set null",
+      },
+    ),
     subject: text("subject").notNull(),
     body: text("body").notNull(),
     attachments: jsonb("attachments")
@@ -468,7 +510,9 @@ export const clientInboxMessages = createTable(
       .default([]),
     /** portal | email | both */
     channel: text("channel").notNull(),
-    sentById: uuid("sent_by_id").references(() => users.id, { onDelete: "set null" }),
+    sentById: uuid("sent_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     readAt: timestamp("read_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
@@ -487,18 +531,25 @@ export const auditEvents = createTable(
   "audit_events",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    actorUserId: uuid("actor_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     action: varchar("action", { length: 120 }).notNull(),
     entityType: varchar("entity_type", { length: 80 }),
     entityId: uuid("entity_id"),
-    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    metadata: jsonb("metadata")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
     ipAddress: varchar("ip_address", { length: 128 }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
   },
   (table) => ({
-    createdIdx: index(`${env.DB_TABLE_PREFIX}_audit_events_created_idx`).on(table.createdAt),
+    createdIdx: index(`${env.DB_TABLE_PREFIX}_audit_events_created_idx`).on(
+      table.createdAt,
+    ),
     actorIdx: index(`${env.DB_TABLE_PREFIX}_audit_events_actor_idx`).on(
       table.actorUserId,
       table.createdAt,
@@ -513,11 +564,10 @@ export const rateLimits = createTable("rate_limits", {
   resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
 });
 
-export const uploadClaimKindEnum = pgEnum(`${env.DB_TABLE_PREFIX}_upload_claim_kind`, [
-  "avatar",
-  "message_attachment",
-  "project_deliverable",
-]);
+export const uploadClaimKindEnum = pgEnum(
+  `${env.DB_TABLE_PREFIX}_upload_claim_kind`,
+  ["avatar", "message_attachment", "project_deliverable"],
+);
 
 /** UploadThing URLs registered on upload; required before attach or discard. */
 export const userUploadClaims = createTable(
@@ -534,11 +584,12 @@ export const userUploadClaims = createTable(
       .notNull(),
   },
   (table) => ({
-    urlUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_user_upload_claims_url_unique`).on(table.url),
-    userCreatedIdx: index(`${env.DB_TABLE_PREFIX}_user_upload_claims_user_created_idx`).on(
-      table.userId,
-      table.createdAt,
-    ),
+    urlUnique: uniqueIndex(
+      `${env.DB_TABLE_PREFIX}_user_upload_claims_url_unique`,
+    ).on(table.url),
+    userCreatedIdx: index(
+      `${env.DB_TABLE_PREFIX}_user_upload_claims_user_created_idx`,
+    ).on(table.userId, table.createdAt),
   }),
 );
 
@@ -549,7 +600,9 @@ export const siteSettings = createTable("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedById: uuid("updated_by_id").references(() => users.id, { onDelete: "set null" }),
+  updatedById: uuid("updated_by_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
 });
 
 export type UserRole = (typeof userRoleEnum.enumValues)[number];

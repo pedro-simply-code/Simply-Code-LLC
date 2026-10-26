@@ -23,4 +23,8 @@ export {
   notifyUsers,
   sendProjectEmail,
 } from "~/server/notifications/delivery";
-export { projectPortalHref, projectStudioHref, withProjectEntity } from "~/server/notifications/templates";
+export {
+  projectPortalHref,
+  projectStudioHref,
+  withProjectEntity,
+} from "~/server/notifications/templates";

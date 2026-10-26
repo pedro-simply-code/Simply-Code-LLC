@@ -20,7 +20,9 @@ function getUtapi(): UTApi | null {
 const MAX_COVER_BYTES = 8 * 1024 * 1024;
 const MAX_AVATAR_BYTES = 4 * 1024 * 1024;
 
-export async function uploadProjectCoverFile(file: File): Promise<string | null> {
+export async function uploadProjectCoverFile(
+  file: File,
+): Promise<string | null> {
   return uploadImageFile(file, MAX_COVER_BYTES, "project-cover");
 }
 
@@ -28,18 +30,26 @@ export async function uploadUserAvatarFile(file: File): Promise<string | null> {
   return uploadImageFile(file, MAX_AVATAR_BYTES, "user-avatar");
 }
 
-async function deleteUploadThingFile(url: string | null | undefined, logTag: string): Promise<void> {
+async function deleteUploadThingFile(
+  url: string | null | undefined,
+  logTag: string,
+): Promise<void> {
   if (!url || !isUploadThingImageUrl(url)) return;
 
   const api = getUtapi();
   if (!api) {
-    console.error(`[${logTag}] UPLOADTHING_TOKEN is not configured; cannot delete old file`);
+    console.error(
+      `[${logTag}] UPLOADTHING_TOKEN is not configured; cannot delete old file`,
+    );
     return;
   }
 
   const key = uploadThingFileKeyFromUrl(url);
   if (!key) {
-    console.error(`[${logTag}] Could not parse UploadThing file key from URL`, url);
+    console.error(
+      `[${logTag}] Could not parse UploadThing file key from URL`,
+      url,
+    );
     return;
   }
 
@@ -62,7 +72,11 @@ async function replaceStoredUpload(
   await deleteUploadThingFile(previous, logTag);
 }
 
-async function uploadImageFile(file: File, maxBytes: number, logTag: string): Promise<string | null> {
+async function uploadImageFile(
+  file: File,
+  maxBytes: number,
+  logTag: string,
+): Promise<string | null> {
   const api = getUtapi();
   if (!api) {
     console.error(`[${logTag}] UPLOADTHING_TOKEN is not configured`);
@@ -92,8 +106,7 @@ async function uploadImageFile(file: File, maxBytes: number, logTag: string): Pr
 }
 
 export type ResolvedProjectImage =
-  | { ok: true; image: string | null }
-  | { ok: false; reason: "upload-failed" };
+  { ok: true; image: string | null } | { ok: false; reason: "upload-failed" };
 
 export async function resolveProjectImageFromForm(
   formData: FormData,
@@ -114,8 +127,7 @@ export async function resolveProjectImageFromForm(
 }
 
 export type ResolvedUserAvatar =
-  | { ok: true; image: string | null }
-  | { ok: false; reason: "upload-failed" };
+  { ok: true; image: string | null } | { ok: false; reason: "upload-failed" };
 
 export async function resolveUserAvatarFromForm(
   _formData: FormData,

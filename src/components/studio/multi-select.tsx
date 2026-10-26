@@ -76,7 +76,7 @@ export function MultiSelect({
             aria-controls={listId}
             className={cn(
               appInput,
-              "flex items-center justify-between gap-3 py-2 text-left hover:ring-sc-accent/35",
+              "hover:ring-sc-accent/35 flex items-center justify-between gap-3 py-2 text-left",
             )}
           >
             <span
@@ -101,9 +101,14 @@ export function MultiSelect({
           )}
         >
           <Command className="bg-sc-section text-[#15130f] [&_[cmdk-input]]:text-[#15130f] [&_[cmdk-input]]:placeholder:text-[#9a9488]">
-            <CommandInput placeholder={searchPlaceholder} className="text-[#15130f]" />
+            <CommandInput
+              placeholder={searchPlaceholder}
+              className="text-[#15130f]"
+            />
             <CommandList>
-              <CommandEmpty className="text-[#6f6a60]">{emptyText}</CommandEmpty>
+              <CommandEmpty className="text-[#6f6a60]">
+                {emptyText}
+              </CommandEmpty>
               <CommandGroup>
                 {options.map((option) => {
                   const active = selected.includes(option.value);
@@ -114,7 +119,7 @@ export function MultiSelect({
                         .filter(Boolean)
                         .join(" ")}
                       onSelect={() => toggle(option.value)}
-                      className="cursor-pointer text-[#15130f] data-[selected=true]:bg-sc-section-alt data-[selected=true]:text-[#15130f] aria-selected:bg-sc-section-alt aria-selected:text-[#15130f]"
+                      className="data-[selected=true]:bg-sc-section-alt aria-selected:bg-sc-section-alt cursor-pointer text-[#15130f] aria-selected:text-[#15130f] data-[selected=true]:text-[#15130f]"
                     >
                       <span
                         className={cn(

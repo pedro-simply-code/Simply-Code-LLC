@@ -4,7 +4,11 @@ export type AppToastVariant = "success" | "error" | "warning" | "info";
 
 export type AppToastOptions = ExternalToast;
 
-function show(variant: AppToastVariant, message: string, options?: AppToastOptions) {
+function show(
+  variant: AppToastVariant,
+  message: string,
+  options?: AppToastOptions,
+) {
   switch (variant) {
     case "success":
       sonner.success(message, options);
@@ -23,8 +27,12 @@ function show(variant: AppToastVariant, message: string, options?: AppToastOptio
 
 /** Theme-aware toasts (see `AppToaster` + `.app-toast` in globals.css). */
 export const appToast = {
-  success: (message: string, options?: AppToastOptions) => show("success", message, options),
-  error: (message: string, options?: AppToastOptions) => show("error", message, options),
-  warning: (message: string, options?: AppToastOptions) => show("warning", message, options),
-  info: (message: string, options?: AppToastOptions) => show("info", message, options),
+  success: (message: string, options?: AppToastOptions) =>
+    show("success", message, options),
+  error: (message: string, options?: AppToastOptions) =>
+    show("error", message, options),
+  warning: (message: string, options?: AppToastOptions) =>
+    show("warning", message, options),
+  info: (message: string, options?: AppToastOptions) =>
+    show("info", message, options),
 };

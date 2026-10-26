@@ -19,7 +19,8 @@ function StudioViewToggleInner({ scope }: { scope?: StudioOverviewViewScope }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const paramKey = scope ? studioOverviewViewParam[scope] : "view";
-  const view: StudioViewMode = searchParams.get(paramKey) === "list" ? "list" : "grid";
+  const view: StudioViewMode =
+    searchParams.get(paramKey) === "list" ? "list" : "grid";
 
   const setView = (next: StudioViewMode) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -37,7 +38,7 @@ function StudioViewToggleInner({ scope }: { scope?: StudioOverviewViewScope }) {
 
   return (
     <div
-      className="inline-flex gap-0.5 rounded-md bg-sc-section-alt p-0.5 shadow-[inset_0_1px_2px_rgba(21,19,15,0.06)]"
+      className="bg-sc-section-alt inline-flex gap-0.5 rounded-md p-0.5 shadow-[inset_0_1px_2px_rgba(21,19,15,0.06)]"
       role="group"
       aria-label="Layout"
     >
@@ -71,7 +72,11 @@ function StudioViewToggleInner({ scope }: { scope?: StudioOverviewViewScope }) {
   );
 }
 
-export function StudioViewToggle({ scope }: { scope?: StudioOverviewViewScope }) {
+export function StudioViewToggle({
+  scope,
+}: {
+  scope?: StudioOverviewViewScope;
+}) {
   return (
     <Suspense fallback={<span className="inline-block size-8" aria-hidden />}>
       <StudioViewToggleInner scope={scope} />
@@ -91,7 +96,9 @@ export function StudioViewToolbar({
       <div className="text-xs text-[#6f6a60]">
         {summary}
         {pageSummary ? (
-          <span className="mt-0.5 block text-[11px] text-[#9a9488]">{pageSummary}</span>
+          <span className="mt-0.5 block text-[11px] text-[#9a9488]">
+            {pageSummary}
+          </span>
         ) : null}
       </div>
       <StudioViewToggle />

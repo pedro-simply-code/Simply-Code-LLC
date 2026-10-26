@@ -1,7 +1,9 @@
 import type { CreateNotificationInput } from "~/server/notifications/types";
 
 export function projectStudioHref(projectId: string, tab?: string) {
-  return tab ? `/studio/projects/${projectId}?tab=${tab}` : `/studio/projects/${projectId}`;
+  return tab
+    ? `/studio/projects/${projectId}?tab=${tab}`
+    : `/studio/projects/${projectId}`;
 }
 
 export function projectPortalHref(projectId: string) {

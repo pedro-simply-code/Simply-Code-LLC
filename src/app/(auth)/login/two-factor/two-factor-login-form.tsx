@@ -47,7 +47,10 @@ export function TwoFactorLoginForm({ callbackUrl }: { callbackUrl: string }) {
       <button
         type="submit"
         disabled={pending || code.length < 6}
-        className={cn(appPrimaryButtonStudioSubmit, "w-full disabled:opacity-50")}
+        className={cn(
+          appPrimaryButtonStudioSubmit,
+          "w-full disabled:opacity-50",
+        )}
       >
         {pending ? "Verifying…" : "Continue to studio"}
       </button>

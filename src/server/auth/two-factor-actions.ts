@@ -6,8 +6,15 @@ import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
 import { isFounder } from "~/lib/roles";
 import { logAuditEvent } from "~/server/audit/log";
-import { twoFactorCookieName, twoFactorCookieValue } from "~/lib/two-factor-cookie";
-import { createTotpSecret, totpAuthUri, verifyTotpCode } from "~/server/auth/totp";
+import {
+  twoFactorCookieName,
+  twoFactorCookieValue,
+} from "~/lib/two-factor-cookie";
+import {
+  createTotpSecret,
+  totpAuthUri,
+  verifyTotpCode,
+} from "~/server/auth/totp";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
 
@@ -22,7 +29,11 @@ export async function getTwoFactorSetup(): Promise<TwoFactorSetupState> {
   if (!session?.user?.id || !isFounder(session.user.role)) return null;
 
   const [row] = await db
-    .select({ email: users.email, totpEnabled: users.totpEnabled, totpSecret: users.totpSecret })
+    .select({
+      email: users.email,
+      totpEnabled: users.totpEnabled,
+      totpSecret: users.totpSecret,
+    })
     .from(users)
     .where(eq(users.id, session.user.id))
     .limit(1);
@@ -40,7 +51,10 @@ export async function getTwoFactorSetup(): Promise<TwoFactorSetupState> {
   return { secret, uri: totpAuthUri(row.email, secret), email: row.email };
 }
 
-export async function enableTwoFactor(secret: string, code: string): Promise<{ ok: boolean }> {
+export async function enableTwoFactor(
+  secret: string,
+  code: string,
+): Promise<{ ok: boolean }> {
   const session = await auth();
   if (!session?.user?.id || !isFounder(session.user.role)) {
     return { ok: false };
@@ -56,13 +70,17 @@ export async function enableTwoFactor(secret: string, code: string): Promise<{ o
     .where(eq(users.id, session.user.id));
 
   const cookieStore = await cookies();
-  cookieStore.set(twoFactorCookieName(), twoFactorCookieValue(session.user.id), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 30 * 24 * 60 * 60,
-  });
+  cookieStore.set(
+    twoFactorCookieName(),
+    twoFactorCookieValue(session.user.id),
+    {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+    },
+  );
 
   await logAuditEvent({
     actorUserId: session.user.id,
@@ -130,12 +148,18 @@ export async function disableTwoFactor(code: string): Promise<{ ok: boolean }> {
   return { ok: true };
 }
 
-export async function verifyTwoFactorLogin(code: string): Promise<{ ok: boolean }> {
+export async function verifyTwoFactorLogin(
+  code: string,
+): Promise<{ ok: boolean }> {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
   const [row] = await db
-    .select({ totpSecret: users.totpSecret, totpEnabled: users.totpEnabled, role: users.role })
+    .select({
+      totpSecret: users.totpSecret,
+      totpEnabled: users.totpEnabled,
+      role: users.role,
+    })
     .from(users)
     .where(eq(users.id, session.user.id))
     .limit(1);
@@ -149,13 +173,17 @@ export async function verifyTwoFactorLogin(code: string): Promise<{ ok: boolean 
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(twoFactorCookieName(), twoFactorCookieValue(session.user.id), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 30 * 24 * 60 * 60,
-  });
+  cookieStore.set(
+    twoFactorCookieName(),
+    twoFactorCookieValue(session.user.id),
+    {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+    },
+  );
 
   await logAuditEvent({
     actorUserId: session.user.id,

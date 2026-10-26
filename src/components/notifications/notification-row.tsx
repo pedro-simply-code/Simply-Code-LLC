@@ -22,7 +22,8 @@ const rowTypeTag =
 const titleClass =
   "line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug text-[#15130f]";
 
-const bodyClass = "line-clamp-2 min-h-[2.5rem] text-xs leading-snug text-[#57524a]";
+const bodyClass =
+  "line-clamp-2 min-h-[2.5rem] text-xs leading-snug text-[#57524a]";
 
 export function NotificationRowContent({
   item,
@@ -39,21 +40,33 @@ export function NotificationRowContent({
   return (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className={cn(titleClass, compact && "min-h-0 line-clamp-2 text-sm")}>{title}</p>
+        <p
+          className={cn(titleClass, compact && "line-clamp-2 min-h-0 text-sm")}
+        >
+          {title}
+        </p>
         {showTypeChip ? (
-          <span className={cn(appChip, "shrink-0 px-1.5 py-0.5 text-[9px] uppercase")}>
+          <span
+            className={cn(
+              appChip,
+              "shrink-0 px-1.5 py-0.5 text-[9px] uppercase",
+            )}
+          >
             {item.typeLabel}
           </span>
         ) : null}
       </div>
       {item.body ? (
-        <p className={cn(bodyClass, "mt-1", compact && "min-h-0")}>{item.body}</p>
+        <p className={cn(bodyClass, "mt-1", compact && "min-h-0")}>
+          {item.body}
+        </p>
       ) : (
         <p className={cn(bodyClass, "mt-1", compact && "min-h-0")}>&nbsp;</p>
       )}
       {!compact && item.projectTitle ? (
         <p className="mt-1 line-clamp-1 text-[10px] text-[#6f6a60]">
-          <span className="font-bold text-[#15130f]">Project:</span> {item.projectTitle}
+          <span className="font-bold text-[#15130f]">Project:</span>{" "}
+          {item.projectTitle}
         </p>
       ) : null}
       <p className="mt-1 text-[10px] font-bold tracking-[0.08em] text-[#9a9488] uppercase">
@@ -89,21 +102,26 @@ export function NotificationRow({
         !item.readAt && appNotificationUnreadRow,
       )}
     >
-      {!compact ? (
-        <span className={rowTypeTag}>{item.typeLabel}</span>
-      ) : null}
+      {!compact ? <span className={rowTypeTag}>{item.typeLabel}</span> : null}
       <div className={cn("min-w-0 flex-1", !compact && "pr-28")}>
         {item.href && compact ? (
           <Link
             href={item.href}
             onClick={(event) => onOpen?.(event, item)}
-            className="block transition-colors hover:text-sc-accent"
+            className="hover:text-sc-accent block transition-colors"
           >
             <NotificationRowContent item={item} compact={compact} />
           </Link>
         ) : item.href && !compact ? (
-          <Link href={item.href} className="block transition-colors hover:text-sc-accent">
-            <NotificationRowContent item={item} compact={compact} showTypeChip={false} />
+          <Link
+            href={item.href}
+            className="hover:text-sc-accent block transition-colors"
+          >
+            <NotificationRowContent
+              item={item}
+              compact={compact}
+              showTypeChip={false}
+            />
           </Link>
         ) : (
           <NotificationRowContent

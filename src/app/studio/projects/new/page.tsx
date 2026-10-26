@@ -4,7 +4,11 @@ import { StudioHeader } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
 import { canCreateProjects, isFounder } from "~/lib/roles";
 import { createProject } from "~/server/studio/actions";
-import { getClients, getTeamUsers, getTechnologies } from "~/server/studio/queries";
+import {
+  getClients,
+  getTeamUsers,
+  getTechnologies,
+} from "~/server/studio/queries";
 
 export const dynamic = "force-dynamic";
 

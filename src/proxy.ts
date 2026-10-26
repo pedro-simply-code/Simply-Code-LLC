@@ -1,7 +1,10 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import authConfig from "~/lib/auth.config";
-import { isTwoFactorCookieValid, twoFactorCookieName } from "~/lib/two-factor-cookie";
+import {
+  isTwoFactorCookieValid,
+  twoFactorCookieName,
+} from "~/lib/two-factor-cookie";
 import { homePathForRole, isTeam, normalizeRole } from "~/lib/roles";
 
 const { auth } = NextAuth(authConfig);
@@ -28,12 +31,18 @@ export const proxy = auth((req) => {
   const totpRequired = !!req.auth?.totpRequired;
   const userId = req.auth?.user?.id;
   const twoFactorOk =
-    userId && isTwoFactorCookieValid(userId, req.cookies.get(twoFactorCookieName())?.value);
+    userId &&
+    isTwoFactorCookieValid(
+      userId,
+      req.cookies.get(twoFactorCookieName())?.value,
+    );
 
   // Only `/login` — not `/login/two-factor` (founders verify 2FA there while signed in).
   if (pathname === "/login") {
     if (isLoggedIn) {
-      return withPathname(NextResponse.redirect(new URL(homePathForRole(role), req.url)));
+      return withPathname(
+        NextResponse.redirect(new URL(homePathForRole(role), req.url)),
+      );
     }
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
@@ -43,7 +52,9 @@ export const proxy = auth((req) => {
       return withPathname(NextResponse.redirect(new URL("/login", req.url)));
     }
     if (!totpRequired) {
-      return withPathname(NextResponse.redirect(new URL(homePathForRole(role), req.url)));
+      return withPathname(
+        NextResponse.redirect(new URL(homePathForRole(role), req.url)),
+      );
     }
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
@@ -54,7 +65,9 @@ export const proxy = auth((req) => {
       login.searchParams.set("callbackUrl", pathname);
       return withPathname(NextResponse.redirect(login));
     }
-    return withPathname(NextResponse.redirect(new URL(homePathForRole(role), req.url)));
+    return withPathname(
+      NextResponse.redirect(new URL(homePathForRole(role), req.url)),
+    );
   }
 
   if (pathname === "/studio" || pathname.startsWith("/studio/")) {

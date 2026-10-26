@@ -106,13 +106,15 @@ export const ENGAGEMENT_MODELS: EngagementModel[] = [
     title: "Fixed-scope project",
     description:
       "A defined outcome, a written scope and a fixed quote. We plan the work in stages and you approve the design before development starts.",
-    bestFor: "New sites, redesigns and platform rebuilds with a clear finish line.",
+    bestFor:
+      "New sites, redesigns and platform rebuilds with a clear finish line.",
   },
   {
     title: "Monthly retainer",
     description:
       "An agreed number of hours or deliverables each month, with direct access to the developers doing the work.",
-    bestFor: "Ongoing improvements, maintenance and teams without in-house engineering.",
+    bestFor:
+      "Ongoing improvements, maintenance and teams without in-house engineering.",
   },
   {
     title: "White-label partnership",

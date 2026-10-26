@@ -38,7 +38,10 @@ export function CancelInviteForm({
         <DialogTrigger asChild>
           <button
             type="button"
-            className={cn(appGhostButtonLg, "text-[10px] text-[#9a3b2e] hover:bg-red-50")}
+            className={cn(
+              appGhostButtonLg,
+              "text-[10px] text-[#9a3b2e] hover:bg-red-50",
+            )}
           >
             Cancel invitation
           </button>
@@ -54,14 +57,17 @@ export function CancelInviteForm({
             <DialogDescription className="text-sm leading-relaxed text-[#57524a]">
               {email ? (
                 <>
-                  The invite for <strong className="font-semibold text-[#15130f]">{email}</strong>{" "}
-                  will be removed. The link in the email will stop working, and you can send a new
-                  invitation anytime.
+                  The invite for{" "}
+                  <strong className="font-semibold text-[#15130f]">
+                    {email}
+                  </strong>{" "}
+                  will be removed. The link in the email will stop working, and
+                  you can send a new invitation anytime.
                 </>
               ) : (
                 <>
-                  The invitation link in the email will stop working. You can send a new invitation
-                  anytime.
+                  The invitation link in the email will stop working. You can
+                  send a new invitation anytime.
                 </>
               )}
             </DialogDescription>

@@ -63,19 +63,33 @@ export default async function ContactMessagePage({
         <span>·</span>
         <span className="capitalize">{message.status}</span>
         <span>·</span>
-        <span>{replies.length} {replies.length === 1 ? "reply" : "replies"}</span>
+        <span>
+          {replies.length} {replies.length === 1 ? "reply" : "replies"}
+        </span>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="space-y-4 lg:col-span-3">
-          <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">Conversation</h2>
+          <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">
+            Conversation
+          </h2>
           <ContactMessageThread enquiry={message} replies={replies} />
         </div>
 
-        <section className={cn(appPanel, "h-fit p-5 lg:col-span-2 lg:sticky lg:top-24")}>
-          <h3 className="text-[12px] font-bold tracking-[0.16em] uppercase">Compose reply</h3>
+        <section
+          className={cn(
+            appPanel,
+            "h-fit p-5 lg:sticky lg:top-24 lg:col-span-2",
+          )}
+        >
+          <h3 className="text-[12px] font-bold tracking-[0.16em] uppercase">
+            Compose reply
+          </h3>
           <div className="mt-4">
-            <ContactMessageReplyForm contactMessageId={message.id} recipient={recipient} />
+            <ContactMessageReplyForm
+              contactMessageId={message.id}
+              recipient={recipient}
+            />
           </div>
         </section>
       </div>

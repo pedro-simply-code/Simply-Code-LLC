@@ -13,10 +13,14 @@ export const dynamic = "force-dynamic";
 
 export default async function PortalMessagesPage() {
   const session = await auth();
-  if (!session?.user?.id || !session.user.email) redirect("/login?callbackUrl=/portal/messages");
+  if (!session?.user?.id || !session.user.email)
+    redirect("/login?callbackUrl=/portal/messages");
 
   await backfillClientInboxForPortalUser(session.user.id, session.user.email);
-  const conversations = await getClientConversationSummaries(session.user.id, session.user.email);
+  const conversations = await getClientConversationSummaries(
+    session.user.id,
+    session.user.email,
+  );
 
   return (
     <div>
@@ -27,8 +31,9 @@ export default async function PortalMessagesPage() {
 
       {conversations.length === 0 ? (
         <p className={cn(appPanel, "px-5 py-10 text-sm text-[#6f6a60]")}>
-          No conversations yet. When you contact us through the site, the thread appears here once we
-          reply (or right away if you already sent a message with this email).
+          No conversations yet. When you contact us through the site, the thread
+          appears here once we reply (or right away if you already sent a
+          message with this email).
         </p>
       ) : (
         <ul className={cn(appPanel, "divide-y divide-[#15130f]/10")}>
@@ -36,14 +41,14 @@ export default async function PortalMessagesPage() {
             <li key={thread.contactMessageId}>
               <Link
                 href={`/portal/messages/${thread.contactMessageId}`}
-                className="block px-5 py-5 transition-colors hover:bg-sc-section-alt/40"
+                className="hover:bg-sc-section-alt/40 block px-5 py-5 transition-colors"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-sm font-bold">{thread.subject}</h2>
                       {thread.unreadCount > 0 ? (
-                        <span className="rounded-full bg-sc-accent px-2 py-0.5 text-[9px] font-bold tracking-wide text-white uppercase">
+                        <span className="bg-sc-accent rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide text-white uppercase">
                           {thread.unreadCount} new
                         </span>
                       ) : null}

@@ -12,7 +12,11 @@ function assignFileToInput(input: HTMLInputElement | null, file: File | null) {
   input.files = dt.files;
 }
 
-export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null }) {
+export function ProjectCoverUpload({
+  defaultUrl,
+}: {
+  defaultUrl?: string | null;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const localPreviewRef = useRef<string | null>(null);
 
@@ -64,11 +68,17 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
 
   const previewSrc = localPreview || savedUrl || null;
   const showLegacyNote =
-    Boolean(defaultUrl?.startsWith("/")) && savedUrl === defaultUrl?.trim() && !hasPendingFile;
+    Boolean(defaultUrl?.startsWith("/")) &&
+    savedUrl === defaultUrl?.trim() &&
+    !hasPendingFile;
 
   return (
     <div className="space-y-4">
-      <input type="hidden" name="image" value={hasPendingFile ? "" : savedUrl} />
+      <input
+        type="hidden"
+        name="image"
+        value={hasPendingFile ? "" : savedUrl}
+      />
       <input
         ref={inputRef}
         type="file"
@@ -82,7 +92,7 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
       />
 
       <div
-        className="relative aspect-[1000/560] overflow-hidden rounded-lg bg-sc-section-alt shadow-[inset_0_1px_2px_rgba(21,19,15,0.06),0_1px_3px_rgba(21,19,15,0.05)]"
+        className="bg-sc-section-alt relative aspect-[1000/560] overflow-hidden rounded-lg shadow-[inset_0_1px_2px_rgba(21,19,15,0.06),0_1px_3px_rgba(21,19,15,0.05)]"
         onDragOver={(event) => {
           event.preventDefault();
           event.dataTransfer.dropEffect = "copy";
@@ -100,12 +110,16 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
             fill
             sizes="(min-width: 1024px) 380px, 100vw"
             className="object-cover"
-            unoptimized={previewSrc.startsWith("blob:") || previewSrc.startsWith("/")}
+            unoptimized={
+              previewSrc.startsWith("blob:") || previewSrc.startsWith("/")
+            }
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center text-[#9a9488]">
             <Upload className="size-8 opacity-40" />
-            <p className="text-xs font-semibold tracking-wide uppercase">No cover yet</p>
+            <p className="text-xs font-semibold tracking-wide uppercase">
+              No cover yet
+            </p>
             <p className="text-[11px]">Choose or drop an image</p>
           </div>
         )}
@@ -115,7 +129,7 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+          className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
         >
           {previewSrc ? "Choose another image" : "Choose image"}
         </button>
@@ -129,7 +143,7 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
           </button>
         ) : null}
         {hasPendingFile ? (
-          <span className="text-[10px] font-bold tracking-[0.1em] text-sc-accent uppercase">
+          <span className="text-sc-accent text-[10px] font-bold tracking-[0.1em] uppercase">
             Unsaved
           </span>
         ) : savedUrl ? (
@@ -141,7 +155,8 @@ export function ProjectCoverUpload({ defaultUrl }: { defaultUrl?: string | null 
 
       {showLegacyNote ? (
         <p className="text-[11px] leading-relaxed text-[#9a9488]">
-          This project uses an older static image. Choose a new file and save to replace it.
+          This project uses an older static image. Choose a new file and save to
+          replace it.
         </p>
       ) : null}
     </div>

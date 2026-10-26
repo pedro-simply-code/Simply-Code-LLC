@@ -9,7 +9,8 @@ import { userUploadClaims } from "~/server/db/schema";
 
 const CLAIM_TTL_MS = 48 * 60 * 60 * 1000;
 
-export type UploadClaimKind = "avatar" | "message_attachment" | "project_deliverable";
+export type UploadClaimKind =
+  "avatar" | "message_attachment" | "project_deliverable";
 
 function isClaimableUploadUrl(url: string, kind: UploadClaimKind): boolean {
   if (kind === "avatar") return isUploadThingImageUrl(url);
@@ -36,7 +37,8 @@ export async function userOwnsUploadClaim(
 ): Promise<boolean> {
   if (kind === "avatar" && !isUploadThingImageUrl(url)) return false;
   if (kind !== "avatar" && !isUploadThingFileUrl(url)) return false;
-  if (!kind && !isUploadThingFileUrl(url) && !isUploadThingImageUrl(url)) return false;
+  if (!kind && !isUploadThingFileUrl(url) && !isUploadThingImageUrl(url))
+    return false;
 
   const minCreated = new Date(Date.now() - CLAIM_TTL_MS);
   const conditions = [
@@ -57,13 +59,27 @@ export async function userOwnsUploadClaim(
   return !!row;
 }
 
-export async function releaseUserUploadClaims(userId: string, urls: string[]): Promise<void> {
-  const unique = [...new Set(urls.filter((url) => isUploadThingFileUrl(url) || isUploadThingImageUrl(url)))];
+export async function releaseUserUploadClaims(
+  userId: string,
+  urls: string[],
+): Promise<void> {
+  const unique = [
+    ...new Set(
+      urls.filter(
+        (url) => isUploadThingFileUrl(url) || isUploadThingImageUrl(url),
+      ),
+    ),
+  ];
   if (unique.length === 0) return;
 
   await db
     .delete(userUploadClaims)
-    .where(and(eq(userUploadClaims.userId, userId), inArray(userUploadClaims.url, unique)));
+    .where(
+      and(
+        eq(userUploadClaims.userId, userId),
+        inArray(userUploadClaims.url, unique),
+      ),
+    );
 }
 
 export async function filterAttachmentsWithClaims(

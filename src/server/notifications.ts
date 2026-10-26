@@ -17,4 +17,5 @@ export {
 } from "~/server/notifications/index";
 
 /** @deprecated Use `CreateNotificationInput` from `~/server/notifications`. */
-export type NotificationInput = import("~/server/notifications/types").CreateNotificationInput;
+export type NotificationInput =
+  import("~/server/notifications/types").CreateNotificationInput;

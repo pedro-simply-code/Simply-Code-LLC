@@ -29,16 +29,18 @@ export default function FaqPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c"),
+        }}
       />
 
       <SiteNav />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
-        <section className="border-b border-[#15130f]/10 bg-sc-section-alt py-16 lg:py-24">
+        <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">
           <div className="mx-auto grid max-w-[1400px] gap-12 px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
             <div>
-              <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+              <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
                 FAQ
               </p>
               <h1 className="mt-5 text-[clamp(2.4rem,5.2vw,4.4rem)] leading-[0.98] font-black tracking-[-0.045em] uppercase">
@@ -47,12 +49,12 @@ export default function FaqPage() {
                 Answered
               </h1>
               <p className="mt-6 max-w-md text-[16px] leading-relaxed text-[#57524a]">
-                The things clients ask before starting. If yours is not here, send it over — we
-                answer every message.
+                The things clients ask before starting. If yours is not here,
+                send it over — we answer every message.
               </p>
               <Link
                 href="/contact"
-                className="mt-8 inline-flex items-center gap-2 rounded-md bg-[#15130f] px-6 py-3.5 text-[11px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-sc-accent"
+                className="hover:bg-sc-accent mt-8 inline-flex items-center gap-2 rounded-md bg-[#15130f] px-6 py-3.5 text-[11px] font-bold tracking-[0.16em] text-white uppercase transition-colors"
               >
                 Ask us directly <ArrowRight className="size-4" />
               </Link>
@@ -60,7 +62,7 @@ export default function FaqPage() {
                 Or email{" "}
                 <a
                   href={`mailto:${SITE.email}`}
-                  className="underline underline-offset-4 hover:text-sc-accent"
+                  className="hover:text-sc-accent underline underline-offset-4"
                 >
                   {SITE.email}
                 </a>
@@ -74,7 +76,7 @@ export default function FaqPage() {
                     <span className="text-[17px] leading-snug font-bold tracking-tight">
                       {item.question}
                     </span>
-                    <Plus className="mt-0.5 size-5 shrink-0 text-sc-accent transition-transform duration-200 group-open:rotate-45" />
+                    <Plus className="text-sc-accent mt-0.5 size-5 shrink-0 transition-transform duration-200 group-open:rotate-45" />
                   </summary>
                   <p className="mt-3 max-w-2xl pr-8 text-[15px] leading-relaxed text-[#57524a]">
                     {item.answer}
@@ -85,7 +87,10 @@ export default function FaqPage() {
           </div>
         </section>
 
-        <CtaSection title="Still have a question?" description="Send it with your project details and we will answer both in one reply." />
+        <CtaSection
+          title="Still have a question?"
+          description="Send it with your project details and we will answer both in one reply."
+        />
       </main>
 
       <SiteFooter />

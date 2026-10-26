@@ -9,5 +9,11 @@ export function ContactMessageThread({
   enquiry: typeof contactMessages.$inferSelect;
   replies: ContactMessageReply[];
 }) {
-  return <MessageConversationThread enquiry={enquiry} replies={replies} viewer="studio" />;
+  return (
+    <MessageConversationThread
+      enquiry={enquiry}
+      replies={replies}
+      viewer="studio"
+    />
+  );
 }

@@ -1,5 +1,9 @@
 import { notificationTypeLabel } from "~/server/notifications/labels";
-import type { NotificationDTO, NotificationRecord, NotificationType } from "~/server/notifications/types";
+import type {
+  NotificationDTO,
+  NotificationRecord,
+  NotificationType,
+} from "~/server/notifications/types";
 
 export function toNotificationDTO(
   row: NotificationRecord,

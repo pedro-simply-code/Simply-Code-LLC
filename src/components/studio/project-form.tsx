@@ -2,11 +2,25 @@ import type { Project } from "~/server/db/schema";
 import type { UserRole } from "~/server/db/schema";
 import { MultiSelect } from "~/components/studio/multi-select";
 import { ProjectCoverUpload } from "~/components/studio/project-cover-upload";
-import { Field, StudioCard, StudioInput, StudioSelect, StudioTextarea } from "~/components/studio/ui";
-import { studioProjectPanel, studioProjectPanelMuted } from "~/lib/studio-project-surface";
+import {
+  Field,
+  StudioCard,
+  StudioInput,
+  StudioSelect,
+  StudioTextarea,
+} from "~/components/studio/ui";
+import {
+  studioProjectPanel,
+  studioProjectPanelMuted,
+} from "~/lib/studio-project-surface";
 import { cn } from "~/lib/utils";
 
-type Person = { id: string; name: string | null; email: string | null; role: UserRole };
+type Person = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  role: UserRole;
+};
 type Technology = { id: string; name: string; category: string };
 type Client = { id: string; name: string };
 
@@ -37,7 +51,9 @@ export function ProjectForm({
 
   return (
     <form action={action} className="space-y-6">
-      {project ? <input type="hidden" name="projectId" value={project.id} /> : null}
+      {project ? (
+        <input type="hidden" name="projectId" value={project.id} />
+      ) : null}
 
       <section className={cn(studioProjectPanel, "p-5 md:p-6")}>
         <Field label="Title">
@@ -46,12 +62,16 @@ export function ProjectForm({
             defaultValue={project?.title}
             required
             placeholder="Project name"
-            className="border-0 border-b border-[#15130f]/20 px-0 py-2 text-2xl font-bold tracking-tight focus:border-sc-accent"
+            className="focus:border-sc-accent border-0 border-b border-[#15130f]/20 px-0 py-2 text-2xl font-bold tracking-tight"
           />
         </Field>
 
         <div className="mt-5 grid gap-5 pt-1 md:grid-cols-2">
-          <Field label="Permalink" hint="Leave blank to generate from the title." className="md:col-span-1">
+          <Field
+            label="Permalink"
+            hint="Leave blank to generate from the title."
+            className="md:col-span-1"
+          >
             <div className="flex flex-wrap items-center gap-2 text-sm text-[#6f6a60]">
               <span className="shrink-0 font-mono text-xs">/work/</span>
               <StudioInput
@@ -62,7 +82,11 @@ export function ProjectForm({
               />
             </div>
           </Field>
-          <Field label="Live URL" hint="Deployed site." className="md:col-span-1">
+          <Field
+            label="Live URL"
+            hint="Deployed site."
+            className="md:col-span-1"
+          >
             <StudioInput
               name="liveUrl"
               defaultValue={project?.liveUrl ?? ""}
@@ -80,7 +104,7 @@ export function ProjectForm({
       >
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-md bg-[#15130f] px-5 py-2.5 text-[10px] font-bold tracking-[0.16em] text-white uppercase hover:bg-sc-accent"
+          className="hover:bg-sc-accent inline-flex items-center justify-center rounded-md bg-[#15130f] px-5 py-2.5 text-[10px] font-bold tracking-[0.16em] text-white uppercase"
         >
           {submitLabel}
         </button>
@@ -125,10 +149,16 @@ export function ProjectForm({
             <StudioCard title="Client" className={cardSurface}>
               <div className="grid gap-4">
                 <Field label="Client name">
-                  <StudioInput name="clientName" defaultValue={project?.clientName} />
+                  <StudioInput
+                    name="clientName"
+                    defaultValue={project?.clientName}
+                  />
                 </Field>
                 <Field label="Portal account" hint="Optional client login.">
-                  <StudioSelect name="clientId" defaultValue={project?.clientId ?? ""}>
+                  <StudioSelect
+                    name="clientId"
+                    defaultValue={project?.clientId ?? ""}
+                  >
                     <option value="">No portal account</option>
                     {clients.map((client) => (
                       <option key={client.id} value={client.id}>
@@ -148,9 +178,14 @@ export function ProjectForm({
               className={cardSurface}
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Project lead" hint="Receives project email and controls the project.">
+                <Field
+                  label="Project lead"
+                  hint="Receives project email and controls the project."
+                >
                   <StudioSelect name="leadId" defaultValue={leadId ?? ""}>
-                    <option value="">Unassigned (founder receives email)</option>
+                    <option value="">
+                      Unassigned (founder receives email)
+                    </option>
                     {team.map((person) => (
                       <option key={person.id} value={person.id}>
                         {person.name ?? person.email}
@@ -158,7 +193,11 @@ export function ProjectForm({
                     ))}
                   </StudioSelect>
                 </Field>
-                <Field as="div" label="Developers" hint="Choose one or more team members.">
+                <Field
+                  as="div"
+                  label="Developers"
+                  hint="Choose one or more team members."
+                >
                   <MultiSelect
                     name="memberIds"
                     ariaLabel="Developers"
@@ -169,7 +208,9 @@ export function ProjectForm({
                     options={team.map((person) => ({
                       value: person.id,
                       label: person.name ?? person.email ?? "Unnamed",
-                      description: person.name ? (person.email ?? undefined) : undefined,
+                      description: person.name
+                        ? (person.email ?? undefined)
+                        : undefined,
                     }))}
                   />
                 </Field>
@@ -186,14 +227,21 @@ export function ProjectForm({
           <StudioCard title="Publishing" className={cardSurface}>
             <div className="grid gap-3">
               <Field label="Status">
-                <StudioSelect name="status" defaultValue={project?.status ?? "draft"}>
+                <StudioSelect
+                  name="status"
+                  defaultValue={project?.status ?? "draft"}
+                >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
                   <option value="completed">Completed</option>
                 </StudioSelect>
               </Field>
               <label className="flex items-center gap-2 text-xs leading-snug">
-                <input type="checkbox" name="featured" defaultChecked={project?.featured} />
+                <input
+                  type="checkbox"
+                  name="featured"
+                  defaultChecked={project?.featured}
+                />
                 Feature on home
               </label>
             </div>

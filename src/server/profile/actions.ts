@@ -46,8 +46,14 @@ export async function updateUserProfile(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const profilePath = isTeam(session.user.role) ? "/studio/profile" : "/portal/profile";
-  const [existing] = await db.select().from(users).where(eq(users.id, session.user.id)).limit(1);
+  const profilePath = isTeam(session.user.role)
+    ? "/studio/profile"
+    : "/portal/profile";
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1);
   if (!existing) redirect(homePathForRole(session.user.role));
 
   const name = text(formData, "name");
@@ -95,7 +101,9 @@ export async function updateUserProfile(formData: FormData) {
       timezone,
       bio,
       title: teamMember ? text(formData, "title") || null : existing.title,
-      profileSkills: teamMember ? skillList(formData, "profileSkills") : existing.profileSkills,
+      profileSkills: teamMember
+        ? skillList(formData, "profileSkills")
+        : existing.profileSkills,
       showOnAbout:
         teamMember && isFounder(session.user.role)
           ? checkbox(formData, "showOnAbout")
@@ -107,7 +115,11 @@ export async function updateUserProfile(formData: FormData) {
     })
     .where(eq(users.id, session.user.id));
 
-  if (nextImage && nextImage !== existing.image && isUploadThingImageUrl(nextImage)) {
+  if (
+    nextImage &&
+    nextImage !== existing.image &&
+    isUploadThingImageUrl(nextImage)
+  ) {
     await releaseUserUploadClaims(session.user.id, [nextImage]);
   }
 

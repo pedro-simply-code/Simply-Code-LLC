@@ -24,7 +24,10 @@ function conversationSubject(enquiry: typeof contactMessages.$inferSelect) {
 }
 
 /** Attach email-only reply rows to a portal user when their account matches the enquiry email. */
-export async function backfillClientInboxForPortalUser(userId: string, email: string) {
+export async function backfillClientInboxForPortalUser(
+  userId: string,
+  email: string,
+) {
   const normalized = email.trim().toLowerCase();
   if (!normalized) return;
 
@@ -102,7 +105,10 @@ export async function getClientConversationSummaries(
   for (const row of inboxRows) {
     if (!row.contactMessageId) continue;
     if (row.readAt) continue;
-    unreadByContact.set(row.contactMessageId, (unreadByContact.get(row.contactMessageId) ?? 0) + 1);
+    unreadByContact.set(
+      row.contactMessageId,
+      (unreadByContact.get(row.contactMessageId) ?? 0) + 1,
+    );
   }
 
   const summaries: ClientConversationSummary[] = [];
@@ -125,7 +131,9 @@ export async function getClientConversationSummaries(
     });
   }
 
-  summaries.sort((a, b) => b.lastActivityAt.getTime() - a.lastActivityAt.getTime());
+  summaries.sort(
+    (a, b) => b.lastActivityAt.getTime() - a.lastActivityAt.getTime(),
+  );
   return summaries;
 }
 

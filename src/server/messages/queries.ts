@@ -1,12 +1,23 @@
 import "server-only";
 
 import { asc, desc, eq } from "drizzle-orm";
-import { sanitizeMessageAttachments, type MessageAttachment } from "~/lib/message-attachments";
+import {
+  sanitizeMessageAttachments,
+  type MessageAttachment,
+} from "~/lib/message-attachments";
 import { db } from "~/server/db";
-import { clientInboxMessages, contactMessages, users } from "~/server/db/schema";
+import {
+  clientInboxMessages,
+  contactMessages,
+  users,
+} from "~/server/db/schema";
 
 export async function getContactMessageById(id: string) {
-  const [row] = await db.select().from(contactMessages).where(eq(contactMessages.id, id)).limit(1);
+  const [row] = await db
+    .select()
+    .from(contactMessages)
+    .where(eq(contactMessages.id, id))
+    .limit(1);
   return row ?? null;
 }
 

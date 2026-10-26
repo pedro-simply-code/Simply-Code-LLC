@@ -14,7 +14,10 @@ import type { CreateNotificationInput } from "~/server/notifications/types";
 import { sendEmail } from "~/server/email/sendEmail";
 import { getProjectEmailRecipients } from "~/server/studio/queries";
 
-export async function notifyUsers(userIds: string[], input: CreateNotificationInput) {
+export async function notifyUsers(
+  userIds: string[],
+  input: CreateNotificationInput,
+) {
   await insertNotificationsForUsers(userIds, input);
 }
 
@@ -47,7 +50,10 @@ export async function getProjectMemberIds(projectId: string) {
  * Project-specific notifications go to the project lead. If a project has no
  * lead, a lead-team member working on it is next, then the founders.
  */
-export async function notifyProject(projectId: string, input: CreateNotificationInput) {
+export async function notifyProject(
+  projectId: string,
+  input: CreateNotificationInput,
+) {
   const members = await getProjectMemberIds(projectId);
   const leads = members.filter((member) => member.projectRole === "lead");
   if (leads.length > 0) {
@@ -58,7 +64,9 @@ export async function notifyProject(projectId: string, input: CreateNotification
     return;
   }
 
-  const teamLeads = members.filter((member) => normalizeRole(member.role) === "lead");
+  const teamLeads = members.filter(
+    (member) => normalizeRole(member.role) === "lead",
+  );
   if (teamLeads.length > 0) {
     await notifyUsers(
       teamLeads.map((lead) => lead.userId),
@@ -99,7 +107,10 @@ export async function sendProjectEmail(
   );
 }
 
-export async function notifyProjectClients(projectId: string, input: CreateNotificationInput) {
+export async function notifyProjectClients(
+  projectId: string,
+  input: CreateNotificationInput,
+) {
   const [project] = await db
     .select({ clientId: projects.clientId })
     .from(projects)
@@ -119,7 +130,11 @@ export async function notifyProjectClients(projectId: string, input: CreateNotif
   );
 }
 
-export async function notifyProjectRequest(projectId: string, title: string, body: string) {
+export async function notifyProjectRequest(
+  projectId: string,
+  title: string,
+  body: string,
+) {
   await notifyProject(projectId, {
     type: "request",
     title: `New client request: ${title}`,

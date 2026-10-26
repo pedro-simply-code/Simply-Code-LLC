@@ -10,12 +10,17 @@ import {
   clientOwnsContactMessage,
   markClientConversationRead,
 } from "~/server/messages/inbox";
-import { getContactMessageById, getContactMessageReplyHistory } from "~/server/messages/queries";
+import {
+  getContactMessageById,
+  getContactMessageReplyHistory,
+} from "~/server/messages/queries";
 
 export const dynamic = "force-dynamic";
 
 function conversationTitle(service: string | null) {
-  return service ? `Project enquiry · ${service}` : "Conversation with Simply Code";
+  return service
+    ? `Project enquiry · ${service}`
+    : "Conversation with Simply Code";
 }
 
 export default async function PortalConversationPage({
@@ -24,7 +29,8 @@ export default async function PortalConversationPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  if (!session?.user?.id || !session.user.email) redirect("/login?callbackUrl=/portal/messages");
+  if (!session?.user?.id || !session.user.email)
+    redirect("/login?callbackUrl=/portal/messages");
 
   const { id } = await params;
   const owns = await clientOwnsContactMessage(id, session.user.email);
@@ -51,17 +57,21 @@ export default async function PortalConversationPage({
         }
       />
 
-      <div className="mb-4 rounded-md border border-[#15130f]/10 bg-sc-section-alt/30 px-4 py-3 text-xs text-[#6f6a60]">
-        This thread includes replies we sent to your email before you had portal access, when they
-        were about this same contact message.
+      <div className="bg-sc-section-alt/30 mb-4 rounded-md border border-[#15130f]/10 px-4 py-3 text-xs text-[#6f6a60]">
+        This thread includes replies we sent to your email before you had portal
+        access, when they were about this same contact message.
       </div>
 
-      <MessageConversationThread enquiry={enquiry} replies={replies} viewer="client" />
+      <MessageConversationThread
+        enquiry={enquiry}
+        replies={replies}
+        viewer="client"
+      />
 
       {replies.length === 0 ? (
         <p className={cn(appPanel, "mt-4 px-5 py-4 text-sm text-[#6f6a60]")}>
-          We typically reply here and by email. You do not need to send another form unless your
-          question changed.
+          We typically reply here and by email. You do not need to send another
+          form unless your question changed.
         </p>
       ) : null}
     </div>

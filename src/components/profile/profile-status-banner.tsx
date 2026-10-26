@@ -4,8 +4,14 @@ import { appPanelMuted } from "~/lib/surface";
 const MESSAGES: Record<string, { tone: "ok" | "error"; text: string }> = {
   saved: { tone: "ok", text: "Profile saved." },
   name: { tone: "error", text: "Name is required." },
-  "avatar-upload": { tone: "error", text: "Could not upload photo. Try a smaller image." },
-  url: { tone: "error", text: "Check your link URLs — use https:// addresses." },
+  "avatar-upload": {
+    tone: "error",
+    text: "Could not upload photo. Try a smaller image.",
+  },
+  url: {
+    tone: "error",
+    text: "Check your link URLs — use https:// addresses.",
+  },
 };
 
 export function ProfileStatusBanner({ code }: { code?: string | null }) {

@@ -22,7 +22,10 @@ import {
 } from "~/server/db/schema";
 import { projectDisplayYear } from "~/lib/project-year";
 import { normalizeRole } from "~/lib/roles";
-import { buildProjectActivityFeed, type ProjectActivityItem } from "~/server/projects/activity";
+import {
+  buildProjectActivityFeed,
+  type ProjectActivityItem,
+} from "~/server/projects/activity";
 import type { Project as ContentProject } from "~/content/projects";
 import { getUnreadNotificationCount } from "~/server/notifications";
 
@@ -66,8 +69,12 @@ export async function getTechnologies() {
 
   return techRows.map((technology) => ({
     ...technology,
-    developerCount: userLinks.filter((link) => link.technologyId === technology.id).length,
-    projectCount: projectLinks.filter((link) => link.technologyId === technology.id).length,
+    developerCount: userLinks.filter(
+      (link) => link.technologyId === technology.id,
+    ).length,
+    projectCount: projectLinks.filter(
+      (link) => link.technologyId === technology.id,
+    ).length,
   }));
 }
 
@@ -148,7 +155,10 @@ export async function getStudioProjects(viewerId?: string) {
     .from(projects)
     .leftJoin(
       projectMembers,
-      and(eq(projectMembers.projectId, projects.id), eq(projectMembers.projectRole, "lead")),
+      and(
+        eq(projectMembers.projectId, projects.id),
+        eq(projectMembers.projectRole, "lead"),
+      ),
     )
     .leftJoin(users, eq(users.id, projectMembers.userId));
 
@@ -158,7 +168,9 @@ export async function getStudioProjects(viewerId?: string) {
         .orderBy(desc(projects.updatedAt))
     : await query.orderBy(desc(projects.updatedAt));
 
-  const stackByProjectId = await technologyNamesByProjectIds(rows.map((row) => row.id));
+  const stackByProjectId = await technologyNamesByProjectIds(
+    rows.map((row) => row.id),
+  );
   return rows.map((row) => ({
     ...row,
     stackLabel: (stackByProjectId.get(row.id) ?? []).join(", "),
@@ -168,76 +180,84 @@ export async function getStudioProjects(viewerId?: string) {
 export async function getProjectById(id: string) {
   if (!isUuid(id)) return null;
 
-  const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+  const [project] = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.id, id))
+    .limit(1);
   if (!project) return null;
 
-  const [members, tech, updates, requests, milestones, deliverables] = await Promise.all([
-    db
-      .select({
-        userId: users.id,
-        name: users.name,
-        email: users.email,
-        role: users.role,
-        projectRole: projectMembers.projectRole,
-        assignedAt: projectMembers.createdAt,
-      })
-      .from(projectMembers)
-      .innerJoin(users, eq(users.id, projectMembers.userId))
-      .where(eq(projectMembers.projectId, id))
-      .orderBy(projectMembers.projectRole, users.name),
-    db
-      .select({
-        id: technologies.id,
-        name: technologies.name,
-        category: technologies.category,
-      })
-      .from(projectTechnologies)
-      .innerJoin(technologies, eq(technologies.id, projectTechnologies.technologyId))
-      .where(eq(projectTechnologies.projectId, id))
-      .orderBy(technologies.name),
-    db
-      .select({
-        id: projectUpdates.id,
-        title: projectUpdates.title,
-        body: projectUpdates.body,
-        visibility: projectUpdates.visibility,
-        createdAt: projectUpdates.createdAt,
-        authorName: users.name,
-      })
-      .from(projectUpdates)
-      .leftJoin(users, eq(users.id, projectUpdates.authorId))
-      .where(eq(projectUpdates.projectId, id))
-      .orderBy(desc(projectUpdates.createdAt)),
-    db
-      .select()
-      .from(projectRequests)
-      .where(eq(projectRequests.projectId, id))
-      .orderBy(desc(projectRequests.createdAt)),
-    db
-      .select()
-      .from(projectMilestones)
-      .where(eq(projectMilestones.projectId, id))
-      .orderBy(projectMilestones.sortOrder, projectMilestones.createdAt),
-    db
-      .select({
-        id: projectDeliverables.id,
-        projectId: projectDeliverables.projectId,
-        title: projectDeliverables.title,
-        description: projectDeliverables.description,
-        fileUrl: projectDeliverables.fileUrl,
-        fileName: projectDeliverables.fileName,
-        fileSize: projectDeliverables.fileSize,
-        contentType: projectDeliverables.contentType,
-        visibility: projectDeliverables.visibility,
-        uploadedById: projectDeliverables.uploadedById,
-        createdAt: projectDeliverables.createdAt,
-        uploaderName: users.name,
-      })
-      .from(projectDeliverables)
-      .leftJoin(users, eq(users.id, projectDeliverables.uploadedById))
-      .where(eq(projectDeliverables.projectId, id))
-      .orderBy(desc(projectDeliverables.createdAt)),
-  ]);
+  const [members, tech, updates, requests, milestones, deliverables] =
+    await Promise.all([
+      db
+        .select({
+          userId: users.id,
+          name: users.name,
+          email: users.email,
+          role: users.role,
+          projectRole: projectMembers.projectRole,
+          assignedAt: projectMembers.createdAt,
+        })
+        .from(projectMembers)
+        .innerJoin(users, eq(users.id, projectMembers.userId))
+        .where(eq(projectMembers.projectId, id))
+        .orderBy(projectMembers.projectRole, users.name),
+      db
+        .select({
+          id: technologies.id,
+          name: technologies.name,
+          category: technologies.category,
+        })
+        .from(projectTechnologies)
+        .innerJoin(
+          technologies,
+          eq(technologies.id, projectTechnologies.technologyId),
+        )
+        .where(eq(projectTechnologies.projectId, id))
+        .orderBy(technologies.name),
+      db
+        .select({
+          id: projectUpdates.id,
+          title: projectUpdates.title,
+          body: projectUpdates.body,
+          visibility: projectUpdates.visibility,
+          createdAt: projectUpdates.createdAt,
+          authorName: users.name,
+        })
+        .from(projectUpdates)
+        .leftJoin(users, eq(users.id, projectUpdates.authorId))
+        .where(eq(projectUpdates.projectId, id))
+        .orderBy(desc(projectUpdates.createdAt)),
+      db
+        .select()
+        .from(projectRequests)
+        .where(eq(projectRequests.projectId, id))
+        .orderBy(desc(projectRequests.createdAt)),
+      db
+        .select()
+        .from(projectMilestones)
+        .where(eq(projectMilestones.projectId, id))
+        .orderBy(projectMilestones.sortOrder, projectMilestones.createdAt),
+      db
+        .select({
+          id: projectDeliverables.id,
+          projectId: projectDeliverables.projectId,
+          title: projectDeliverables.title,
+          description: projectDeliverables.description,
+          fileUrl: projectDeliverables.fileUrl,
+          fileName: projectDeliverables.fileName,
+          fileSize: projectDeliverables.fileSize,
+          contentType: projectDeliverables.contentType,
+          visibility: projectDeliverables.visibility,
+          uploadedById: projectDeliverables.uploadedById,
+          createdAt: projectDeliverables.createdAt,
+          uploaderName: users.name,
+        })
+        .from(projectDeliverables)
+        .leftJoin(users, eq(users.id, projectDeliverables.uploadedById))
+        .where(eq(projectDeliverables.projectId, id))
+        .orderBy(desc(projectDeliverables.createdAt)),
+    ]);
 
   const activity = buildProjectActivityFeed(
     {
@@ -249,7 +269,16 @@ export async function getProjectById(id: string) {
     "studio",
   );
 
-  return { project, members, technologies: tech, updates, requests, milestones, deliverables, activity };
+  return {
+    project,
+    members,
+    technologies: tech,
+    updates,
+    requests,
+    milestones,
+    deliverables,
+    activity,
+  };
 }
 
 export async function getPublicProjects(): Promise<ContentProject[]> {
@@ -259,11 +288,17 @@ export async function getPublicProjects(): Promise<ContentProject[]> {
     .where(inArray(projects.status, [...PUBLIC_PROJECT_STATUSES]))
     .orderBy(desc(projects.featured), desc(projects.createdAt));
 
-  const stackByProjectId = await technologyNamesByProjectIds(rows.map((row) => row.id));
-  return rows.map((row) => toContentProject(row, stackByProjectId.get(row.id) ?? []));
+  const stackByProjectId = await technologyNamesByProjectIds(
+    rows.map((row) => row.id),
+  );
+  return rows.map((row) =>
+    toContentProject(row, stackByProjectId.get(row.id) ?? []),
+  );
 }
 
-export async function getPublicProject(slug: string): Promise<ContentProject | null> {
+export async function getPublicProject(
+  slug: string,
+): Promise<ContentProject | null> {
   const [row] = await db
     .select()
     .from(projects)
@@ -346,7 +381,10 @@ async function technologyNamesByProjectIds(
       name: technologies.name,
     })
     .from(projectTechnologies)
-    .innerJoin(technologies, eq(technologies.id, projectTechnologies.technologyId))
+    .innerJoin(
+      technologies,
+      eq(technologies.id, projectTechnologies.technologyId),
+    )
     .where(inArray(projectTechnologies.projectId, projectIds))
     .orderBy(technologies.name);
 
@@ -459,8 +497,11 @@ export async function getClientsOverview(): Promise<ClientOverviewRow[]> {
     slug: client.slug,
     contactEmail: client.contactEmail,
     memberCount: memberLinks.filter((row) => row.clientId === client.id).length,
-    projectCount: projectLinks.filter((row) => row.clientId === client.id).length,
-    pendingInviteCount: pendingInvites.filter((row) => row.clientId === client.id).length,
+    projectCount: projectLinks.filter((row) => row.clientId === client.id)
+      .length,
+    pendingInviteCount: pendingInvites.filter(
+      (row) => row.clientId === client.id,
+    ).length,
   }));
 }
 
@@ -488,8 +529,14 @@ export type ClientDetail = {
   projects: ClientLinkedProject[];
 };
 
-export async function getClientDetail(clientId: string): Promise<ClientDetail | null> {
-  const [client] = await db.select().from(clients).where(eq(clients.id, clientId)).limit(1);
+export async function getClientDetail(
+  clientId: string,
+): Promise<ClientDetail | null> {
+  const [client] = await db
+    .select()
+    .from(clients)
+    .where(eq(clients.id, clientId))
+    .limit(1);
   if (!client) return null;
 
   const [members, pendingInvites, projectRows] = await Promise.all([
@@ -581,7 +628,12 @@ export async function getPortalProjects(userId: string) {
         createdAt: projectUpdates.createdAt,
       })
       .from(projectUpdates)
-      .where(and(inArray(projectUpdates.projectId, ids), eq(projectUpdates.visibility, "client")))
+      .where(
+        and(
+          inArray(projectUpdates.projectId, ids),
+          eq(projectUpdates.visibility, "client"),
+        ),
+      )
       .orderBy(desc(projectUpdates.createdAt)),
   ]);
 
@@ -590,9 +642,11 @@ export async function getPortalProjects(userId: string) {
   return projectRows.map((project) => ({
     ...project,
     stackLabel: (stackByProjectId.get(project.id) ?? []).join(", "),
-    lead: members.find(
-      (member) => member.projectId === project.id && member.projectRole === "lead",
-    ) ?? null,
+    lead:
+      members.find(
+        (member) =>
+          member.projectId === project.id && member.projectRole === "lead",
+      ) ?? null,
     updates: updateRows.filter((update) => update.projectId === project.id),
   }));
 }
@@ -609,76 +663,83 @@ export async function getPortalProject(id: string, userId: string) {
     .limit(1);
   if (!project) return null;
 
-  const [updates, requests, members, clientReview, milestones, deliverables] = await Promise.all([
-    db
-      .select({
-        id: projectUpdates.id,
-        title: projectUpdates.title,
-        body: projectUpdates.body,
-        visibility: projectUpdates.visibility,
-        createdAt: projectUpdates.createdAt,
-        authorName: users.name,
-      })
-      .from(projectUpdates)
-      .leftJoin(users, eq(users.id, projectUpdates.authorId))
-      .where(
-        and(eq(projectUpdates.projectId, id), eq(projectUpdates.visibility, "client")),
-      )
-      .orderBy(desc(projectUpdates.createdAt)),
-    db
-      .select()
-      .from(projectRequests)
-      .where(eq(projectRequests.projectId, id))
-      .orderBy(desc(projectRequests.createdAt)),
-    db
-      .select({
-        name: users.name,
-        projectRole: projectMembers.projectRole,
-      })
-      .from(projectMembers)
-      .innerJoin(users, eq(users.id, projectMembers.userId))
-      .where(eq(projectMembers.projectId, id)),
-    project.clientId
-      ? db
-          .select()
-          .from(reviews)
-          .where(
-            and(
-              eq(reviews.projectId, id),
-              eq(reviews.clientId, project.clientId),
-              ne(reviews.status, "hidden"),
-            ),
-          )
-          .orderBy(desc(reviews.createdAt))
-          .limit(1)
-      : Promise.resolve([]),
-    db
-      .select()
-      .from(projectMilestones)
-      .where(eq(projectMilestones.projectId, id))
-      .orderBy(projectMilestones.sortOrder, projectMilestones.createdAt),
-    db
-      .select({
-        id: projectDeliverables.id,
-        projectId: projectDeliverables.projectId,
-        title: projectDeliverables.title,
-        description: projectDeliverables.description,
-        fileUrl: projectDeliverables.fileUrl,
-        fileName: projectDeliverables.fileName,
-        fileSize: projectDeliverables.fileSize,
-        contentType: projectDeliverables.contentType,
-        visibility: projectDeliverables.visibility,
-        uploadedById: projectDeliverables.uploadedById,
-        createdAt: projectDeliverables.createdAt,
-        uploaderName: users.name,
-      })
-      .from(projectDeliverables)
-      .leftJoin(users, eq(users.id, projectDeliverables.uploadedById))
-      .where(
-        and(eq(projectDeliverables.projectId, id), eq(projectDeliverables.visibility, "client")),
-      )
-      .orderBy(desc(projectDeliverables.createdAt)),
-  ]);
+  const [updates, requests, members, clientReview, milestones, deliverables] =
+    await Promise.all([
+      db
+        .select({
+          id: projectUpdates.id,
+          title: projectUpdates.title,
+          body: projectUpdates.body,
+          visibility: projectUpdates.visibility,
+          createdAt: projectUpdates.createdAt,
+          authorName: users.name,
+        })
+        .from(projectUpdates)
+        .leftJoin(users, eq(users.id, projectUpdates.authorId))
+        .where(
+          and(
+            eq(projectUpdates.projectId, id),
+            eq(projectUpdates.visibility, "client"),
+          ),
+        )
+        .orderBy(desc(projectUpdates.createdAt)),
+      db
+        .select()
+        .from(projectRequests)
+        .where(eq(projectRequests.projectId, id))
+        .orderBy(desc(projectRequests.createdAt)),
+      db
+        .select({
+          name: users.name,
+          projectRole: projectMembers.projectRole,
+        })
+        .from(projectMembers)
+        .innerJoin(users, eq(users.id, projectMembers.userId))
+        .where(eq(projectMembers.projectId, id)),
+      project.clientId
+        ? db
+            .select()
+            .from(reviews)
+            .where(
+              and(
+                eq(reviews.projectId, id),
+                eq(reviews.clientId, project.clientId),
+                ne(reviews.status, "hidden"),
+              ),
+            )
+            .orderBy(desc(reviews.createdAt))
+            .limit(1)
+        : Promise.resolve([]),
+      db
+        .select()
+        .from(projectMilestones)
+        .where(eq(projectMilestones.projectId, id))
+        .orderBy(projectMilestones.sortOrder, projectMilestones.createdAt),
+      db
+        .select({
+          id: projectDeliverables.id,
+          projectId: projectDeliverables.projectId,
+          title: projectDeliverables.title,
+          description: projectDeliverables.description,
+          fileUrl: projectDeliverables.fileUrl,
+          fileName: projectDeliverables.fileName,
+          fileSize: projectDeliverables.fileSize,
+          contentType: projectDeliverables.contentType,
+          visibility: projectDeliverables.visibility,
+          uploadedById: projectDeliverables.uploadedById,
+          createdAt: projectDeliverables.createdAt,
+          uploaderName: users.name,
+        })
+        .from(projectDeliverables)
+        .leftJoin(users, eq(users.id, projectDeliverables.uploadedById))
+        .where(
+          and(
+            eq(projectDeliverables.projectId, id),
+            eq(projectDeliverables.visibility, "client"),
+          ),
+        )
+        .orderBy(desc(projectDeliverables.createdAt)),
+    ]);
 
   const activity = buildProjectActivityFeed(
     {
@@ -690,7 +751,9 @@ export async function getPortalProject(id: string, userId: string) {
     "portal",
   );
 
-  const completedMilestones = milestones.filter((m) => m.status === "completed").length;
+  const completedMilestones = milestones.filter(
+    (m) => m.status === "completed",
+  ).length;
 
   return {
     project,
@@ -700,7 +763,9 @@ export async function getPortalProject(id: string, userId: string) {
     deliverables,
     activity,
     milestoneProgress:
-      milestones.length > 0 ? Math.round((completedMilestones / milestones.length) * 100) : null,
+      milestones.length > 0
+        ? Math.round((completedMilestones / milestones.length) * 100)
+        : null,
     lead: members.find((member) => member.projectRole === "lead") ?? null,
     review: clientReview[0] ?? null,
   };
@@ -709,9 +774,14 @@ export async function getPortalProject(id: string, userId: string) {
 export async function getPortalActivityFeed(
   userId: string,
   limit = 40,
-): Promise<(ProjectActivityItem & { projectId: string; projectTitle: string })[]> {
+): Promise<
+  (ProjectActivityItem & { projectId: string; projectTitle: string })[]
+> {
   const projects = await getPortalProjects(userId);
-  const combined: (ProjectActivityItem & { projectId: string; projectTitle: string })[] = [];
+  const combined: (ProjectActivityItem & {
+    projectId: string;
+    projectTitle: string;
+  })[] = [];
 
   for (const row of projects) {
     const detail = await getPortalProject(row.id, userId);
@@ -728,7 +798,6 @@ export async function getPortalActivityFeed(
   combined.sort((a, b) => b.at.getTime() - a.at.getTime());
   return combined.slice(0, limit);
 }
-
 
 export type StudioOverviewRequestItem = {
   id: string;
@@ -848,46 +917,62 @@ async function getRecentProjectUpdatesForOverview(viewerId?: string) {
 export async function getStudioOverview(options: StudioOverviewOptions) {
   const { projectViewerId, userId, founder } = options;
 
-  const [allProjects, allUsers, allTechnologies, unreadNotificationCount, openRequests, recentUpdates] =
-    await Promise.all([
-      getStudioProjects(projectViewerId),
-      founder ? getAllUsers() : Promise.resolve([]),
-      founder ? getTechnologies() : Promise.resolve([]),
-      getUnreadNotificationCount(userId, "studio"),
-      getOpenProjectRequestsForOverview(projectViewerId),
-      getRecentProjectUpdatesForOverview(projectViewerId),
-    ]);
+  const [
+    allProjects,
+    allUsers,
+    allTechnologies,
+    unreadNotificationCount,
+    openRequests,
+    recentUpdates,
+  ] = await Promise.all([
+    getStudioProjects(projectViewerId),
+    founder ? getAllUsers() : Promise.resolve([]),
+    founder ? getTechnologies() : Promise.resolve([]),
+    getUnreadNotificationCount(userId, "studio"),
+    getOpenProjectRequestsForOverview(projectViewerId),
+    getRecentProjectUpdatesForOverview(projectViewerId),
+  ]);
 
-  const draftCount = allProjects.filter((project) => project.status === "draft").length;
-  const publishedCount = allProjects.filter((project) => project.status === "published").length;
-  const completedCount = allProjects.filter((project) => project.status === "completed").length;
+  const draftCount = allProjects.filter(
+    (project) => project.status === "draft",
+  ).length;
+  const publishedCount = allProjects.filter(
+    (project) => project.status === "published",
+  ).length;
+  const completedCount = allProjects.filter(
+    (project) => project.status === "completed",
+  ).length;
   const publicPortfolioCount = publishedCount + completedCount;
 
-  const overviewRequests: StudioOverviewRequestItem[] = openRequests.map((request) => ({
-    id: request.id,
-    title: request.title,
-    description: request.description,
-    type: request.type,
-    priority: request.priority,
-    projectId: request.projectId,
-    projectTitle: request.projectTitle,
-    clientName: request.clientName,
-    authorName: request.authorName,
-    createdAt: request.createdAt,
-  }));
+  const overviewRequests: StudioOverviewRequestItem[] = openRequests.map(
+    (request) => ({
+      id: request.id,
+      title: request.title,
+      description: request.description,
+      type: request.type,
+      priority: request.priority,
+      projectId: request.projectId,
+      projectTitle: request.projectTitle,
+      clientName: request.clientName,
+      authorName: request.authorName,
+      createdAt: request.createdAt,
+    }),
+  );
 
-  const overviewUpdates: StudioOverviewUpdateItem[] = recentUpdates.map((update) => ({
-    id: update.id,
-    title: update.title,
-    body: update.body,
-    projectId: update.projectId,
-    projectTitle: update.projectTitle,
-    visibility: update.visibility,
-    authorName: update.authorName,
-    authorRole: update.authorRole,
-    projectRole: update.projectRole,
-    createdAt: update.createdAt,
-  }));
+  const overviewUpdates: StudioOverviewUpdateItem[] = recentUpdates.map(
+    (update) => ({
+      id: update.id,
+      title: update.title,
+      body: update.body,
+      projectId: update.projectId,
+      projectTitle: update.projectTitle,
+      visibility: update.visibility,
+      authorName: update.authorName,
+      authorRole: update.authorRole,
+      projectRole: update.projectRole,
+      createdAt: update.createdAt,
+    }),
+  );
 
   return {
     projectCount: allProjects.length,
@@ -927,7 +1012,9 @@ export async function getProjectEmailRecipients(projectId: string) {
 
   // A lead-team member working on the project can receive its email even when
   // they are not the assigned lead. Plain developers never do.
-  const teamLeads = rows.filter((row) => normalizeRole(row.role) === "lead" && row.email);
+  const teamLeads = rows.filter(
+    (row) => normalizeRole(row.role) === "lead" && row.email,
+  );
   if (teamLeads.length > 0) return teamLeads;
 
   const founders = await db

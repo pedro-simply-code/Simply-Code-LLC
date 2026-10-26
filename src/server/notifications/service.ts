@@ -25,7 +25,8 @@ export async function getNotificationFeed(
     limit: options.limit,
     cursor: options.cursor,
     unreadOnly: options.unreadOnly,
-    type: options.type as import("~/server/notifications/types").NotificationType | undefined,
+    type: options.type as
+      import("~/server/notifications/types").NotificationType | undefined,
     entityId: options.entityId,
     since: options.since,
     context: options.context,

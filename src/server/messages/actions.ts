@@ -56,9 +56,11 @@ export async function replyToContactMessage(formData: FormData) {
     parseMessageAttachmentsFromForm(formData),
   );
   const subject = `Re: your project enquiry${enquiry.service ? ` (${enquiry.service})` : ""}`;
-  const usePortal = recipient.channel === "portal" && recipient.portalUsers.length > 0;
+  const usePortal =
+    recipient.channel === "portal" && recipient.portalUsers.length > 0;
   const sendEmailToo = !usePortal || alsoEmail;
-  const channel = usePortal && sendEmailToo ? "both" : usePortal ? "portal" : "email";
+  const channel =
+    usePortal && sendEmailToo ? "both" : usePortal ? "portal" : "email";
 
   if (usePortal) {
     for (const portalUser of recipient.portalUsers) {

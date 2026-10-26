@@ -20,7 +20,7 @@ export function TeamGrid({ members }: TeamGridProps) {
             "w-full p-8 text-center sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.334rem)]",
           )}
         >
-          <div className="relative mx-auto mb-6 size-24 overflow-hidden rounded-full bg-gradient-to-br from-sc-accent-bright to-sc-accent">
+          <div className="from-sc-accent-bright to-sc-accent relative mx-auto mb-6 size-24 overflow-hidden rounded-full bg-gradient-to-br">
             {member.image ? (
               <Image
                 src={member.image}
@@ -35,12 +35,16 @@ export function TeamGrid({ members }: TeamGridProps) {
               </div>
             )}
           </div>
-          <h3 className="text-xl font-black tracking-tight uppercase">{member.name}</h3>
-          <p className="mt-2 text-[13px] font-semibold tracking-[0.12em] text-sc-accent uppercase">
+          <h3 className="text-xl font-black tracking-tight uppercase">
+            {member.name}
+          </h3>
+          <p className="text-sc-accent mt-2 text-[13px] font-semibold tracking-[0.12em] uppercase">
             {member.role}
           </p>
           {member.bio ? (
-            <p className="mt-4 text-sm leading-relaxed text-[#57524a]">{member.bio}</p>
+            <p className="mt-4 text-sm leading-relaxed text-[#57524a]">
+              {member.bio}
+            </p>
           ) : null}
           {member.linkedinUrl || member.githubUrl || member.portfolioUrl ? (
             <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -49,7 +53,7 @@ export function TeamGrid({ members }: TeamGridProps) {
                   href={member.linkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex size-9 items-center justify-center rounded-md bg-sc-section text-sc-ink ring-1 ring-[#15130f]/10 transition-colors hover:bg-sc-accent hover:text-white"
+                  className="bg-sc-section text-sc-ink hover:bg-sc-accent inline-flex size-9 items-center justify-center rounded-md ring-1 ring-[#15130f]/10 transition-colors hover:text-white"
                   aria-label={`${member.name} on LinkedIn`}
                 >
                   <Linkedin className="size-4" />
@@ -60,7 +64,7 @@ export function TeamGrid({ members }: TeamGridProps) {
                   href={member.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex size-9 items-center justify-center rounded-md bg-sc-section text-sc-ink ring-1 ring-[#15130f]/10 transition-colors hover:bg-sc-accent hover:text-white"
+                  className="bg-sc-section text-sc-ink hover:bg-sc-accent inline-flex size-9 items-center justify-center rounded-md ring-1 ring-[#15130f]/10 transition-colors hover:text-white"
                   aria-label={`${member.name} on GitHub`}
                 >
                   <Github className="size-4" />
@@ -71,7 +75,7 @@ export function TeamGrid({ members }: TeamGridProps) {
                   href={member.portfolioUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex size-9 items-center justify-center rounded-md bg-sc-section text-sc-ink ring-1 ring-[#15130f]/10 transition-colors hover:bg-sc-accent hover:text-white"
+                  className="bg-sc-section text-sc-ink hover:bg-sc-accent inline-flex size-9 items-center justify-center rounded-md ring-1 ring-[#15130f]/10 transition-colors hover:text-white"
                   aria-label={`${member.name} portfolio`}
                 >
                   <Globe className="size-4" />
@@ -81,10 +85,7 @@ export function TeamGrid({ members }: TeamGridProps) {
           ) : null}
           <div className="mt-6 flex flex-wrap justify-center gap-1.5">
             {member.skills.map((skill) => (
-              <span
-                key={skill}
-                className={appChip}
-              >
+              <span key={skill} className={appChip}>
                 {skill}
               </span>
             ))}

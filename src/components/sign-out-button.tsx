@@ -20,7 +20,7 @@ export function SignOutButton({ compact = false }: { compact?: boolean }) {
         title="Sign out"
         className={
           compact
-            ? "rounded-none border-[#15130f]/15 bg-white text-[#15130f] hover:bg-sc-section-alt hover:text-[#15130f]"
+            ? "hover:bg-sc-section-alt rounded-none border-[#15130f]/15 bg-white text-[#15130f] hover:text-[#15130f]"
             : undefined
         }
       >

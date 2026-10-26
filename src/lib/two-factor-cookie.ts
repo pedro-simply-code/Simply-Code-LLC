@@ -8,10 +8,15 @@ export function twoFactorCookieName(): string {
 }
 
 export function twoFactorCookieValue(userId: string): string {
-  return createHmac("sha256", env.AUTH_SECRET).update(`2fa:${userId}`).digest("hex");
+  return createHmac("sha256", env.AUTH_SECRET)
+    .update(`2fa:${userId}`)
+    .digest("hex");
 }
 
-export function isTwoFactorCookieValid(userId: string, cookieValue: string | undefined): boolean {
+export function isTwoFactorCookieValid(
+  userId: string,
+  cookieValue: string | undefined,
+): boolean {
   if (!cookieValue) return false;
   return cookieValue === twoFactorCookieValue(userId);
 }

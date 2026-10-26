@@ -20,7 +20,9 @@ export async function requirePortalProject(
   const [project] = await db
     .select({ id: projects.id })
     .from(projects)
-    .where(and(eq(projects.id, projectId), inArray(projects.clientId, clientIds)))
+    .where(
+      and(eq(projects.id, projectId), inArray(projects.clientId, clientIds)),
+    )
     .limit(1);
 
   if (!project) redirect("/portal");

@@ -34,7 +34,7 @@ export function MessageAttachmentsList({
                 alt={file.name}
                 width={320}
                 height={200}
-                className="max-h-48 w-auto object-contain bg-white/10"
+                className="max-h-48 w-auto bg-white/10 object-contain"
                 unoptimized
               />
             </a>
@@ -43,7 +43,10 @@ export function MessageAttachmentsList({
               href={file.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn("inline-flex items-center gap-2 text-xs font-medium", linkClass)}
+              className={cn(
+                "inline-flex items-center gap-2 text-xs font-medium",
+                linkClass,
+              )}
             >
               <FileText className="size-4 shrink-0 opacity-80" />
               <span className="truncate">{file.name}</span>

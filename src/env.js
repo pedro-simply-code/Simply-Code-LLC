@@ -7,8 +7,13 @@ export const env = createEnv({
     DB_TABLE_PREFIX: z
       .string()
       .min(1)
-      .regex(/^[a-z][a-z0-9_]*$/i, "Use letters, numbers, underscores; start with a letter"),
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+      .regex(
+        /^[a-z][a-z0-9_]*$/i,
+        "Use letters, numbers, underscores; start with a letter",
+      ),
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
     AUTH_SECRET: z.string().min(1),
     AUTH_URL: z.string().url().optional(),
     AUTH_GOOGLE_ID: z.string().min(1).optional(),

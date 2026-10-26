@@ -18,7 +18,10 @@ export function totpAuthUri(email: string, secret: string): string {
   });
 }
 
-export async function verifyTotpCode(secret: string, code: string): Promise<boolean> {
+export async function verifyTotpCode(
+  secret: string,
+  code: string,
+): Promise<boolean> {
   const normalized = code.replace(/\s/g, "");
   if (!/^\d{6}$/.test(normalized)) return false;
   const result = await verify({ secret, token: normalized });

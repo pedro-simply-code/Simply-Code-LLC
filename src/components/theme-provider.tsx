@@ -24,7 +24,9 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 function resolveTheme(setting: ThemeSetting): ResolvedTheme {
   if (typeof window === "undefined") return "light";
   if (setting === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   }
   return setting;
 }
@@ -40,7 +42,8 @@ function readStoredTheme(): ThemeSetting {
   if (typeof window === "undefined") return "system";
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "light" || stored === "dark" || stored === "system") return stored;
+    if (stored === "light" || stored === "dark" || stored === "system")
+      return stored;
   } catch {
     // ignore
   }
@@ -48,7 +51,9 @@ function readStoredTheme(): ThemeSetting {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(readStoredTheme()));
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
+    resolveTheme(readStoredTheme()),
+  );
 
   useEffect(() => {
     applyResolvedTheme(resolveTheme(readStoredTheme()));
@@ -84,7 +89,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [resolvedTheme, setTheme],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {

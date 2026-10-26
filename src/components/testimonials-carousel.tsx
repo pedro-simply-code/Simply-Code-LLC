@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Quote, Star } from "lucide-react";
-import {
-  UPWORK_PROFILE_URL,
-  type Testimonial,
-} from "~/content/testimonials";
+import { UPWORK_PROFILE_URL, type Testimonial } from "~/content/testimonials";
 import {
   testimonialRatingMeta,
   testimonialRatingScreenReader,
@@ -30,14 +27,20 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
     <figure className={cn(appPanelMuted, "flex h-full flex-col p-8")}>
       <div className="flex items-center justify-between gap-4">
-        <Quote className="size-7 text-sc-accent-bright" aria-hidden />
-        <div className="flex items-center gap-1 text-sc-accent-bright" aria-hidden>
+        <Quote className="text-sc-accent-bright size-7" aria-hidden />
+        <div
+          className="text-sc-accent-bright flex items-center gap-1"
+          aria-hidden
+        >
           {Array.from({ length: 5 }).map((_, index) => (
             <Star key={index} className="size-3.5 fill-current" />
           ))}
         </div>
         <span className="sr-only">
-          {testimonialRatingScreenReader(testimonial.rating, testimonial.source)}
+          {testimonialRatingScreenReader(
+            testimonial.rating,
+            testimonial.source,
+          )}
         </span>
       </div>
 
@@ -50,12 +53,16 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
           {testimonial.project}
         </p>
         <p className="mt-0.5 text-[12px] text-[#6f6a60]">
-          {testimonialRatingMeta(testimonial.rating, testimonial.period, testimonial.source)}
+          {testimonialRatingMeta(
+            testimonial.rating,
+            testimonial.period,
+            testimonial.source,
+          )}
         </p>
         {testimonial.projectSlug ? (
           <Link
             href={`/work/${testimonial.projectSlug}`}
-            className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase underline underline-offset-4 hover:text-sc-accent"
+            className="hover:text-sc-accent mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#15130f] uppercase underline underline-offset-4"
           >
             View project <ArrowRight className="size-3" />
           </Link>
@@ -124,7 +131,8 @@ export function TestimonialsCarousel({
         }}
         onTouchEnd={(event) => {
           if (touchStart.current === null) return;
-          const delta = (event.changedTouches[0]?.clientX ?? 0) - touchStart.current;
+          const delta =
+            (event.changedTouches[0]?.clientX ?? 0) - touchStart.current;
           touchStart.current = null;
           if (Math.abs(delta) > 50) goTo(current + (delta < 0 ? 1 : -1));
         }}
@@ -172,7 +180,7 @@ export function TestimonialsCarousel({
             aria-label="Previous reviews"
             className={cn(
               appIconButton,
-              "size-10 text-[#15130f] hover:text-sc-accent disabled:pointer-events-none disabled:opacity-30",
+              "hover:text-sc-accent size-10 text-[#15130f] disabled:pointer-events-none disabled:opacity-30",
             )}
           >
             <ArrowLeft className="size-4" />
@@ -184,7 +192,7 @@ export function TestimonialsCarousel({
             aria-label="Next reviews"
             className={cn(
               appIconButton,
-              "size-10 text-[#15130f] hover:text-sc-accent disabled:pointer-events-none disabled:opacity-30",
+              "hover:text-sc-accent size-10 text-[#15130f] disabled:pointer-events-none disabled:opacity-30",
             )}
           >
             <ArrowRight className="size-4" />
@@ -197,7 +205,7 @@ export function TestimonialsCarousel({
           href={UPWORK_PROFILE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.16em] text-[#15130f] uppercase underline underline-offset-4 transition-colors hover:text-sc-accent"
+          className="hover:text-sc-accent mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.16em] text-[#15130f] uppercase underline underline-offset-4 transition-colors"
         >
           Read all reviews on Upwork <ArrowUpRight className="size-3" />
         </a>

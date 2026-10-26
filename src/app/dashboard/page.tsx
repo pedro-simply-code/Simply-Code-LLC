@@ -7,9 +7,14 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold">Hello, {session?.user.name ?? session?.user.email}</h1>
+        <h1 className="text-2xl font-semibold">
+          Hello, {session?.user.name ?? session?.user.email}
+        </h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Role: <code className="rounded bg-muted px-1.5 py-0.5">{session?.user.role}</code>
+          Role:{" "}
+          <code className="bg-muted rounded px-1.5 py-0.5">
+            {session?.user.role}
+          </code>
         </p>
       </div>
       <DashboardNote />

@@ -10,8 +10,13 @@ export type NotificationItem = {
 
 export const NOTIFICATIONS_CHANGED_EVENT = "notifications:changed";
 
-export function emitNotificationsChanged(detail: { unread: number; id?: string }) {
-  window.dispatchEvent(new CustomEvent(NOTIFICATIONS_CHANGED_EVENT, { detail }));
+export function emitNotificationsChanged(detail: {
+  unread: number;
+  id?: string;
+}) {
+  window.dispatchEvent(
+    new CustomEvent(NOTIFICATIONS_CHANGED_EVENT, { detail }),
+  );
 }
 
 export async function markNotificationRead(id: string): Promise<number | null> {

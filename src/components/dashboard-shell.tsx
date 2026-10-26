@@ -144,7 +144,7 @@ export function DashboardShell({
       .toUpperCase() || "SC";
 
   return (
-    <div className="min-h-screen bg-sc-canvas text-sc-ink">
+    <div className="bg-sc-canvas text-sc-ink min-h-screen">
       {mobileOpen ? (
         <button
           type="button"
@@ -171,7 +171,10 @@ export function DashboardShell({
           </span>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label={`${subtitle} navigation`}>
+        <nav
+          className="flex-1 overflow-y-auto px-3 py-4"
+          aria-label={`${subtitle} navigation`}
+        >
           {sections.map(([section, items], index) => (
             <div
               key={section}
@@ -185,7 +188,7 @@ export function DashboardShell({
             >
               <p
                 className={cn(
-                  "px-3 pt-3 pb-1 text-[10px] font-bold tracking-[0.18em] text-sc-muted uppercase",
+                  "text-sc-muted px-3 pt-3 pb-1 text-[10px] font-bold tracking-[0.18em] uppercase",
                   collapsed && "lg:hidden",
                 )}
               >
@@ -208,7 +211,7 @@ export function DashboardShell({
                       collapsed && "lg:justify-center lg:px-0",
                       active
                         ? "border-sc-accent-bright bg-[#15130f] text-white"
-                        : "border-transparent text-sc-muted hover:bg-sc-section hover:text-sc-ink",
+                        : "text-sc-muted hover:bg-sc-section hover:text-sc-ink border-transparent",
                     )}
                   >
                     <Icon className="size-[18px] shrink-0" />
@@ -227,16 +230,18 @@ export function DashboardShell({
             href="/"
             title="Back to site"
             className={cn(
-              "flex items-center gap-3 px-3 py-2 text-[11px] font-bold tracking-[0.14em] text-sc-muted uppercase transition-colors hover:text-sc-ink",
+              "text-sc-muted hover:text-sc-ink flex items-center gap-3 px-3 py-2 text-[11px] font-bold tracking-[0.14em] uppercase transition-colors",
               collapsed && "lg:justify-center lg:px-0",
             )}
           >
             <Globe className="size-4 shrink-0" />
-            <span className={cn("truncate", collapsed && "lg:hidden")}>Back to site</span>
+            <span className={cn("truncate", collapsed && "lg:hidden")}>
+              Back to site
+            </span>
           </Link>
           <p
             className={cn(
-              "mt-2 px-3 text-[10px] leading-relaxed text-sc-muted",
+              "text-sc-muted mt-2 px-3 text-[10px] leading-relaxed",
               collapsed && "lg:hidden",
             )}
           >
@@ -273,7 +278,10 @@ export function DashboardShell({
               onClick={toggleCollapsed}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className={cn(appIconButton, "hidden size-10 shrink-0 lg:inline-flex")}
+              className={cn(
+                appIconButton,
+                "hidden size-10 shrink-0 lg:inline-flex",
+              )}
             >
               {collapsed ? (
                 <PanelLeftOpen className="size-4" />
@@ -287,10 +295,10 @@ export function DashboardShell({
             </span>
 
             <div className="hidden min-w-0 flex-col lg:flex">
-              <span className="text-[10px] font-bold tracking-[0.18em] text-sc-muted uppercase">
+              <span className="text-sc-muted text-[10px] font-bold tracking-[0.18em] uppercase">
                 {subtitle}
               </span>
-              <span className="truncate text-sm font-bold tracking-[-0.01em] text-sc-ink">
+              <span className="text-sc-ink truncate text-sm font-bold tracking-[-0.01em]">
                 {currentLabel}
               </span>
             </div>
@@ -302,10 +310,12 @@ export function DashboardShell({
                 {initials}
               </span>
               <span className="hidden flex-col leading-tight xl:flex">
-                <span className="max-w-[160px] truncate text-[12px] font-semibold text-sc-ink">
+                <span className="text-sc-ink max-w-[160px] truncate text-[12px] font-semibold">
                   {displayName}
                 </span>
-                <span className="text-[10px] text-sc-muted">{user.roleLabel}</span>
+                <span className="text-sc-muted text-[10px]">
+                  {user.roleLabel}
+                </span>
               </span>
             </div>
 

@@ -36,9 +36,11 @@ export function SiteMotionRoot({ children }: { children: React.ReactNode }) {
 
     const scan = () => {
       if (motionDisabledOnDocument()) return;
-      document.querySelectorAll(".site-reveal:not(.site-reveal-visible)").forEach((el) => {
-        observer.observe(el);
-      });
+      document
+        .querySelectorAll(".site-reveal:not(.site-reveal-visible)")
+        .forEach((el) => {
+          observer.observe(el);
+        });
     };
 
     scan();

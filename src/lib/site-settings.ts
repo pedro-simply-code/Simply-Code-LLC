@@ -12,12 +12,13 @@ export const SITE_CORNER_RADIUS_LABELS: Record<SiteCornerRadius, string> = {
   lg: "Large",
 };
 
-export const SITE_CORNER_RADIUS_DESCRIPTIONS: Record<SiteCornerRadius, string> = {
-  none: "0px — sharp corners on cards and controls.",
-  sm: "~4px cards · ~2px buttons and inputs.",
-  md: "~8px cards · ~6px buttons and inputs.",
-  lg: "~12px cards · ~8px buttons and inputs.",
-};
+export const SITE_CORNER_RADIUS_DESCRIPTIONS: Record<SiteCornerRadius, string> =
+  {
+    none: "0px — sharp corners on cards and controls.",
+    sm: "~4px cards · ~2px buttons and inputs.",
+    md: "~8px cards · ~6px buttons and inputs.",
+    lg: "~12px cards · ~8px buttons and inputs.",
+  };
 
 export function normalizeCornerRadius(
   value: unknown,
@@ -34,7 +35,12 @@ export function normalizeCornerRadius(
   return "md";
 }
 
-export const SITE_SURFACE_STYLES = ["shadow", "border", "both", "flat"] as const;
+export const SITE_SURFACE_STYLES = [
+  "shadow",
+  "border",
+  "both",
+  "flat",
+] as const;
 export type SiteSurfaceStyle = (typeof SITE_SURFACE_STYLES)[number];
 
 export const SITE_SURFACE_STYLE_LABELS: Record<SiteSurfaceStyle, string> = {
@@ -44,12 +50,13 @@ export const SITE_SURFACE_STYLE_LABELS: Record<SiteSurfaceStyle, string> = {
   flat: "Flat",
 };
 
-export const SITE_SURFACE_STYLE_DESCRIPTIONS: Record<SiteSurfaceStyle, string> = {
-  shadow: "Elevated panels and inset fields.",
-  border: "Flat panels and bordered fields.",
-  both: "Subtle depth with a clear edge.",
-  flat: "No shadow or border — color blocks only.",
-};
+export const SITE_SURFACE_STYLE_DESCRIPTIONS: Record<SiteSurfaceStyle, string> =
+  {
+    shadow: "Elevated panels and inset fields.",
+    border: "Flat panels and bordered fields.",
+    both: "Subtle depth with a clear edge.",
+    flat: "No shadow or border — color blocks only.",
+  };
 
 export const siteSettingsSchema = z.object({
   /** Raised panels, cards, and form fields. */
@@ -91,7 +98,8 @@ export function mergeSiteSettings(partial: unknown): SiteSettings {
   const parsed = siteSettingsSchema.safeParse(normalized);
   if (parsed.success) return parsed.data;
 
-  if (!normalized || typeof normalized !== "object") return DEFAULT_SITE_SETTINGS;
+  if (!normalized || typeof normalized !== "object")
+    return DEFAULT_SITE_SETTINGS;
 
   const loose = siteSettingsSchema.partial().safeParse(normalized);
   if (loose.success) {
@@ -113,7 +121,9 @@ export type SiteSettingsHtmlProps = {
   "data-site-motion": SiteSettings["motionLevel"];
 };
 
-export function siteSettingsHtmlProps(settings: SiteSettings): SiteSettingsHtmlProps {
+export function siteSettingsHtmlProps(
+  settings: SiteSettings,
+): SiteSettingsHtmlProps {
   return {
     "data-site-surface": settings.surfaceStyle,
     "data-site-radius": settings.cornerRadius,

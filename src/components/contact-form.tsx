@@ -28,7 +28,10 @@ function FieldError({ id, messages }: { id: string; messages?: string[] }) {
 }
 
 export function ContactForm() {
-  const [state, formAction, isPending] = useActionState(submitContact, INITIAL_CONTACT_STATE);
+  const [state, formAction, isPending] = useActionState(
+    submitContact,
+    INITIAL_CONTACT_STATE,
+  );
   const startedAtRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -43,10 +46,15 @@ export function ContactForm() {
     return (
       <div
         role="status"
-        className={cn(appPanel, "flex h-full flex-col justify-center p-8 sm:p-10")}
+        className={cn(
+          appPanel,
+          "flex h-full flex-col justify-center p-8 sm:p-10",
+        )}
       >
-        <CheckCircle2 className="size-10 text-sc-accent" />
-        <h3 className="mt-6 text-2xl font-black tracking-tight uppercase">Message sent</h3>
+        <CheckCircle2 className="text-sc-accent size-10" />
+        <h3 className="mt-6 text-2xl font-black tracking-tight uppercase">
+          Message sent
+        </h3>
         <p className="mt-3 text-[15px] leading-relaxed text-[#57524a]">
           {state.message ??
             "Thanks — your message is on its way. We reply within one business day."}
@@ -55,7 +63,7 @@ export function ContactForm() {
           Need to add something? Email us at{" "}
           <a
             href={`mailto:${SITE.email}`}
-            className="font-semibold text-[#15130f] underline underline-offset-4 hover:text-sc-accent"
+            className="hover:text-sc-accent font-semibold text-[#15130f] underline underline-offset-4"
           >
             {SITE.email}
           </a>
@@ -69,11 +77,22 @@ export function ContactForm() {
 
   return (
     <form action={formAction} className={cn(appPanel, "p-6 sm:p-8")} noValidate>
-      <input ref={startedAtRef} type="hidden" name="startedAt" defaultValue="" />
+      <input
+        ref={startedAtRef}
+        type="hidden"
+        name="startedAt"
+        defaultValue=""
+      />
 
       <div className="sr-only" aria-hidden="true">
         <label htmlFor="website">Leave this field empty</label>
-        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
 
       {state.status === "error" && state.message ? (
@@ -88,7 +107,10 @@ export function ContactForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <label htmlFor="name" className="text-[11px] font-bold tracking-[0.16em] uppercase">
+          <label
+            htmlFor="name"
+            className="text-[11px] font-bold tracking-[0.16em] uppercase"
+          >
             Full Name *
           </label>
           <input
@@ -106,7 +128,10 @@ export function ContactForm() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="email" className="text-[11px] font-bold tracking-[0.16em] uppercase">
+          <label
+            htmlFor="email"
+            className="text-[11px] font-bold tracking-[0.16em] uppercase"
+          >
             Email Address *
           </label>
           <input
@@ -126,7 +151,10 @@ export function ContactForm() {
 
       <div className="mt-5 grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <label htmlFor="company" className="text-[11px] font-bold tracking-[0.16em] uppercase">
+          <label
+            htmlFor="company"
+            className="text-[11px] font-bold tracking-[0.16em] uppercase"
+          >
             Company
           </label>
           <input
@@ -143,7 +171,10 @@ export function ContactForm() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="service" className="text-[11px] font-bold tracking-[0.16em] uppercase">
+          <label
+            htmlFor="service"
+            className="text-[11px] font-bold tracking-[0.16em] uppercase"
+          >
             What Do You Need? *
           </label>
           <select
@@ -169,7 +200,10 @@ export function ContactForm() {
       </div>
 
       <div className="mt-5 space-y-2">
-        <label htmlFor="message" className="text-[11px] font-bold tracking-[0.16em] uppercase">
+        <label
+          htmlFor="message"
+          className="text-[11px] font-bold tracking-[0.16em] uppercase"
+        >
           Project Details *
         </label>
         <textarea
@@ -194,7 +228,10 @@ export function ContactForm() {
       <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[12px] text-[#6f6a60]">
           By sending this form you agree to our{" "}
-          <a href="/privacy" className="underline underline-offset-4 hover:text-sc-accent">
+          <a
+            href="/privacy"
+            className="hover:text-sc-accent underline underline-offset-4"
+          >
             privacy policy
           </a>
           .
@@ -202,7 +239,7 @@ export function ContactForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#15130f] px-7 py-3.5 text-[12px] font-bold tracking-[0.16em] text-white uppercase transition-colors hover:bg-sc-accent disabled:cursor-not-allowed disabled:opacity-60"
+          className="hover:bg-sc-accent inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#15130f] px-7 py-3.5 text-[12px] font-bold tracking-[0.16em] text-white uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Sending…" : "Send Message"}
           <ArrowRight className="size-4" />

@@ -72,7 +72,9 @@ const organizationJsonLd = {
   ],
 };
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const siteSettings = await getSiteSettings();
   const siteHtmlProps = siteSettingsHtmlProps(siteSettings);
   const pathname = (await headers()).get("x-pathname") ?? "";
@@ -93,7 +95,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               type="application/ld+json"
               strategy="lazyOnload"
               dangerouslySetInnerHTML={{
-                __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
+                __html: JSON.stringify(organizationJsonLd).replace(
+                  /</g,
+                  "\\u003c",
+                ),
               }}
             />
             <Providers>{children}</Providers>

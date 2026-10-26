@@ -1,4 +1,7 @@
-import type { NotificationContext, NotificationType } from "~/server/notifications/types";
+import type {
+  NotificationContext,
+  NotificationType,
+} from "~/server/notifications/types";
 import { NOTIFICATION_TYPES } from "~/server/notifications/types";
 
 /** Portal users do not receive internal contact-form notifications. */
@@ -15,5 +18,7 @@ export function isNotificationTypeAllowed(
   type: string,
   context: NotificationContext,
 ): type is NotificationType {
-  return (allowedNotificationTypes(context) as readonly string[]).includes(type);
+  return (allowedNotificationTypes(context) as readonly string[]).includes(
+    type,
+  );
 }

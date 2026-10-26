@@ -8,7 +8,11 @@ import { Field, StudioHeader, StudioInput } from "~/components/studio/ui";
 import { TechnologiesCatalogView } from "~/components/studio/technologies-catalog-view";
 import { StudioViewToolbar } from "~/components/studio/studio-view-toggle";
 import { StudioPagination } from "~/components/studio/studio-pagination";
-import { paginateStudio, parseStudioPage, studioPageSummary } from "~/lib/studio-pagination";
+import {
+  paginateStudio,
+  parseStudioPage,
+  studioPageSummary,
+} from "~/lib/studio-pagination";
 import { parseStudioView } from "~/lib/studio-view";
 import { appGhostButtonLg } from "~/lib/surface";
 import { cn } from "~/lib/utils";
@@ -51,13 +55,16 @@ export default async function TechnologiesPage({
                 </Field>
                 <button
                   type="submit"
-                  className="w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+                  className="hover:bg-sc-accent w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
                 >
                   Add technology
                 </button>
               </form>
             </StudioFormDialog>
-            <a href="/studio/team" className={cn("inline-flex", appGhostButtonLg)}>
+            <a
+              href="/studio/team"
+              className={cn("inline-flex", appGhostButtonLg)}
+            >
               Assign on Team
             </a>
           </div>
@@ -66,7 +73,9 @@ export default async function TechnologiesPage({
 
       <StudioViewToolbar
         summary={
-          <span className="font-semibold text-[#15130f]">{technologies.length} technologies</span>
+          <span className="font-semibold text-[#15130f]">
+            {technologies.length} technologies
+          </span>
         }
         pageSummary={studioPageSummary(
           paginatedTech.page,
@@ -75,7 +84,10 @@ export default async function TechnologiesPage({
         )}
       />
       <TechnologiesCatalogView technologies={paginatedTech.items} view={view} />
-      <StudioPagination page={paginatedTech.page} totalPages={paginatedTech.totalPages} />
+      <StudioPagination
+        page={paginatedTech.page}
+        totalPages={paginatedTech.totalPages}
+      />
     </div>
   );
 }

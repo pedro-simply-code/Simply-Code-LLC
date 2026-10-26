@@ -5,5 +5,8 @@ export function projectDisplayYear(createdAt: Date | string): string {
 
 export function projectDisplayDate(createdAt: Date | string): string {
   const date = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    year: "numeric",
+  });
 }

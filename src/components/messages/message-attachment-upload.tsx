@@ -47,7 +47,9 @@ export function MessageAttachmentUpload({
 
     const remaining = MESSAGE_ATTACHMENT_MAX_COUNT - attachments.length;
     if (remaining <= 0) {
-      appToast.error(`You can attach up to ${MESSAGE_ATTACHMENT_MAX_COUNT} files.`);
+      appToast.error(
+        `You can attach up to ${MESSAGE_ATTACHMENT_MAX_COUNT} files.`,
+      );
       return;
     }
 
@@ -89,7 +91,9 @@ export function MessageAttachmentUpload({
       }
 
       if (next.length) {
-        setAttachments((prev) => [...prev, ...next].slice(0, MESSAGE_ATTACHMENT_MAX_COUNT));
+        setAttachments((prev) =>
+          [...prev, ...next].slice(0, MESSAGE_ATTACHMENT_MAX_COUNT),
+        );
       }
     } catch {
       appToast.error("Upload failed. Try again.");
@@ -110,7 +114,9 @@ export function MessageAttachmentUpload({
         className="sr-only"
         multiple
         accept={MESSAGE_ATTACHMENT_ACCEPT}
-        disabled={isUploading || attachments.length >= MESSAGE_ATTACHMENT_MAX_COUNT}
+        disabled={
+          isUploading || attachments.length >= MESSAGE_ATTACHMENT_MAX_COUNT
+        }
         onChange={(event) => {
           const list = event.target.files;
           if (list?.length) void addFiles(list);
@@ -124,8 +130,10 @@ export function MessageAttachmentUpload({
           disabled={
             isUploading || attachments.length >= MESSAGE_ATTACHMENT_MAX_COUNT
           }
-          onClick={() => document.getElementById("message-attachment-input")?.click()}
-          className="inline-flex items-center gap-2 rounded-md border border-[#15130f]/15 bg-white px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase hover:border-sc-accent hover:text-sc-accent disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() =>
+            document.getElementById("message-attachment-input")?.click()
+          }
+          className="hover:border-sc-accent hover:text-sc-accent inline-flex items-center gap-2 rounded-md border border-[#15130f]/15 bg-white px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Paperclip className="size-3.5" />
           {isUploading ? "Uploading…" : "Add files"}
@@ -134,14 +142,16 @@ export function MessageAttachmentUpload({
       </div>
 
       {attachments.length > 0 ? (
-        <ul className="space-y-2 rounded-md border border-[#15130f]/10 bg-sc-section-alt/30 p-3">
+        <ul className="bg-sc-section-alt/30 space-y-2 rounded-md border border-[#15130f]/10 p-3">
           {attachments.map((file) => (
             <li
               key={file.url}
               className="flex items-center justify-between gap-2 text-xs text-[#57524a]"
             >
               <span className="min-w-0 truncate font-medium">{file.name}</span>
-              <span className="shrink-0 text-[#9a9488]">{formatBytes(file.size)}</span>
+              <span className="shrink-0 text-[#9a9488]">
+                {formatBytes(file.size)}
+              </span>
               <button
                 type="button"
                 aria-label={`Remove ${file.name}`}

@@ -37,7 +37,9 @@ function aggregatePortalUsers(
   return [...byUser.values()];
 }
 
-export async function resolveContactRecipient(email: string): Promise<ContactRecipient> {
+export async function resolveContactRecipient(
+  email: string,
+): Promise<ContactRecipient> {
   const normalized = email.trim().toLowerCase();
   if (!normalized) {
     return { email, channel: "email", portalUsers: [] };
@@ -52,7 +54,9 @@ export async function resolveContactRecipient(email: string): Promise<ContactRec
     .from(users)
     .innerJoin(clientMembers, eq(clientMembers.userId, users.id))
     .innerJoin(clients, eq(clients.id, clientMembers.clientId))
-    .where(and(eq(users.role, "client"), sql`lower(${users.email}) = ${normalized}`));
+    .where(
+      and(eq(users.role, "client"), sql`lower(${users.email}) = ${normalized}`),
+    );
 
   const portalUsers = aggregatePortalUsers(rows);
   return {
@@ -65,7 +69,9 @@ export async function resolveContactRecipient(email: string): Promise<ContactRec
 export async function resolveContactRecipientsByEmail(
   emails: string[],
 ): Promise<Map<string, ContactRecipient>> {
-  const normalized = [...new Set(emails.map((e) => e.trim().toLowerCase()).filter(Boolean))];
+  const normalized = [
+    ...new Set(emails.map((e) => e.trim().toLowerCase()).filter(Boolean)),
+  ];
   const map = new Map<string, ContactRecipient>();
   if (normalized.length === 0) return map;
 
@@ -93,12 +99,19 @@ export async function resolveContactRecipientsByEmail(
     map.set(email, { email, channel: "email", portalUsers: [] });
   }
 
-  const grouped = new Map<string, { userId: string; name: string | null; clientName: string }[]>();
+  const grouped = new Map<
+    string,
+    { userId: string; name: string | null; clientName: string }[]
+  >();
   for (const row of rows) {
     if (!row.email) continue;
     const key = row.email.trim().toLowerCase();
     const list = grouped.get(key) ?? [];
-    list.push({ userId: row.userId, name: row.name, clientName: row.clientName });
+    list.push({
+      userId: row.userId,
+      name: row.name,
+      clientName: row.clientName,
+    });
     grouped.set(key, list);
   }
 

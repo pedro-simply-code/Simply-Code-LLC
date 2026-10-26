@@ -1,8 +1,10 @@
 /** Shared raised surfaces, inputs, and controls (driven by site settings CSS variables). */
 
-export const appPanel = "site-elevated site-radius-lg bg-sc-section text-sc-ink";
+export const appPanel =
+  "site-elevated site-radius-lg bg-sc-section text-sc-ink";
 
-export const appPanelMuted = "site-elevated-muted site-radius-lg bg-sc-section-alt/90 text-sc-ink";
+export const appPanelMuted =
+  "site-elevated-muted site-radius-lg bg-sc-section-alt/90 text-sc-ink";
 
 export const appPanelHover = "site-elevated-hover";
 
@@ -50,14 +52,11 @@ export const appIconButton =
 const appInputFocus =
   "focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--site-accent-focus)]";
 
-export const appInput =
-  `site-input-surface site-radius-md w-full border-0 bg-sc-section px-3 py-2 text-sm text-sc-ink ring-1 ring-[#15130f]/10 transition-[box-shadow,ring-color] placeholder:text-[#9a9488] ${appInputFocus} aria-[invalid=true]:ring-red-500/50`;
+export const appInput = `site-input-surface site-radius-md w-full border-0 bg-sc-section px-3 py-2 text-sm text-sc-ink ring-1 ring-[#15130f]/10 transition-[box-shadow,ring-color] placeholder:text-[#9a9488] ${appInputFocus} aria-[invalid=true]:ring-red-500/50`;
 
-export const appInputLg =
-  `site-input-surface site-radius-md w-full border-0 bg-sc-section px-4 py-3 text-sm text-sc-ink ring-1 ring-[#15130f]/10 transition-[box-shadow,ring-color] placeholder:text-[#6f6a60] ${appInputFocus} aria-[invalid=true]:ring-red-500/50`;
+export const appInputLg = `site-input-surface site-radius-md w-full border-0 bg-sc-section px-4 py-3 text-sm text-sc-ink ring-1 ring-[#15130f]/10 transition-[box-shadow,ring-color] placeholder:text-[#6f6a60] ${appInputFocus} aria-[invalid=true]:ring-red-500/50`;
 
-export const appInputOnMuted =
-  `site-input-surface site-radius-md w-full border-0 bg-sc-section-alt px-3 py-2 text-sm text-sc-ink ring-1 ring-[#15130f]/10 transition-[box-shadow,ring-color] ${appInputFocus}`;
+export const appInputOnMuted = `site-input-surface site-radius-md w-full border-0 bg-sc-section-alt px-3 py-2 text-sm text-sc-ink ring-1 ring-[#15130f]/10 transition-[box-shadow,ring-color] ${appInputFocus}`;
 
 export const appChip =
   "site-control site-radius-md bg-sc-section px-2 py-1 text-[10px] font-bold tracking-[0.1em] uppercase text-sc-ink";
@@ -82,7 +81,8 @@ export const appNotificationCountBadgeSm =
   "app-notification-badge inline-flex min-w-[1.125rem] items-center justify-center rounded-full px-1.5 text-[9px] font-bold text-white";
 
 /** Highlight for unread notification rows (dropdown + notifications page). */
-export const appNotificationUnreadRow = "app-notification-unread app-notification-unread-accent";
+export const appNotificationUnreadRow =
+  "app-notification-unread app-notification-unread-accent";
 
 export const appShellAside = "site-shell-aside bg-sc-section-alt text-sc-ink";
 

@@ -15,7 +15,9 @@ export default async function PortalProjectPage({
   const { id } = await params;
   const { review: reviewStatus } = await searchParams;
   const session = await auth();
-  const detail = session?.user.id ? await getPortalProject(id, session.user.id) : null;
+  const detail = session?.user.id
+    ? await getPortalProject(id, session.user.id)
+    : null;
   if (!detail) notFound();
 
   return <PortalProjectWorkspace detail={detail} reviewStatus={reviewStatus} />;

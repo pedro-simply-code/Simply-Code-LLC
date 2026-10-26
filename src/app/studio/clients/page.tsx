@@ -8,7 +8,11 @@ import { ClientsListView } from "~/components/studio/clients-list-view";
 import { StudioFormDialog } from "~/components/studio/studio-form-dialog";
 import { StudioViewToolbar } from "~/components/studio/studio-view-toggle";
 import { StudioPagination } from "~/components/studio/studio-pagination";
-import { paginateStudio, parseStudioPage, studioPageSummary } from "~/lib/studio-pagination";
+import {
+  paginateStudio,
+  parseStudioPage,
+  studioPageSummary,
+} from "~/lib/studio-pagination";
 import { parseStudioView } from "~/lib/studio-view";
 
 export const dynamic = "force-dynamic";
@@ -45,12 +49,19 @@ export default async function ClientsPage({
               <Field label="Organization name">
                 <StudioInput name="name" required placeholder="Acme Inc." />
               </Field>
-              <Field label="Contact email" hint="Optional — billing or main contact, not portal login.">
-                <StudioInput name="contactEmail" type="email" placeholder="hello@acme.com" />
+              <Field
+                label="Contact email"
+                hint="Optional — billing or main contact, not portal login."
+              >
+                <StudioInput
+                  name="contactEmail"
+                  type="email"
+                  placeholder="hello@acme.com"
+                />
               </Field>
               <button
                 type="submit"
-                className="w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+                className="hover:bg-sc-accent w-fit rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
               >
                 Create & continue
               </button>
@@ -62,13 +73,21 @@ export default async function ClientsPage({
       <StudioViewToolbar
         summary={
           <span className="font-semibold text-[#15130f]">
-            {clients.length} {clients.length === 1 ? "organization" : "organizations"}
+            {clients.length}{" "}
+            {clients.length === 1 ? "organization" : "organizations"}
           </span>
         }
-        pageSummary={studioPageSummary(paginated.page, paginated.pageSize, paginated.total)}
+        pageSummary={studioPageSummary(
+          paginated.page,
+          paginated.pageSize,
+          paginated.total,
+        )}
       />
       <ClientsListView clients={paginated.items} view={view} />
-      <StudioPagination page={paginated.page} totalPages={paginated.totalPages} />
+      <StudioPagination
+        page={paginated.page}
+        totalPages={paginated.totalPages}
+      />
     </div>
   );
 }

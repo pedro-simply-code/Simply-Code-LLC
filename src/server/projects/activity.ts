@@ -1,8 +1,5 @@
 export type ProjectActivityKind =
-  | "update"
-  | "request"
-  | "deliverable"
-  | "milestone";
+  "update" | "request" | "deliverable" | "milestone";
 
 export type ProjectActivityItem = {
   id: string;
@@ -62,7 +59,9 @@ export function buildProjectActivityFeed(
       title: update.title,
       body: update.body,
       at: update.createdAt,
-      meta: update.authorName ? `Update · ${update.authorName}` : "Progress update",
+      meta: update.authorName
+        ? `Update · ${update.authorName}`
+        : "Progress update",
     });
   }
 
@@ -85,7 +84,9 @@ export function buildProjectActivityFeed(
       title: file.title,
       body: file.description || file.fileName,
       at: file.createdAt,
-      meta: file.uploaderName ? `Deliverable · ${file.uploaderName}` : "New deliverable",
+      meta: file.uploaderName
+        ? `Deliverable · ${file.uploaderName}`
+        : "New deliverable",
     });
   }
 

@@ -17,7 +17,13 @@ type ReviewRow = {
   projectTitle: string | null;
 };
 
-function ReviewStatusBadge({ status, source }: { status: string; source: string }) {
+function ReviewStatusBadge({
+  status,
+  source,
+}: {
+  status: string;
+  source: string;
+}) {
   const needsModeration = status === "pending" && source === "client";
   const published = status === "approved";
   const hidden = status === "hidden";
@@ -35,7 +41,8 @@ function ReviewStatusBadge({ status, source }: { status: string; source: string 
         {reviewStatusLabel(status)}
       </span>
       <span className="text-[10px] font-bold tracking-[0.1em] text-[#9a9488] uppercase">
-        {reviewSourceLabel(source)} · {needsModeration ? "needs approval" : "curated"}
+        {reviewSourceLabel(source)} ·{" "}
+        {needsModeration ? "needs approval" : "curated"}
       </span>
     </div>
   );
@@ -50,7 +57,7 @@ function ReviewModerationActions({ review }: { review: ReviewRow }) {
           <input type="hidden" name="status" value="approved" />
           <button
             type="submit"
-            className="rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
+            className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
           >
             Approve & publish
           </button>
@@ -72,7 +79,9 @@ function ReviewModerationActions({ review }: { review: ReviewRow }) {
   if (review.status === "approved") {
     return (
       <div className="flex flex-wrap items-center gap-2">
-        <p className="text-[11px] text-[#6f6a60]">Live on the marketing site.</p>
+        <p className="text-[11px] text-[#6f6a60]">
+          Live on the marketing site.
+        </p>
         <form action={setReviewStatus}>
           <input type="hidden" name="reviewId" value={review.id} />
           <input type="hidden" name="status" value="hidden" />
@@ -95,7 +104,7 @@ function ReviewModerationActions({ review }: { review: ReviewRow }) {
         <input type="hidden" name="status" value="approved" />
         <button
           type="submit"
-          className="rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent"
+          className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
         >
           Approve & publish
         </button>
@@ -127,7 +136,7 @@ export function ReviewsListView({
           {review.rating}/5 · {new Date(review.createdAt).toLocaleDateString()}
         </p>
       </div>
-      <blockquote className="mt-3 text-sm leading-relaxed text-[#15130f] line-clamp-4">
+      <blockquote className="mt-3 line-clamp-4 text-sm leading-relaxed text-[#15130f]">
         &ldquo;{review.quote}&rdquo;
       </blockquote>
       <p className="mt-2 text-[11px] text-[#6f6a60]">
@@ -146,7 +155,10 @@ export function ReviewsListView({
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {reviews.map((review) => (
-          <article key={review.id} className={cn(appPanel, appPanelHover, "p-4")}>
+          <article
+            key={review.id}
+            className={cn(appPanel, appPanelHover, "p-4")}
+          >
             {card(review)}
           </article>
         ))}
@@ -157,7 +169,9 @@ export function ReviewsListView({
   return (
     <ul className={cn(appPanel, "divide-y divide-[#15130f]/10")}>
       {reviews.map((review) => (
-        <li key={review.id} className="px-4 py-4">{card(review)}</li>
+        <li key={review.id} className="px-4 py-4">
+          {card(review)}
+        </li>
       ))}
     </ul>
   );

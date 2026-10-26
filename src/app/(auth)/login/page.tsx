@@ -2,7 +2,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LoginForm } from "~/app/(auth)/login/login-form";
-import { AuthFooterLinks, AuthLink, AuthScreen } from "~/components/auth/auth-screen";
+import {
+  AuthFooterLinks,
+  AuthLink,
+  AuthScreen,
+} from "~/components/auth/auth-screen";
 
 export const metadata: Metadata = {
   title: "Sign in",

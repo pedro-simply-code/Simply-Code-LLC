@@ -71,7 +71,8 @@ export function sanitizeMessageAttachments(
 
   return parsed.data.filter(
     (item) =>
-      isUploadThingFileUrl(item.url) && isAllowedAttachmentMime(item.contentType),
+      isUploadThingFileUrl(item.url) &&
+      isAllowedAttachmentMime(item.contentType),
   );
 }
 
@@ -85,8 +86,12 @@ export function parseMessageAttachmentsJson(raw: string): MessageAttachment[] {
   }
 }
 
-export function parseMessageAttachmentsFromForm(formData: FormData): MessageAttachment[] {
-  return parseMessageAttachmentsJson(String(formData.get("attachmentsJson") ?? ""));
+export function parseMessageAttachmentsFromForm(
+  formData: FormData,
+): MessageAttachment[] {
+  return parseMessageAttachmentsJson(
+    String(formData.get("attachmentsJson") ?? ""),
+  );
 }
 
 export function isImageAttachment(contentType: string): boolean {

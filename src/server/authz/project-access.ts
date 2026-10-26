@@ -18,7 +18,12 @@ export async function userHasStudioProjectAccess(
   const [membership] = await db
     .select({ projectRole: projectMembers.projectRole })
     .from(projectMembers)
-    .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, userId)))
+    .where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.userId, userId),
+      ),
+    )
     .limit(1);
 
   return !!membership;

@@ -42,11 +42,15 @@ function initials(name: string | null, email: string | null): string {
 
 function TeamAvatar({ person }: { person: Person }) {
   return (
-    <div
-      className="relative size-20 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-sc-accent-bright to-sc-accent ring-2 ring-white shadow-[0_2px_12px_rgba(21,19,15,0.1)]"
-    >
+    <div className="from-sc-accent-bright to-sc-accent relative size-20 shrink-0 overflow-hidden rounded-full bg-gradient-to-br shadow-[0_2px_12px_rgba(21,19,15,0.1)] ring-2 ring-white">
       {person.image ? (
-        <Image src={person.image} alt="" fill sizes="80px" className="object-cover" />
+        <Image
+          src={person.image}
+          alt=""
+          fill
+          sizes="80px"
+          className="object-cover"
+        />
       ) : (
         <div className="flex size-full flex-col items-center justify-center text-white">
           <span className="text-lg font-black tracking-tight">
@@ -72,7 +76,9 @@ function SkillChips({ technologies }: { technologies: AssignedTechnology[] }) {
   return (
     <ul className="flex flex-wrap gap-1.5">
       {labels.slice(0, 8).map((skill) => (
-        <li key={skill} className={cn(appChip, "text-[9px]")}>{skill}</li>
+        <li key={skill} className={cn(appChip, "text-[9px]")}>
+          {skill}
+        </li>
       ))}
       {labels.length > 8 ? (
         <li className={cn(appChip, "text-[9px]")}>+{labels.length - 8}</li>
@@ -104,19 +110,24 @@ export function TeamMembersView({
           const skillLabel = "Skills";
 
           return (
-            <article key={person.id} className={cn(appPanel, appPanelHover, "flex flex-col p-5")}>
+            <article
+              key={person.id}
+              className={cn(appPanel, appPanelHover, "flex flex-col p-5")}
+            >
               <div className="flex flex-col items-center text-center">
                 <TeamAvatar person={person} />
                 <h3 className="mt-4 text-sm font-bold text-[#15130f]">
                   {person.name ?? person.email}
                   {isSelf ? (
-                    <span className="ml-2 text-[10px] font-bold tracking-[0.12em] text-sc-accent uppercase">
+                    <span className="text-sc-accent ml-2 text-[10px] font-bold tracking-[0.12em] uppercase">
                       You
                     </span>
                   ) : null}
                 </h3>
-                <p className="mt-1 text-[11px] text-[#6f6a60]">{person.email}</p>
-                <p className="mt-2 text-[12px] font-semibold tracking-[0.08em] text-sc-accent uppercase">
+                <p className="mt-1 text-[11px] text-[#6f6a60]">
+                  {person.email}
+                </p>
+                <p className="text-sc-accent mt-2 text-[12px] font-semibold tracking-[0.08em] uppercase">
                   {person.title?.trim() || roleLabel(person.role)}
                 </p>
                 <div className="mt-3">
@@ -171,7 +182,10 @@ export function TeamMembersView({
         const isSelf = person.id === currentUserId;
 
         return (
-          <li key={person.id} className="flex flex-wrap items-start gap-4 px-4 py-5">
+          <li
+            key={person.id}
+            className="flex flex-wrap items-start gap-4 px-4 py-5"
+          >
             <TeamAvatar person={person} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -179,7 +193,7 @@ export function TeamMembersView({
                   <p className="text-sm font-semibold">
                     {person.name ?? person.email}
                     {isSelf ? (
-                      <span className="ml-2 text-[10px] font-bold tracking-[0.12em] text-sc-accent uppercase">
+                      <span className="text-sc-accent ml-2 text-[10px] font-bold tracking-[0.12em] uppercase">
                         You
                       </span>
                     ) : null}

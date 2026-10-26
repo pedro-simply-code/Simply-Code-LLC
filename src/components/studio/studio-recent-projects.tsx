@@ -51,7 +51,9 @@ function OverviewProjectMetaLine({
   return (
     <p className="text-[11px] leading-snug text-[#57524a]">
       <span className="font-bold text-[#15130f]">{label}:</span>{" "}
-      <span className={cn("text-[#57524a]", capitalizeValue && "capitalize")}>{value}</span>
+      <span className={cn("text-[#57524a]", capitalizeValue && "capitalize")}>
+        {value}
+      </span>
     </p>
   );
 }
@@ -60,7 +62,11 @@ function OverviewProjectSummary({ summary }: { summary?: string }) {
   const text = summary?.trim();
   if (!text) return null;
 
-  return <p className="mt-px line-clamp-1 text-[11px] leading-snug text-[#6f6a60]">{text}</p>;
+  return (
+    <p className="mt-px line-clamp-1 text-[11px] leading-snug text-[#6f6a60]">
+      {text}
+    </p>
+  );
 }
 
 function OverviewProjectMeta({ project }: { project: RecentProject }) {
@@ -72,8 +78,15 @@ function OverviewProjectMeta({ project }: { project: RecentProject }) {
         {project.stackLabel || "No stack"}
       </p>
       <div className="space-y-0.5 border-t border-[#15130f]/8 pt-1">
-        <OverviewProjectMetaLine label="Lead" value={overviewProjectLeadLabel(project)} />
-        <OverviewProjectMetaLine label="Status" value={statusLabel} capitalizeValue />
+        <OverviewProjectMetaLine
+          label="Lead"
+          value={overviewProjectLeadLabel(project)}
+        />
+        <OverviewProjectMetaLine
+          label="Status"
+          value={statusLabel}
+          capitalizeValue
+        />
         {project.clientName ? (
           <OverviewProjectMetaLine label="Client" value={project.clientName} />
         ) : null}
@@ -100,7 +113,9 @@ function OverviewProjectCell({
   const inner = (
     <>
       <div className="min-w-0">
-        <p className="text-sm font-semibold hover:text-sc-accent">{project.title}</p>
+        <p className="hover:text-sc-accent text-sm font-semibold">
+          {project.title}
+        </p>
         <OverviewProjectSummary summary={project.summary} />
         <OverviewProjectMeta project={project} />
       </div>
@@ -115,7 +130,10 @@ function OverviewProjectCell({
   }
 
   return (
-    <Link href={`/studio/projects/${project.id}`} className={overviewProjectGridCellClass()}>
+    <Link
+      href={`/studio/projects/${project.id}`}
+      className={overviewProjectGridCellClass()}
+    >
       {inner}
     </Link>
   );
@@ -131,7 +149,7 @@ function OverviewProjectListRow({
   const title = asLink ? (
     <Link
       href={`/studio/projects/${project.id}`}
-      className="text-sm font-semibold hover:text-sc-accent"
+      className="hover:text-sc-accent text-sm font-semibold"
     >
       {project.title}
     </Link>
@@ -187,11 +205,14 @@ export function StudioRecentProjects({
                     key={key}
                     className={cn(
                       overviewPreviewListItemClass,
-                      "invisible pointer-events-none select-none",
+                      "pointer-events-none invisible select-none",
                     )}
                     aria-hidden
                   >
-                    <OverviewProjectListRow project={overviewProjectGhost} asLink={false} />
+                    <OverviewProjectListRow
+                      project={overviewProjectGhost}
+                      asLink={false}
+                    />
                   </li>
                 );
               }
@@ -209,10 +230,13 @@ export function StudioRecentProjects({
                 return (
                   <div
                     key={key}
-                    className="invisible pointer-events-none select-none"
+                    className="pointer-events-none invisible select-none"
                     aria-hidden
                   >
-                    <OverviewProjectCell project={overviewProjectGhost} asLink={false} />
+                    <OverviewProjectCell
+                      project={overviewProjectGhost}
+                      asLink={false}
+                    />
                   </div>
                 );
               }
@@ -232,7 +256,9 @@ export function StudioRecentProjects({
             className={cn(appPanel, appPanelHover, "block p-4")}
           >
             <div className="min-w-0">
-              <p className="text-sm font-semibold hover:text-sc-accent">{project.title}</p>
+              <p className="hover:text-sc-accent text-sm font-semibold">
+                {project.title}
+              </p>
               <p className="mt-1 text-[11px] text-[#6f6a60]">
                 {project.stackLabel || "No stack"} · {project.status}
               </p>
@@ -266,11 +292,14 @@ export function StudioRecentProjects({
                   key={key}
                   className={cn(
                     overviewPreviewListItemClass,
-                    "invisible pointer-events-none select-none",
+                    "pointer-events-none invisible select-none",
                   )}
                   aria-hidden
                 >
-                  <OverviewProjectListRow project={overviewProjectGhost} asLink={false} />
+                  <OverviewProjectListRow
+                    project={overviewProjectGhost}
+                    asLink={false}
+                  />
                 </li>
               );
             }
@@ -295,7 +324,7 @@ export function StudioRecentProjects({
           <div>
             <Link
               href={`/studio/projects/${project.id}`}
-              className="text-sm font-semibold hover:text-sc-accent"
+              className="hover:text-sc-accent text-sm font-semibold"
             >
               {project.title}
             </Link>

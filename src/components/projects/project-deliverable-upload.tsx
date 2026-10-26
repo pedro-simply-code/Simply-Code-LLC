@@ -35,7 +35,7 @@ export function ProjectDeliverableUpload({
       <input
         type="file"
         accept={MESSAGE_ATTACHMENT_ACCEPT}
-        className="block w-full text-sm text-[#57524a] file:mr-3 file:rounded-md file:border-0 file:bg-[#15130f] file:px-3 file:py-2 file:text-[10px] file:font-bold file:tracking-[0.12em] file:text-white file:uppercase hover:file:bg-sc-accent"
+        className="hover:file:bg-sc-accent block w-full text-sm text-[#57524a] file:mr-3 file:rounded-md file:border-0 file:bg-[#15130f] file:px-3 file:py-2 file:text-[10px] file:font-bold file:tracking-[0.12em] file:text-white file:uppercase"
         disabled={isUploading}
         onChange={(event) => {
           const selected = event.target.files;
@@ -48,7 +48,9 @@ export function ProjectDeliverableUpload({
       ) : file ? (
         <p className="text-xs text-[#2e7d32]">Ready: {file.name}</p>
       ) : (
-        <p className="text-xs text-[#6f6a60]">PDF, images, Office docs, up to 8MB.</p>
+        <p className="text-xs text-[#6f6a60]">
+          PDF, images, Office docs, up to 8MB.
+        </p>
       )}
       {file ? (
         <button

@@ -12,9 +12,11 @@ export type ResolvedActionToast = {
 export const ACTION_ERROR_MESSAGES: Record<string, string> = {
   validation: "Check your input and try again.",
   name: "Name is required.",
-  "avatar-upload": "The photo could not be saved. Try again or use a smaller file.",
+  "avatar-upload":
+    "The photo could not be saved. Try again or use a smaller file.",
   title: "Title is required.",
-  "cover-upload": "The cover image could not be saved. Try again or use a smaller file.",
+  "cover-upload":
+    "The cover image could not be saved. Try again or use a smaller file.",
   create: "The project could not be created. Try again.",
   update: "Could not save the project. Check the title and try again.",
   member: "Could not update project members.",
@@ -29,10 +31,14 @@ export const ACTION_ERROR_MESSAGES: Record<string, string> = {
   invite: "That invitation is no longer pending.",
 };
 
-const LOGIN_AUTH_ERRORS: Record<string, { variant: AppToastVariant; message: string }> = {
+const LOGIN_AUTH_ERRORS: Record<
+  string,
+  { variant: AppToastVariant; message: string }
+> = {
   AccessDenied: {
     variant: "warning",
-    message: "That email has not been invited. Ask the Simply Code team for an invitation.",
+    message:
+      "That email has not been invited. Ask the Simply Code team for an invitation.",
   },
   OAuthAccountNotLinked: {
     variant: "warning",
@@ -82,7 +88,8 @@ export function resolveActionToast(
     if (pathname.startsWith("/login")) {
       return {
         variant: "success",
-        message: "Your account is ready. Sign in with the password you just created.",
+        message:
+          "Your account is ready. Sign in with the password you just created.",
         clearParams: ["invited"],
       };
     }
@@ -107,11 +114,16 @@ export function resolveActionToast(
   if (pathname.startsWith("/login")) {
     const auth = LOGIN_AUTH_ERRORS[error];
     if (auth) {
-      return { variant: auth.variant, message: auth.message, clearParams: ["error"] };
+      return {
+        variant: auth.variant,
+        message: auth.message,
+        clearParams: ["error"],
+      };
     }
     return {
       variant: "error",
-      message: "We couldn't sign you in with that account. Ask the studio for an invitation.",
+      message:
+        "We couldn't sign you in with that account. Ask the studio for an invitation.",
       clearParams: ["error"],
     };
   }
@@ -144,7 +156,11 @@ export function resolveActionToast(
   if (!message) return null;
 
   const variant: AppToastVariant =
-    error === "email" ? "warning" : error === "validation" ? "warning" : "error";
+    error === "email"
+      ? "warning"
+      : error === "validation"
+        ? "warning"
+        : "error";
 
   return { variant, message, clearParams: ["error"] };
 }

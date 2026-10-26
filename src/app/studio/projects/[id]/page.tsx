@@ -4,7 +4,12 @@ import { ProjectWorkspace } from "~/components/studio/project-workspace";
 import { StudioHeader } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
 import { isFounder } from "~/lib/roles";
-import { getClients, getProjectById, getTeamUsers, getTechnologies } from "~/server/studio/queries";
+import {
+  getClients,
+  getProjectById,
+  getTeamUsers,
+  getTechnologies,
+} from "~/server/studio/queries";
 import { appGhostButtonLg } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -26,9 +31,12 @@ export default async function ProjectDetailPage({
   const isManager =
     founder ||
     detail.members.some(
-      (member) => member.userId === session.user.id && member.projectRole === "lead",
+      (member) =>
+        member.userId === session.user.id && member.projectRole === "lead",
     );
-  const isMember = detail.members.some((member) => member.userId === session.user.id);
+  const isMember = detail.members.some(
+    (member) => member.userId === session.user.id,
+  );
 
   if (!isManager && !isMember && !founder) {
     redirect("/studio/projects");
@@ -46,7 +54,9 @@ export default async function ProjectDetailPage({
       getClients(),
     ]);
     const memberIds = new Set(detail.members.map((member) => member.userId));
-    assignableTeam = founder ? team : team.filter((person) => !memberIds.has(person.id));
+    assignableTeam = founder
+      ? team
+      : team.filter((person) => !memberIds.has(person.id));
   }
 
   const { project } = detail;
@@ -58,7 +68,8 @@ export default async function ProjectDetailPage({
         description={`${project.status} · /work/${project.slug}`}
         actions={
           <>
-            {project.status === "published" || project.status === "completed" ? (
+            {project.status === "published" ||
+            project.status === "completed" ? (
               <Link
                 href={`/work/${project.slug}`}
                 className={cn("inline-flex", appGhostButtonLg)}

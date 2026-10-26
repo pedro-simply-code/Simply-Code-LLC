@@ -89,7 +89,9 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
     >
       {enabled ? (
         <div className="space-y-3">
-          <p className="text-sm text-[#2e7d32]">2FA is enabled for your account.</p>
+          <p className="text-sm text-[#2e7d32]">
+            2FA is enabled for your account.
+          </p>
           <StudioInput
             placeholder="6-digit code to disable"
             inputMode="numeric"
@@ -109,12 +111,15 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
       ) : setup ? (
         <div className="space-y-4">
           <p className="text-sm text-[#57524a]">
-            Scan the QR <strong className="font-semibold text-[#15130f]">or</strong> enter the key
-            manually — use one method only. The QR and the key below are the same secret. The
-            6-digit codes change every 30 seconds; compare codes only within the same app entry.
+            Scan the QR{" "}
+            <strong className="font-semibold text-[#15130f]">or</strong> enter
+            the key manually — use one method only. The QR and the key below are
+            the same secret. The 6-digit codes change every 30 seconds; compare
+            codes only within the same app entry.
           </p>
           <p className="text-xs text-[#6f6a60]">
-            Account: <span className="font-medium text-[#15130f]">{setup.email}</span>
+            Account:{" "}
+            <span className="font-medium text-[#15130f]">{setup.email}</span>
           </p>
 
           <div className="mx-auto w-fit rounded-lg border border-[#15130f]/12 bg-white p-4 shadow-[0_2px_12px_rgba(21,19,15,0.08)]">
@@ -133,13 +138,13 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
               Can&apos;t scan? Enter this key in the app
             </summary>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <code className="max-w-full break-all font-mono text-[10px] leading-snug tracking-tight text-[#15130f]">
+              <code className="max-w-full font-mono text-[10px] leading-snug tracking-tight break-all text-[#15130f]">
                 {formatSecretCompact(setup.secret)}
               </code>
               <button
                 type="button"
                 onClick={() => void copySecret()}
-                className="shrink-0 rounded border border-[#15130f]/15 bg-white px-2 py-1 text-[9px] font-bold tracking-[0.12em] text-[#15130f] uppercase hover:bg-sc-section-alt/80"
+                className="hover:bg-sc-section-alt/80 shrink-0 rounded border border-[#15130f]/15 bg-white px-2 py-1 text-[9px] font-bold tracking-[0.12em] text-[#15130f] uppercase"
               >
                 Copy
               </button>
@@ -165,7 +170,9 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
               autoComplete="one-time-code"
               maxLength={6}
               value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
+              onChange={(event) =>
+                setCode(event.target.value.replace(/\D/g, ""))
+              }
             />
           </div>
 
@@ -173,7 +180,7 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
             type="button"
             disabled={pending || code.length < 6}
             onClick={() => void confirmEnable()}
-            className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent disabled:opacity-50"
+            className="hover:bg-sc-accent rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase disabled:opacity-50"
           >
             Confirm and enable
           </button>
@@ -183,7 +190,7 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
           type="button"
           disabled={pending}
           onClick={() => void startSetup()}
-          className="rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase hover:bg-sc-accent"
+          className="hover:bg-sc-accent rounded-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
         >
           Set up authenticator
         </button>

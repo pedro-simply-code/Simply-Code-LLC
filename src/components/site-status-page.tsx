@@ -15,21 +15,28 @@ type SiteStatusPageProps = {
 };
 
 /** Centered status card (maintenance, 404, etc.). */
-export function SiteStatusPage({ eyebrow, title, description, action }: SiteStatusPageProps) {
+export function SiteStatusPage({
+  eyebrow,
+  title,
+  description,
+  action,
+}: SiteStatusPageProps) {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-sc-canvas px-6 py-16 text-sc-ink">
+    <div className="bg-sc-canvas text-sc-ink flex min-h-[100dvh] items-center justify-center px-6 py-16">
       <div className={`w-full max-w-lg p-8 ${appPanel}`}>
         <div className="mb-8 flex justify-center">
           <BrandLogo className="min-w-max shrink-0" />
         </div>
         <div className="text-center">
-          <p className="text-[10px] font-bold tracking-[0.2em] text-sc-accent uppercase">
+          <p className="text-sc-accent text-[10px] font-bold tracking-[0.2em] uppercase">
             {eyebrow}
           </p>
           <h1 className="mt-4 text-[clamp(1.75rem,4vw,2.25rem)] font-black tracking-[-0.03em] text-[#15130f] uppercase">
             {title}
           </h1>
-          <div className="mt-4 text-sm leading-relaxed text-[#57524a]">{description}</div>
+          <div className="mt-4 text-sm leading-relaxed text-[#57524a]">
+            {description}
+          </div>
           {action ? (
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link href={action.href} className={appPrimaryButtonMarketing}>

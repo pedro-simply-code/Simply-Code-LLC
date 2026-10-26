@@ -5,7 +5,8 @@ import { pageMetadata } from "~/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Terms of Service",
-  description: "Terms covering the use of the Simply Code website and the start of a project.",
+  description:
+    "Terms covering the use of the Simply Code website and the start of a project.",
   path: "/terms",
 });
 
@@ -19,7 +20,7 @@ export default function TermsPage() {
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt py-16 lg:py-24">
           <div className="mx-auto max-w-3xl px-6">
-            <p className="text-[11px] font-bold tracking-[0.24em] text-sc-accent uppercase">
+            <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
               Legal
             </p>
             <h1 className="mt-5 text-[clamp(2.2rem,4.6vw,3.6rem)] leading-[1.02] font-black tracking-[-0.04em] uppercase">
@@ -35,9 +36,11 @@ export default function TermsPage() {
                   1. About these terms
                 </h2>
                 <p className="mt-3">
-                  These terms apply to the use of this website, operated by {SITE.name}. By browsing
-                  the site or sending an enquiry you accept them. Project work is governed by a
-                  separate written proposal or agreement, which takes precedence over these terms.
+                  These terms apply to the use of this website, operated by{" "}
+                  {SITE.name}. By browsing the site or sending an enquiry you
+                  accept them. Project work is governed by a separate written
+                  proposal or agreement, which takes precedence over these
+                  terms.
                 </p>
               </section>
 
@@ -46,10 +49,11 @@ export default function TermsPage() {
                   2. Website content
                 </h2>
                 <p className="mt-3">
-                  Case studies, service descriptions and other content are provided for information.
-                  They describe past work and capabilities but are not a guarantee of a particular
-                  result. Any timelines, scope or pricing for your project are only valid when
-                  confirmed in writing in a proposal.
+                  Case studies, service descriptions and other content are
+                  provided for information. They describe past work and
+                  capabilities but are not a guarantee of a particular result.
+                  Any timelines, scope or pricing for your project are only
+                  valid when confirmed in writing in a proposal.
                 </p>
               </section>
 
@@ -58,9 +62,11 @@ export default function TermsPage() {
                   3. Intellectual property
                 </h2>
                 <p className="mt-3">
-                  The design, text, code and images on this website belong to {SITE.name} or are used
-                  with permission. You may not copy or republish them without written consent. Work
-                  delivered to clients is licensed or assigned according to the project agreement.
+                  The design, text, code and images on this website belong to{" "}
+                  {SITE.name} or are used with permission. You may not copy or
+                  republish them without written consent. Work delivered to
+                  clients is licensed or assigned according to the project
+                  agreement.
                 </p>
               </section>
 
@@ -69,9 +75,10 @@ export default function TermsPage() {
                   4. Acceptable use
                 </h2>
                 <p className="mt-3">
-                  Do not attempt to disrupt the site, gain unauthorised access to it, scrape it at
-                  scale or use the contact form to send spam, unlawful content or malicious code.
-                  Access may be restricted if these rules are broken.
+                  Do not attempt to disrupt the site, gain unauthorised access
+                  to it, scrape it at scale or use the contact form to send
+                  spam, unlawful content or malicious code. Access may be
+                  restricted if these rules are broken.
                 </p>
               </section>
 
@@ -80,8 +87,9 @@ export default function TermsPage() {
                   5. Third-party links
                 </h2>
                 <p className="mt-3">
-                  The site links to external services and client websites. We are not responsible for
-                  their content, availability or privacy practices.
+                  The site links to external services and client websites. We
+                  are not responsible for their content, availability or privacy
+                  practices.
                 </p>
               </section>
 
@@ -90,9 +98,10 @@ export default function TermsPage() {
                   6. Availability and liability
                 </h2>
                 <p className="mt-3">
-                  The website is provided &quot;as is&quot;. We aim to keep it available and accurate
-                  but do not guarantee uninterrupted access or that every detail is free of errors.
-                  To the extent permitted by law, {SITE.name} is not liable for indirect or
+                  The website is provided &quot;as is&quot;. We aim to keep it
+                  available and accurate but do not guarantee uninterrupted
+                  access or that every detail is free of errors. To the extent
+                  permitted by law, {SITE.name} is not liable for indirect or
                   consequential loss arising from use of this website.
                 </p>
               </section>
@@ -102,11 +111,11 @@ export default function TermsPage() {
                   7. Changes and contact
                 </h2>
                 <p className="mt-3">
-                  We may update these terms from time to time; the current version is always on this
-                  page. Questions can be sent to{" "}
+                  We may update these terms from time to time; the current
+                  version is always on this page. Questions can be sent to{" "}
                   <a
                     href={`mailto:${SITE.email}`}
-                    className="font-semibold text-[#15130f] underline underline-offset-4 hover:text-sc-accent"
+                    className="hover:text-sc-accent font-semibold text-[#15130f] underline underline-offset-4"
                   >
                     {SITE.email}
                   </a>

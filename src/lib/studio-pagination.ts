@@ -22,7 +22,11 @@ export function parseStudioPage(value: string | null | undefined): number {
   return parsed;
 }
 
-export function paginateStudio<T>(items: T[], page: number, pageSize = STUDIO_PAGE_SIZE) {
+export function paginateStudio<T>(
+  items: T[],
+  page: number,
+  pageSize = STUDIO_PAGE_SIZE,
+) {
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
   const safePage = Math.min(Math.max(1, page), totalPages);

@@ -61,18 +61,22 @@ function GridTile({
       type="button"
       onClick={onSelect}
       style={
-        tileBorderRadiusPx !== undefined ? { borderRadius: tileBorderRadiusPx } : undefined
+        tileBorderRadiusPx !== undefined
+          ? { borderRadius: tileBorderRadiusPx }
+          : undefined
       }
       className={cn(
         "flex h-full flex-col p-3 text-left transition-colors",
         appPanelMuted,
-        selected && "ring-2 ring-sc-accent/50",
+        selected && "ring-sc-accent/50 ring-2",
       )}
     >
       {preview ? <div className="mb-3">{preview}</div> : null}
-      <span className="text-sm font-semibold text-sc-ink">{label}</span>
+      <span className="text-sc-ink text-sm font-semibold">{label}</span>
       {description ? (
-        <span className="mt-1 text-[11px] leading-relaxed text-[#6f6a60]">{description}</span>
+        <span className="mt-1 text-[11px] leading-relaxed text-[#6f6a60]">
+          {description}
+        </span>
       ) : null}
     </button>
   );
@@ -101,7 +105,7 @@ function MotionPreview({ level }: { level: SiteMotionLevel }) {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="flex-1 rounded-sm bg-sc-accent/70 motion-preview-bar"
+          className="bg-sc-accent/70 motion-preview-bar flex-1 rounded-sm"
           style={{
             height: `${28 + i * 6}%`,
             animationDuration: duration,
@@ -137,7 +141,11 @@ function PalettePreview({ palette }: { palette: SiteColorPalette }) {
   );
 }
 
-export function SiteSettingsForm({ settings: initial }: { settings: SiteSettings }) {
+export function SiteSettingsForm({
+  settings: initial,
+}: {
+  settings: SiteSettings;
+}) {
   const [draft, setDraft] = useState<SiteSettings>(initial);
 
   useEffect(() => {
@@ -160,7 +168,11 @@ export function SiteSettingsForm({ settings: initial }: { settings: SiteSettings
       <input type="hidden" name="surfaceStyle" value={draft.surfaceStyle} />
       <input type="hidden" name="cornerRadius" value={draft.cornerRadius} />
       <input type="hidden" name="motionLevel" value={draft.motionLevel} />
-      <input type="hidden" name="maintenanceMessage" value={draft.maintenanceMessage} />
+      <input
+        type="hidden"
+        name="maintenanceMessage"
+        value={draft.maintenanceMessage}
+      />
 
       <StudioCard
         title="Color palette"
@@ -215,7 +227,9 @@ export function SiteSettingsForm({ settings: initial }: { settings: SiteSettings
         </div>
 
         <div className="mt-8">
-          <h3 className="text-[12px] font-bold tracking-[0.16em] uppercase">Corner radius</h3>
+          <h3 className="text-[12px] font-bold tracking-[0.16em] uppercase">
+            Corner radius
+          </h3>
           <p className="mt-1 text-xs leading-relaxed text-[#6f6a60]">
             Cards use the larger radius; buttons and inputs use the smaller one.
           </p>
@@ -244,11 +258,15 @@ export function SiteSettingsForm({ settings: initial }: { settings: SiteSettings
             name="maintenanceMode"
             value="on"
             checked={draft.maintenanceMode}
-            onChange={(event) => patch({ maintenanceMode: event.target.checked })}
-            className="mt-1 size-4 rounded accent-sc-accent"
+            onChange={(event) =>
+              patch({ maintenanceMode: event.target.checked })
+            }
+            className="accent-sc-accent mt-1 size-4 rounded"
           />
           <span>
-            <span className="block text-sm font-semibold text-sc-ink">Maintenance mode</span>
+            <span className="text-sc-ink block text-sm font-semibold">
+              Maintenance mode
+            </span>
             <span className="mt-0.5 block text-xs text-[#6f6a60]">
               Public pages only. Studio, portal, and login stay available.
             </span>
@@ -261,7 +279,9 @@ export function SiteSettingsForm({ settings: initial }: { settings: SiteSettings
               rows={3}
               maxLength={500}
               value={draft.maintenanceMessage}
-              onChange={(event) => patch({ maintenanceMessage: event.target.value })}
+              onChange={(event) =>
+                patch({ maintenanceMessage: event.target.value })
+              }
               placeholder="We are making improvements…"
             />
           </Field>

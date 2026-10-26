@@ -9,9 +9,17 @@ const SERVICE_VALUES = [
 ] as const;
 
 export const contactSchema = z.object({
-  name: z.string().trim().min(2, "Please enter your name.").max(120, "That name is too long."),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Please enter your name.")
+    .max(120, "That name is too long."),
   email: z.email("Please enter a valid email address.").max(200),
-  company: z.string().trim().max(160, "That company name is too long.").optional(),
+  company: z
+    .string()
+    .trim()
+    .max(160, "That company name is too long.")
+    .optional(),
   service: z.enum(SERVICE_VALUES, { error: "Please choose a service." }),
   message: z
     .string()

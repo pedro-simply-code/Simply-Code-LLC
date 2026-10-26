@@ -44,7 +44,10 @@ export function NotificationsWorkspace({
     void feed.markRead.mutate(id);
   };
 
-  const openNotification = async (event: React.MouseEvent, item: NotificationDTO) => {
+  const openNotification = async (
+    event: React.MouseEvent,
+    item: NotificationDTO,
+  ) => {
     if (!item.href) return;
     event.preventDefault();
     if (!item.readAt) {
@@ -101,50 +104,64 @@ export function NotificationsWorkspace({
         <button
           type="button"
           onClick={selectAllFilter}
-          className={cn(filterToolbarButton, allFilterActive && filterToolbarButtonActive)}
+          className={cn(
+            filterToolbarButton,
+            allFilterActive && filterToolbarButtonActive,
+          )}
         >
           All
         </button>
         <button
           type="button"
           onClick={selectUnreadFilter}
-          className={cn(filterToolbarButton, unreadFilterActive && filterToolbarButtonActive)}
+          className={cn(
+            filterToolbarButton,
+            unreadFilterActive && filterToolbarButtonActive,
+          )}
         >
           Unread
         </button>
-        {NOTIFICATION_TYPES.filter((type) => context === "studio" || type !== "contact").map(
-          (type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => selectTypeFilter(type)}
-              className={cn(
-                filterTypeButton,
-                feed.typeFilter === type && filterToolbarButtonActive,
-              )}
-            >
-              {notificationTypeLabel(type)}
-            </button>
-          ),
-        )}
+        {NOTIFICATION_TYPES.filter(
+          (type) => context === "studio" || type !== "contact",
+        ).map((type) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => selectTypeFilter(type)}
+            className={cn(
+              filterTypeButton,
+              feed.typeFilter === type && filterToolbarButtonActive,
+            )}
+          >
+            {notificationTypeLabel(type)}
+          </button>
+        ))}
       </div>
 
       {feed.isLoading ? (
         <div className={appPanel}>
-          <p className="px-5 py-10 text-sm text-[#6f6a60]">Loading notifications…</p>
+          <p className="px-5 py-10 text-sm text-[#6f6a60]">
+            Loading notifications…
+          </p>
         </div>
       ) : feed.isError ? (
         <div className={appPanel}>
           <p className="px-5 py-10 text-sm text-[#9a3b2e]">
             Could not load notifications.{" "}
-            <button type="button" className="underline" onClick={() => void feed.refetch()}>
+            <button
+              type="button"
+              className="underline"
+              onClick={() => void feed.refetch()}
+            >
               Retry
             </button>
           </p>
         </div>
       ) : feed.items.length === 0 ? (
         <div className={appPanel}>
-          <p className="px-5 py-10 text-sm text-[#6f6a60]">No notifications yet.</p>
+          <p className="px-5 py-10 text-sm text-[#6f6a60]">
+            No notifications yet.
+          </p>
         </div>
       ) : (
         <div className={cn(appPanel, "overflow-hidden")} aria-live="polite">

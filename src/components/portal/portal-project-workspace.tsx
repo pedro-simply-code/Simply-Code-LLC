@@ -16,7 +16,10 @@ import { projectDisplayDate } from "~/lib/project-year";
 import { reviewStatusLabel } from "~/lib/reviews";
 import { appGhostButtonLg } from "~/lib/surface";
 import { cn } from "~/lib/utils";
-import { createClientReview, createPortalRequest } from "~/server/studio/actions";
+import {
+  createClientReview,
+  createPortalRequest,
+} from "~/server/studio/actions";
 import type { getPortalProject } from "~/server/studio/queries";
 
 type PortalDetail = NonNullable<Awaited<ReturnType<typeof getPortalProject>>>;
@@ -28,8 +31,17 @@ export function PortalProjectWorkspace({
   detail: PortalDetail;
   reviewStatus?: string;
 }) {
-  const { project, updates, requests, milestones, deliverables, activity, milestoneProgress, lead, review } =
-    detail;
+  const {
+    project,
+    updates,
+    requests,
+    milestones,
+    deliverables,
+    activity,
+    milestoneProgress,
+    lead,
+    review,
+  } = detail;
 
   const overviewPanel = (
     <div className="space-y-6">
@@ -38,16 +50,24 @@ export function PortalProjectWorkspace({
           <p className="text-sm font-semibold capitalize">{project.status}</p>
         </StudioCard>
         <StudioCard title="Your lead">
-          <p className="text-sm font-semibold">{lead?.name ?? "Simply Code team"}</p>
+          <p className="text-sm font-semibold">
+            {lead?.name ?? "Simply Code team"}
+          </p>
         </StudioCard>
         <StudioCard title="Started">
-          <p className="text-sm font-semibold">{projectDisplayDate(project.createdAt)}</p>
+          <p className="text-sm font-semibold">
+            {projectDisplayDate(project.createdAt)}
+          </p>
         </StudioCard>
       </div>
       {milestoneProgress !== null ? (
         <StudioCard title="Milestone progress">
-          <p className="text-2xl font-black tracking-tight">{milestoneProgress}%</p>
-          <p className="mt-1 text-xs text-[#6f6a60]">Based on completed milestones</p>
+          <p className="text-2xl font-black tracking-tight">
+            {milestoneProgress}%
+          </p>
+          <p className="mt-1 text-xs text-[#6f6a60]">
+            Based on completed milestones
+          </p>
         </StudioCard>
       ) : null}
       <StudioCard title="Latest activity">
@@ -71,7 +91,8 @@ export function PortalProjectWorkspace({
                 </p>
               ) : null}
               <p className="mt-2 text-[10px] text-[#9a9488]">
-                {update.authorName ?? "Simply Code"} · {new Date(update.createdAt).toLocaleString()}
+                {update.authorName ?? "Simply Code"} ·{" "}
+                {new Date(update.createdAt).toLocaleString()}
               </p>
             </li>
           ))}
@@ -84,7 +105,9 @@ export function PortalProjectWorkspace({
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <StudioCard title="Your requests">
         {requests.length === 0 ? (
-          <p className="text-sm text-[#6f6a60]">You have not submitted any requests yet.</p>
+          <p className="text-sm text-[#6f6a60]">
+            You have not submitted any requests yet.
+          </p>
         ) : (
           <ul className="divide-y divide-[#15130f]/10">
             {requests.map((request) => (
@@ -100,8 +123,12 @@ export function PortalProjectWorkspace({
                           : "text-[#6f6a60]"
                     }`}
                   >
-                    {request.status === "completed" ? <Check className="size-3" /> : null}
-                    {request.status === "rejected" ? <X className="size-3" /> : null}
+                    {request.status === "completed" ? (
+                      <Check className="size-3" />
+                    ) : null}
+                    {request.status === "rejected" ? (
+                      <X className="size-3" />
+                    ) : null}
                     {request.status}
                   </span>
                 </div>
@@ -116,7 +143,10 @@ export function PortalProjectWorkspace({
         )}
       </StudioCard>
 
-      <StudioCard title="Send a request" description="Your project lead receives it in studio.">
+      <StudioCard
+        title="Send a request"
+        description="Your project lead receives it in studio."
+      >
         <form action={createPortalRequest} className="space-y-4">
           <input type="hidden" name="projectId" value={project.id} />
           <Field label="Title">
@@ -141,7 +171,7 @@ export function PortalProjectWorkspace({
           </Field>
           <button
             type="submit"
-            className="w-full rounded-md bg-[#15130f] px-4 py-3 text-[10px] font-bold tracking-[0.16em] text-white uppercase hover:bg-sc-accent"
+            className="hover:bg-sc-accent w-full rounded-md bg-[#15130f] px-4 py-3 text-[10px] font-bold tracking-[0.16em] text-white uppercase"
           >
             Submit request
           </button>
@@ -172,7 +202,10 @@ export function PortalProjectWorkspace({
   );
 
   const activityPanel = (
-    <StudioCard title="Activity" description="Updates, requests, deliverables, and completed milestones.">
+    <StudioCard
+      title="Activity"
+      description="Updates, requests, deliverables, and completed milestones."
+    >
       <ProjectActivityFeed items={activity} />
     </StudioCard>
   );
@@ -190,7 +223,7 @@ export function PortalProjectWorkspace({
         ) : null}
         {review ? (
           <div>
-            <p className="text-[10px] font-bold tracking-[0.12em] text-sc-accent uppercase">
+            <p className="text-sc-accent text-[10px] font-bold tracking-[0.12em] uppercase">
               {reviewStatusLabel(review.status, "portal")} · {review.rating}/5
             </p>
             <blockquote className="mt-2 text-sm leading-relaxed text-[#15130f]">
@@ -214,7 +247,11 @@ export function PortalProjectWorkspace({
             </Field>
             <button
               type="submit"
-              className={cn("w-full", appGhostButtonLg, "px-4 py-3 tracking-[0.16em]")}
+              className={cn(
+                "w-full",
+                appGhostButtonLg,
+                "px-4 py-3 tracking-[0.16em]",
+              )}
             >
               Submit review
             </button>
@@ -230,7 +267,9 @@ export function PortalProjectWorkspace({
     { id: "deliverables", label: "Files", panel: deliverablesPanel },
     { id: "updates", label: "Updates", panel: updatesPanel },
     { id: "requests", label: "Requests", panel: requestsPanel },
-    ...(reviewPanel ? [{ id: "review", label: "Review", panel: reviewPanel }] : []),
+    ...(reviewPanel
+      ? [{ id: "review", label: "Review", panel: reviewPanel }]
+      : []),
   ];
 
   return (

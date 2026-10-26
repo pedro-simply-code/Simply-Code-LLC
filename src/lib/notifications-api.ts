@@ -43,7 +43,9 @@ export async function fetchNotifications(
   if (params.entityId) search.set("entityId", params.entityId);
   if (params.since) search.set("since", params.since);
 
-  const res = await fetch(`/api/notifications?${search.toString()}`, { cache: "no-store" });
+  const res = await fetch(`/api/notifications?${search.toString()}`, {
+    cache: "no-store",
+  });
   if (!res.ok) {
     throw new Error("Failed to load notifications");
   }
