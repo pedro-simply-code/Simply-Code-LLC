@@ -16,6 +16,9 @@ import {
 } from "~/lib/studio-project-surface";
 import { appGhostButton, appNotificationCountBadgeSm } from "~/lib/surface";
 import type { UserRole } from "~/server/db/schema";
+import { ProjectActivityFeed } from "~/components/projects/project-activity-feed";
+import { ProjectDeliverablesPanel } from "~/components/projects/project-deliverables-panel";
+import { ProjectMilestonesPanel } from "~/components/projects/project-milestones-panel";
 import {
   assignProjectMember,
   createProjectUpdate,
@@ -53,6 +56,12 @@ export function ProjectWorkspace({
   const openRequests = detail.requests.filter((request) => request.status === "open").length;
   const isPublic = project.status === "published" || project.status === "completed";
   const projectPath = `/studio/projects/${project.id}`;
+  const canPublishToClient = founder || isManager;
+  const completedMilestones = detail.milestones.filter((m) => m.status === "completed").length;
+  const milestoneProgress =
+    detail.milestones.length > 0
+      ? Math.round((completedMilestones / detail.milestones.length) * 100)
+      : null;
 
   const overviewPanel = (
     <div className="space-y-6">
@@ -82,6 +91,20 @@ export function ProjectWorkspace({
           className={`inline-flex items-center gap-1.5 ${studioProjectGhostButton}`}
         >
           Updates
+          <ArrowRight className="size-3" />
+        </Link>
+        <Link
+          href={`${projectPath}?tab=milestones`}
+          className={`inline-flex items-center gap-1.5 ${studioProjectGhostButton}`}
+        >
+          Milestones
+          <ArrowRight className="size-3" />
+        </Link>
+        <Link
+          href={`${projectPath}?tab=deliverables`}
+          className={`inline-flex items-center gap-1.5 ${studioProjectGhostButton}`}
+        >
+          Files
           <ArrowRight className="size-3" />
         </Link>
         <Link
@@ -138,6 +161,19 @@ export function ProjectWorkspace({
 
       <StudioCard title="Summary">
         <p className="text-sm leading-relaxed text-[#57524a]">{project.summary || "No summary yet."}</p>
+      </StudioCard>
+
+      {milestoneProgress !== null ? (
+        <StudioCard title="Milestone progress">
+          <p className="text-2xl font-black tracking-tight">{milestoneProgress}%</p>
+          <p className="mt-1 text-xs text-[#6f6a60]">
+            {completedMilestones} of {detail.milestones.length} completed
+          </p>
+        </StudioCard>
+      ) : null}
+
+      <StudioCard title="Recent activity">
+        <ProjectActivityFeed items={detail.activity.slice(0, 6)} />
       </StudioCard>
 
       {detail.updates[0] ? (
@@ -321,6 +357,32 @@ export function ProjectWorkspace({
     </StudioCard>
   );
 
+  const milestonesPanel = (
+    <ProjectMilestonesPanel
+      projectId={project.id}
+      milestones={detail.milestones}
+      canManage={isManager}
+      isMember={isMember || founder}
+    />
+  );
+
+  const deliverablesPanel = (
+    <ProjectDeliverablesPanel
+      projectId={project.id}
+      deliverables={detail.deliverables}
+      isMember={isMember || founder}
+      canManage={isManager}
+      canPublishToClient={canPublishToClient}
+      audience="studio"
+    />
+  );
+
+  const activityPanel = (
+    <StudioCard title="Activity" description="Updates, requests, deliverables, and milestones.">
+      <ProjectActivityFeed items={detail.activity} />
+    </StudioCard>
+  );
+
   const requestsPanel = (
     <StudioCard
       title="Client requests"
@@ -435,6 +497,9 @@ export function ProjectWorkspace({
         },
         { id: "overview", label: "Overview", panel: overviewPanel },
         { id: "team", label: "Team", panel: teamPanel },
+        { id: "activity", label: "Activity", panel: activityPanel },
+        { id: "milestones", label: "Milestones", panel: milestonesPanel },
+        { id: "deliverables", label: "Files", panel: deliverablesPanel },
         { id: "updates", label: "Updates", panel: updatesPanel },
         {
           id: "requests",
@@ -450,6 +515,9 @@ export function ProjectWorkspace({
           label: "Details",
           panel: editPanel,
         },
+        { id: "activity", label: "Activity", panel: activityPanel },
+        { id: "milestones", label: "Milestones", panel: milestonesPanel },
+        { id: "deliverables", label: "Files", panel: deliverablesPanel },
         { id: "updates", label: "Updates", panel: updatesPanel },
         {
           id: "requests",

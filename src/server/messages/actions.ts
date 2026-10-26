@@ -3,8 +3,7 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { auth } from "~/lib/auth";
-import { isFounder } from "~/lib/roles";
+import { requireFounder } from "~/server/authz";
 import { isUuid } from "~/server/studio/queries";
 import { db } from "~/server/db";
 import { clientInboxMessages, contactMessages } from "~/server/db/schema";
@@ -12,6 +11,10 @@ import { sendEmail } from "~/server/email/sendEmail";
 import { getContactMessageById } from "~/server/messages/queries";
 import { resolveContactRecipient } from "~/server/messages/recipient";
 import { parseMessageAttachmentsFromForm } from "~/lib/message-attachments";
+import {
+  filterAttachmentsWithClaims,
+  releaseUserUploadClaims,
+} from "~/server/uploads/claims";
 import { attachmentsHtmlBlock } from "~/server/messages/attachment-email";
 import { notifyUsers } from "~/server/notifications/delivery";
 
@@ -34,8 +37,7 @@ function escapeHtml(value: string): string {
 }
 
 export async function replyToContactMessage(formData: FormData) {
-  const session = await auth();
-  if (!isFounder(session?.user.role)) redirect("/studio");
+  const session = await requireFounder();
 
   const contactMessageId = text(formData, "contactMessageId");
   const body = text(formData, "body");
@@ -49,7 +51,10 @@ export async function replyToContactMessage(formData: FormData) {
   if (!enquiry) redirect("/studio/messages");
 
   const recipient = await resolveContactRecipient(enquiry.email);
-  const attachments = parseMessageAttachmentsFromForm(formData);
+  const attachments = await filterAttachmentsWithClaims(
+    session.user.id,
+    parseMessageAttachmentsFromForm(formData),
+  );
   const subject = `Re: your project enquiry${enquiry.service ? ` (${enquiry.service})` : ""}`;
   const usePortal = recipient.channel === "portal" && recipient.portalUsers.length > 0;
   const sendEmailToo = !usePortal || alsoEmail;
@@ -64,7 +69,7 @@ export async function replyToContactMessage(formData: FormData) {
         body,
         attachments,
         channel,
-        sentById: session!.user!.id,
+        sentById: session.user.id,
       });
     }
 
@@ -85,7 +90,7 @@ export async function replyToContactMessage(formData: FormData) {
       body,
       attachments,
       channel: "email",
-      sentById: session!.user!.id,
+      sentById: session.user.id,
     });
   }
 
@@ -116,6 +121,11 @@ export async function replyToContactMessage(formData: FormData) {
     .update(contactMessages)
     .set({ status: "replied" })
     .where(eq(contactMessages.id, contactMessageId));
+
+  await releaseUserUploadClaims(
+    session.user.id,
+    attachments.map((item) => item.url),
+  );
 
   revalidatePath("/studio/messages");
   revalidatePath(`/studio/messages/${contactMessageId}`);

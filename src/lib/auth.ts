@@ -3,7 +3,8 @@ import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import authConfig from "~/lib/auth.config";
-import { normalizeRole } from "~/lib/roles";
+import { refreshAuthTokenFromDb } from "~/lib/auth-token-refresh";
+import { isFounder, normalizeRole } from "~/lib/roles";
 import { loginSchema } from "~/schemas/auth";
 import type { UserRole } from "~/server/db/schema";
 import { verifyPassword } from "~/server/auth/password";
@@ -19,25 +20,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
         if (user.role) token.role = normalizeRole(user.role as UserRole);
         token.name = user.name;
         token.picture = user.image;
+        token.totpRequired = !!(user as { totpRequired?: boolean }).totpRequired;
       }
-      if (trigger === "update" && token.sub) {
-        const row = await db.query.users.findFirst({
-          where: eq(users.id, token.sub),
-          columns: { name: true, image: true, role: true },
-        });
-        if (row) {
-          token.name = row.name;
-          token.picture = row.image;
-          token.role = normalizeRole(row.role);
-        }
-      }
-      return token;
+      return refreshAuthTokenFromDb(token);
     },
     session({ session, token }) {
       if (session.user && token.sub) {
@@ -45,6 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.role = normalizeRole(token.role as UserRole | undefined);
         if (typeof token.name === "string") session.user.name = token.name;
         if (typeof token.picture === "string") session.user.image = token.picture;
+        session.totpRequired = !!token.totpRequired;
       }
       return session;
     },
@@ -91,6 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: row.name,
           image: row.image,
           role: row.role,
+          totpRequired: isFounder(row.role) && row.totpEnabled,
         };
       },
     }),

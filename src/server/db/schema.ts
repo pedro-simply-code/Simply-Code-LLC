@@ -61,6 +61,9 @@ export const users = createTable("users", {
   profileSkills: jsonb("profile_skills").$type<string[]>().notNull().default([]),
   /** When true, team members appear on /about#team (founder, lead, developer only). */
   showOnAbout: boolean("show_on_about").notNull().default(false),
+  /** Base32 TOTP secret for founder 2FA (studio access). */
+  totpSecret: text("totp_secret"),
+  totpEnabled: boolean("totp_enabled").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -293,6 +296,60 @@ export const projectUpdates = createTable("project_updates", {
     .notNull(),
 });
 
+export const projectMilestones = createTable(
+  "project_milestones",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    /** pending | in_progress | completed */
+    status: text("status").notNull().default("pending"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    targetDate: timestamp("target_date", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    projectIdx: index(`${env.DB_TABLE_PREFIX}_project_milestones_project_idx`).on(
+      table.projectId,
+      table.sortOrder,
+    ),
+  }),
+);
+
+export const projectDeliverables = createTable(
+  "project_deliverables",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    fileUrl: text("file_url").notNull(),
+    fileName: text("file_name").notNull(),
+    fileSize: integer("file_size").notNull(),
+    contentType: text("content_type").notNull(),
+    /** client = portal; internal = studio only */
+    visibility: text("visibility").notNull().default("client"),
+    uploadedById: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    projectIdx: index(`${env.DB_TABLE_PREFIX}_project_deliverables_project_idx`).on(
+      table.projectId,
+      table.createdAt,
+    ),
+  }),
+);
+
 export const projectRequests = createTable("project_requests", {
   id: uuid("id").primaryKey().defaultRandom(),
   projectId: uuid("project_id")
@@ -425,6 +482,66 @@ export const clientInboxMessages = createTable(
   }),
 );
 
+/** Append-only security and compliance trail. */
+export const auditEvents = createTable(
+  "audit_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    action: varchar("action", { length: 120 }).notNull(),
+    entityType: varchar("entity_type", { length: 80 }),
+    entityId: uuid("entity_id"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    ipAddress: varchar("ip_address", { length: 128 }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    createdIdx: index(`${env.DB_TABLE_PREFIX}_audit_events_created_idx`).on(table.createdAt),
+    actorIdx: index(`${env.DB_TABLE_PREFIX}_audit_events_actor_idx`).on(
+      table.actorUserId,
+      table.createdAt,
+    ),
+  }),
+);
+
+/** Fixed-window counters for login, contact, and other abuse-prone endpoints. */
+export const rateLimits = createTable("rate_limits", {
+  bucket: varchar("bucket", { length: 200 }).primaryKey(),
+  count: integer("count").notNull().default(0),
+  resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
+});
+
+export const uploadClaimKindEnum = pgEnum(`${env.DB_TABLE_PREFIX}_upload_claim_kind`, [
+  "avatar",
+  "message_attachment",
+  "project_deliverable",
+]);
+
+/** UploadThing URLs registered on upload; required before attach or discard. */
+export const userUploadClaims = createTable(
+  "user_upload_claims",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    kind: uploadClaimKindEnum("kind").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    urlUnique: uniqueIndex(`${env.DB_TABLE_PREFIX}_user_upload_claims_url_unique`).on(table.url),
+    userCreatedIdx: index(`${env.DB_TABLE_PREFIX}_user_upload_claims_user_created_idx`).on(
+      table.userId,
+      table.createdAt,
+    ),
+  }),
+);
+
 /** Singleton row (`key = global`) for founder-controlled site appearance and flags. */
 export const siteSettings = createTable("site_settings", {
   key: text("key").primaryKey().notNull(),
@@ -433,19 +550,6 @@ export const siteSettings = createTable("site_settings", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedById: uuid("updated_by_id").references(() => users.id, { onDelete: "set null" }),
-});
-
-/** Example domain table — replace or extend per project. */
-export const posts = createTable("posts", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  title: varchar("title", { length: 256 }).notNull(),
-  body: text("body"),
-  authorId: uuid("author_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
 });
 
 export type UserRole = (typeof userRoleEnum.enumValues)[number];

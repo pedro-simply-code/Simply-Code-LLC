@@ -1,6 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
+import { getClientIp } from "~/lib/client-ip";
 import { env } from "~/env";
+import { consumeRateLimit } from "~/server/rate-limit";
 import { sendEmail } from "~/server/email/sendEmail";
 import { contactSchema, type ContactState } from "~/app/(site)/contact/schema";
 import { db } from "~/server/db";
@@ -54,6 +57,19 @@ export async function submitContact(
   if (data.website || tooFast) {
     // Pretend it worked so the bot does not retry.
     return { status: "success", message: "Thanks — we received your message." };
+  }
+
+  const ip = getClientIp(await headers());
+  const contactAllowed = await consumeRateLimit(
+    `contact:ip:${ip}`,
+    8,
+    60 * 60 * 1000,
+  );
+  if (!contactAllowed) {
+    return {
+      status: "error",
+      message: "Too many messages from your network. Please try again in about an hour.",
+    };
   }
 
   const submittedAt = new Date().toLocaleString("en-US", { timeZone: "UTC" });

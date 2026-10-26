@@ -7,7 +7,9 @@ import {
   clients,
   contactMessages,
   invites,
+  projectDeliverables,
   projectMembers,
+  projectMilestones,
   projectRequests,
   projectTechnologies,
   projectUpdates,
@@ -20,6 +22,7 @@ import {
 } from "~/server/db/schema";
 import { projectDisplayYear } from "~/lib/project-year";
 import { normalizeRole } from "~/lib/roles";
+import { buildProjectActivityFeed, type ProjectActivityItem } from "~/server/projects/activity";
 import type { Project as ContentProject } from "~/content/projects";
 import { getUnreadNotificationCount } from "~/server/notifications";
 
@@ -168,7 +171,7 @@ export async function getProjectById(id: string) {
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
   if (!project) return null;
 
-  const [members, tech, updates, requests] = await Promise.all([
+  const [members, tech, updates, requests, milestones, deliverables] = await Promise.all([
     db
       .select({
         userId: users.id,
@@ -210,9 +213,43 @@ export async function getProjectById(id: string) {
       .from(projectRequests)
       .where(eq(projectRequests.projectId, id))
       .orderBy(desc(projectRequests.createdAt)),
+    db
+      .select()
+      .from(projectMilestones)
+      .where(eq(projectMilestones.projectId, id))
+      .orderBy(projectMilestones.sortOrder, projectMilestones.createdAt),
+    db
+      .select({
+        id: projectDeliverables.id,
+        projectId: projectDeliverables.projectId,
+        title: projectDeliverables.title,
+        description: projectDeliverables.description,
+        fileUrl: projectDeliverables.fileUrl,
+        fileName: projectDeliverables.fileName,
+        fileSize: projectDeliverables.fileSize,
+        contentType: projectDeliverables.contentType,
+        visibility: projectDeliverables.visibility,
+        uploadedById: projectDeliverables.uploadedById,
+        createdAt: projectDeliverables.createdAt,
+        uploaderName: users.name,
+      })
+      .from(projectDeliverables)
+      .leftJoin(users, eq(users.id, projectDeliverables.uploadedById))
+      .where(eq(projectDeliverables.projectId, id))
+      .orderBy(desc(projectDeliverables.createdAt)),
   ]);
 
-  return { project, members, technologies: tech, updates, requests };
+  const activity = buildProjectActivityFeed(
+    {
+      updates,
+      requests,
+      deliverables,
+      milestones,
+    },
+    "studio",
+  );
+
+  return { project, members, technologies: tech, updates, requests, milestones, deliverables, activity };
 }
 
 export async function getPublicProjects(): Promise<ContentProject[]> {
@@ -244,23 +281,11 @@ export async function getPublicProject(slug: string): Promise<ContentProject | n
   return toContentProject(row, stackByProjectId.get(row.id) ?? []);
 }
 
-/** Public pages fall back to the bundled content if the database is unavailable. */
-export async function getPublicProjectsSafe(): Promise<ContentProject[] | null> {
-  try {
-    const rows = await getPublicProjects();
-    return rows.length > 0 ? rows : null;
-  } catch {
-    return null;
-  }
-}
-
-export async function getPublicProjectSafe(slug: string): Promise<ContentProject | null> {
-  try {
-    return await getPublicProject(slug);
-  } catch {
-    return null;
-  }
-}
+export {
+  getApprovedReviewForProjectSlugSafe,
+  getPublicProjectSafe,
+  getPublicProjectsSafe,
+} from "~/server/queries/public-cache";
 
 export type PublicProjectReview = {
   quote: string;
@@ -290,16 +315,6 @@ export async function getApprovedReviewForProjectSlug(
     .limit(1);
 
   return row ?? null;
-}
-
-export async function getApprovedReviewForProjectSlugSafe(
-  slug: string,
-): Promise<PublicProjectReview | null> {
-  try {
-    return await getApprovedReviewForProjectSlug(slug);
-  } catch {
-    return null;
-  }
 }
 
 export async function getApprovedReviewsSafe() {
@@ -594,12 +609,13 @@ export async function getPortalProject(id: string, userId: string) {
     .limit(1);
   if (!project) return null;
 
-  const [updates, requests, members, clientReview] = await Promise.all([
+  const [updates, requests, members, clientReview, milestones, deliverables] = await Promise.all([
     db
       .select({
         id: projectUpdates.id,
         title: projectUpdates.title,
         body: projectUpdates.body,
+        visibility: projectUpdates.visibility,
         createdAt: projectUpdates.createdAt,
         authorName: users.name,
       })
@@ -636,15 +652,81 @@ export async function getPortalProject(id: string, userId: string) {
           .orderBy(desc(reviews.createdAt))
           .limit(1)
       : Promise.resolve([]),
+    db
+      .select()
+      .from(projectMilestones)
+      .where(eq(projectMilestones.projectId, id))
+      .orderBy(projectMilestones.sortOrder, projectMilestones.createdAt),
+    db
+      .select({
+        id: projectDeliverables.id,
+        projectId: projectDeliverables.projectId,
+        title: projectDeliverables.title,
+        description: projectDeliverables.description,
+        fileUrl: projectDeliverables.fileUrl,
+        fileName: projectDeliverables.fileName,
+        fileSize: projectDeliverables.fileSize,
+        contentType: projectDeliverables.contentType,
+        visibility: projectDeliverables.visibility,
+        uploadedById: projectDeliverables.uploadedById,
+        createdAt: projectDeliverables.createdAt,
+        uploaderName: users.name,
+      })
+      .from(projectDeliverables)
+      .leftJoin(users, eq(users.id, projectDeliverables.uploadedById))
+      .where(
+        and(eq(projectDeliverables.projectId, id), eq(projectDeliverables.visibility, "client")),
+      )
+      .orderBy(desc(projectDeliverables.createdAt)),
   ]);
+
+  const activity = buildProjectActivityFeed(
+    {
+      updates,
+      requests,
+      deliverables,
+      milestones,
+    },
+    "portal",
+  );
+
+  const completedMilestones = milestones.filter((m) => m.status === "completed").length;
 
   return {
     project,
     updates,
     requests,
+    milestones,
+    deliverables,
+    activity,
+    milestoneProgress:
+      milestones.length > 0 ? Math.round((completedMilestones / milestones.length) * 100) : null,
     lead: members.find((member) => member.projectRole === "lead") ?? null,
     review: clientReview[0] ?? null,
   };
+}
+
+export async function getPortalActivityFeed(
+  userId: string,
+  limit = 40,
+): Promise<(ProjectActivityItem & { projectId: string; projectTitle: string })[]> {
+  const projects = await getPortalProjects(userId);
+  const combined: (ProjectActivityItem & { projectId: string; projectTitle: string })[] = [];
+
+  for (const row of projects) {
+    const detail = await getPortalProject(row.id, userId);
+    if (!detail) continue;
+    for (const item of detail.activity) {
+      combined.push({
+        ...item,
+        projectId: row.id,
+        projectTitle: row.title,
+      });
+    }
+  }
+
+  combined.sort((a, b) => b.at.getTime() - a.at.getTime());
+  return combined.slice(0, limit);
 }
 
 

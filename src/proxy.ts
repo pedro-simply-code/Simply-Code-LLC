@@ -1,11 +1,12 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import authConfig from "~/lib/auth.config";
+import { isTwoFactorCookieValid, twoFactorCookieName } from "~/lib/two-factor-cookie";
 import { homePathForRole, isTeam, normalizeRole } from "~/lib/roles";
 
 const { auth } = NextAuth(authConfig);
 
-const authPages = ["/login"];
+const twoFactorPath = "/login/two-factor";
 
 export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
@@ -24,9 +25,24 @@ export const proxy = auth((req) => {
     return withPathname(NextResponse.redirect(new URL("/login", req.url)));
   }
 
-  // Signed-in users do not need the auth screens.
-  if (authPages.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+  const totpRequired = !!req.auth?.totpRequired;
+  const userId = req.auth?.user?.id;
+  const twoFactorOk =
+    userId && isTwoFactorCookieValid(userId, req.cookies.get(twoFactorCookieName())?.value);
+
+  // Only `/login` — not `/login/two-factor` (founders verify 2FA there while signed in).
+  if (pathname === "/login") {
     if (isLoggedIn) {
+      return withPathname(NextResponse.redirect(new URL(homePathForRole(role), req.url)));
+    }
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  if (pathname === twoFactorPath || pathname.startsWith(`${twoFactorPath}/`)) {
+    if (!isLoggedIn) {
+      return withPathname(NextResponse.redirect(new URL("/login", req.url)));
+    }
+    if (!totpRequired) {
       return withPathname(NextResponse.redirect(new URL(homePathForRole(role), req.url)));
     }
     return NextResponse.next({ request: { headers: requestHeaders } });
@@ -49,6 +65,11 @@ export const proxy = auth((req) => {
     }
     if (!isTeam(role)) {
       return withPathname(NextResponse.redirect(new URL("/portal", req.url)));
+    }
+    if (totpRequired && !twoFactorOk) {
+      const verify = new URL(twoFactorPath, req.url);
+      verify.searchParams.set("callbackUrl", pathname);
+      return withPathname(NextResponse.redirect(verify));
     }
   }
 

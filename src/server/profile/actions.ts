@@ -4,10 +4,15 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
+import { isUploadThingImageUrl } from "~/lib/project-image";
 import { normalizeOptionalUrl } from "~/lib/profile";
 import { homePathForRole, isFounder, isTeam } from "~/lib/roles";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
+import {
+  releaseUserUploadClaims,
+  userOwnsUploadClaim,
+} from "~/server/uploads/claims";
 import {
   discardUploadThingImageUrl,
   resolveUserAvatarFromForm,
@@ -16,7 +21,9 @@ import {
 export async function discardPendingAvatarUpload(url: string) {
   const session = await auth();
   if (!session?.user?.id) return;
+  if (!(await userOwnsUploadClaim(session.user.id, url))) return;
   await discardUploadThingImageUrl(url, "user-avatar");
+  await releaseUserUploadClaims(session.user.id, [url]);
 }
 
 function text(formData: FormData, key: string): string {
@@ -53,6 +60,16 @@ export async function updateUserProfile(formData: FormData) {
   );
   if (!resolvedImage.ok) redirect(`${profilePath}?error=avatar-upload`);
 
+  const nextImage = resolvedImage.image;
+  if (
+    nextImage &&
+    nextImage !== existing.image &&
+    isUploadThingImageUrl(nextImage) &&
+    !(await userOwnsUploadClaim(session.user.id, nextImage))
+  ) {
+    redirect(`${profilePath}?error=avatar-upload`);
+  }
+
   const teamMember = isTeam(session.user.role);
   const phone = text(formData, "phone") || null;
   const timezone = text(formData, "timezone") || null;
@@ -86,9 +103,13 @@ export async function updateUserProfile(formData: FormData) {
       linkedinUrl: teamMember ? linkedinUrl : existing.linkedinUrl,
       githubUrl: teamMember ? githubUrl : existing.githubUrl,
       portfolioUrl: teamMember ? portfolioUrl : existing.portfolioUrl,
-      image: resolvedImage.image,
+      image: nextImage,
     })
     .where(eq(users.id, session.user.id));
+
+  if (nextImage && nextImage !== existing.image && isUploadThingImageUrl(nextImage)) {
+    await releaseUserUploadClaims(session.user.id, [nextImage]);
+  }
 
   revalidatePath("/about");
   revalidatePath(profilePath);

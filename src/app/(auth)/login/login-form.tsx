@@ -4,11 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { Field, StudioInput } from "~/components/studio/ui";
 import { appToast } from "~/lib/app-toast";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { appGhostButtonLg, appPrimaryButtonStudioSubmit } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 import { loginSchema, type LoginInput } from "~/schemas/auth";
+import { credentialsSignIn } from "~/server/auth/credentials-sign-in";
 
 export function LoginForm() {
   const router = useRouter();
@@ -21,14 +22,22 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: LoginInput) {
-    const result = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
+    const result = await credentialsSignIn(values);
 
-    if (result?.error) {
-      appToast.error("Invalid email or password");
+    if (!result.ok) {
+      if (result.error === "rate_limited") {
+        appToast.error("Too many sign-in attempts. Please wait a few minutes.");
+      } else {
+        appToast.error("Invalid email or password");
+      }
+      return;
+    }
+
+    if (result.needs2fa) {
+      const verify = new URL("/login/two-factor", window.location.origin);
+      verify.searchParams.set("callbackUrl", callbackUrl);
+      router.push(`${verify.pathname}${verify.search}`);
+      router.refresh();
       return;
     }
 
@@ -38,32 +47,60 @@ export function LoginForm() {
   }
 
   return (
-    <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
+    <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+      <Field label="Email">
+        <StudioInput
+          id="email"
+          type="email"
+          autoComplete="email"
+          aria-invalid={!!form.formState.errors.email}
+          {...form.register("email")}
+        />
         {form.formState.errors.email ? (
-          <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+          <p className="text-xs text-[#9a3b2e]">{form.formState.errors.email.message}</p>
         ) : null}
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" autoComplete="current-password" {...form.register("password")} />
+      </Field>
+
+      <Field label="Password">
+        <StudioInput
+          id="password"
+          type="password"
+          autoComplete="current-password"
+          aria-invalid={!!form.formState.errors.password}
+          {...form.register("password")}
+        />
         {form.formState.errors.password ? (
-          <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+          <p className="text-xs text-[#9a3b2e]">{form.formState.errors.password.message}</p>
         ) : null}
-      </div>
-      <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+      </Field>
+
+      <button
+        type="submit"
+        disabled={form.formState.isSubmitting}
+        className={cn(appPrimaryButtonStudioSubmit, "w-full disabled:opacity-50")}
+      >
         {form.formState.isSubmitting ? "Signing in…" : "Sign in with email"}
-      </Button>
-      <Button
+      </button>
+
+      <div className="relative py-1">
+        <div className="absolute inset-0 flex items-center" aria-hidden>
+          <span className="w-full border-t border-[#15130f]/10" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-sc-section px-2 text-[10px] font-bold tracking-[0.12em] text-[#9a9488] uppercase">
+            or
+          </span>
+        </div>
+      </div>
+
+      <button
         type="button"
-        variant="outline"
-        className="w-full"
+        disabled={form.formState.isSubmitting}
         onClick={() => void signIn("google", { callbackUrl })}
+        className={cn(appGhostButtonLg, "w-full justify-center disabled:opacity-50")}
       >
         Continue with Google
-      </Button>
+      </button>
     </form>
   );
 }

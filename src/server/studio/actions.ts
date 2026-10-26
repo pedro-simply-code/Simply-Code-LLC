@@ -2,10 +2,18 @@
 
 import { randomBytes } from "node:crypto";
 import { and, eq, inArray, isNull, ne } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { env } from "~/env";
-import { auth } from "~/lib/auth";
+import {
+  canPublishClientVisibleUpdate,
+  requireFounder,
+  requirePortalProject,
+  requireProjectManager,
+  requireSession,
+  requireTeam,
+} from "~/server/authz";
+import { logAuditEvent } from "~/server/audit/log";
 import { resolveProjectImageFromForm } from "~/server/uploadthing-storage";
 import { isFounder, isTeam, normalizeRole } from "~/lib/roles";
 import { slugify } from "~/lib/slug";
@@ -120,44 +128,6 @@ function statusValue(value: string): "draft" | "published" | "completed" {
   return "draft";
 }
 
-async function requireSession() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-  return session;
-}
-
-async function requireTeam() {
-  const session = await requireSession();
-  if (!isTeam(session.user.role)) redirect("/portal");
-  return session;
-}
-
-async function requireFounder() {
-  const session = await requireTeam();
-  if (!isFounder(session.user.role)) redirect("/studio");
-  return session;
-}
-
-async function requireProjectManager(projectId: string) {
-  const session = await requireTeam();
-  if (isUuid(projectId)) {
-    if (isFounder(session.user.role)) return session;
-    const [membership] = await db
-      .select({ projectRole: projectMembers.projectRole })
-      .from(projectMembers)
-      .where(
-        and(
-          eq(projectMembers.projectId, projectId),
-          eq(projectMembers.userId, session.user.id),
-          eq(projectMembers.projectRole, "lead"),
-        ),
-      )
-      .limit(1);
-    if (membership) return session;
-  }
-  redirect(`/studio/projects`);
-}
-
 async function projectTitle(projectId: string): Promise<string> {
   const [row] = await db
     .select({ title: projects.title })
@@ -217,6 +187,7 @@ function revalidateProject(projectId: string, slug?: string) {
   revalidatePath(`/studio/projects/${projectId}`);
   revalidatePath("/");
   revalidatePath("/work");
+  updateTag("public-projects");
   if (slug) revalidatePath(`/work/${slug}`);
 }
 
@@ -577,17 +548,33 @@ export async function createProjectUpdate(formData: FormData) {
   const title = text(formData, "title");
   if (!title) redirect(`/studio/projects/${projectId}?error=update`);
 
+  const visibility =
+    text(formData, "visibility") === "internal" ? "internal" : ("client" as const);
+  if (
+    visibility === "client" &&
+    !canPublishClientVisibleUpdate(
+      session.user.role,
+      membership
+        ? {
+            projectRole: membership.projectRole === "lead" ? "lead" : "developer",
+          }
+        : null,
+    )
+  ) {
+    redirect(`/studio/projects/${projectId}?error=update-visibility`);
+  }
+
   await db.insert(projectUpdates).values({
     projectId,
     authorId: session.user.id,
     title,
     body: text(formData, "body"),
-    visibility: text(formData, "visibility") === "internal" ? "internal" : "client",
+    visibility,
   });
 
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, projectId));
 
-  if (text(formData, "visibility") !== "internal") {
+  if (visibility !== "internal") {
     const name = await projectTitle(projectId);
     await notifyProjectClients(
       projectId,
@@ -759,6 +746,26 @@ export async function updateTeamMember(formData: FormData) {
     })
     .where(eq(users.id, userId));
 
+  const technologyIds = formData
+    .getAll("technologyIds")
+    .map((value) => String(value))
+    .filter((id) => isUuid(id));
+  if (technologyIds.length > 0) {
+    await db
+      .insert(userTechnologies)
+      .values(technologyIds.map((technologyId) => ({ userId, technologyId })))
+      .onConflictDoNothing();
+  }
+
+  await logAuditEvent({
+    actorUserId: session.user.id,
+    action: "team.role_updated",
+    entityType: "user",
+    entityId: userId,
+    metadata: { role, technologyIdsAdded: technologyIds },
+  });
+
+  revalidatePath("/studio/technologies");
   revalidatePath("/studio/team");
   revalidatePath("/about");
   redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}updated=1`);
@@ -779,7 +786,7 @@ export async function setTeamMemberShowOnAbout(formData: FormData) {
 }
 
 export async function cancelPendingInvite(formData: FormData) {
-  await requireFounder();
+  const session = await requireFounder();
   const inviteId = text(formData, "inviteId");
   const returnTo = text(formData, "returnTo") || "/studio/team";
   if (!isUuid(inviteId)) {
@@ -803,6 +810,13 @@ export async function cancelPendingInvite(formData: FormData) {
   await db
     .delete(invites)
     .where(and(eq(invites.id, inviteId), isNull(invites.acceptedAt)));
+
+  await logAuditEvent({
+    actorUserId: session.user.id,
+    action: "invite.cancelled",
+    entityType: "invite",
+    entityId: inviteId,
+  });
 
   revalidatePath("/studio/team");
   revalidatePath("/studio/clients");
@@ -1049,6 +1063,14 @@ export async function acceptInvite(formData: FormData) {
     .set({ acceptedAt: verifiedAt })
     .where(and(eq(invites.email, email), isNull(invites.acceptedAt)));
 
+  await logAuditEvent({
+    actorUserId: account.id,
+    action: "invite.accepted",
+    entityType: "user",
+    entityId: account.id,
+    metadata: { email, role: invite.role },
+  });
+
   revalidatePath("/studio/team");
   revalidatePath("/studio/clients");
   revalidatePath("/about");
@@ -1069,15 +1091,10 @@ export async function createPortalRequest(formData: FormData) {
   const title = text(formData, "title");
   if (!isUuid(projectId) || !title) redirect("/portal");
 
+  await requirePortalProject(session, projectId);
+
   const project = await getProjectById(projectId);
   if (!project) redirect("/portal");
-
-  const clientIds = await db
-    .select({ clientId: clientMembers.clientId })
-    .from(clientMembers)
-    .where(eq(clientMembers.userId, session.user.id));
-  const allowed = clientIds.some((row) => row.clientId === project.project.clientId);
-  if (!allowed) redirect("/portal");
 
   await db.insert(projectRequests).values({
     projectId,

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LoginForm } from "~/app/(auth)/login/login-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { AuthFooterLinks, AuthLink, AuthScreen } from "~/components/auth/auth-screen";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -11,30 +11,35 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Studio and client portal access.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-            <LoginForm />
-          </Suspense>
-          <p className="text-center text-sm text-muted-foreground">
-            Accounts are created by the studio. Need access?{" "}
-            <a href="mailto:hello@simplycode.io" className="text-primary underline-offset-4 hover:underline">
-              Email us
-            </a>
-          </p>
-          <p className="text-center text-xs text-muted-foreground">
-            <Link href="/" className="underline-offset-4 hover:underline">
-              Back to simplycode.io
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthScreen
+      title="Sign in"
+      description="Studio and client portal access for invited team members and clients."
+      footer={
+        <AuthFooterLinks
+          primary={
+            <p>
+              Accounts are created by the studio. Need access?{" "}
+              <AuthLink href="mailto:hello@simplycode.io">Email us</AuthLink>
+            </p>
+          }
+          secondary={
+            <p>
+              <Link
+                href="/"
+                className="font-semibold text-[#57524a] underline-offset-4 transition-colors hover:text-[#15130f] hover:underline"
+              >
+                Back to simplycode.io
+              </Link>
+            </p>
+          }
+        />
+      }
+    >
+      <Suspense
+        fallback={<p className="text-sm text-[#6f6a60]">Loading sign-in…</p>}
+      >
+        <LoginForm />
+      </Suspense>
+    </AuthScreen>
   );
 }
-

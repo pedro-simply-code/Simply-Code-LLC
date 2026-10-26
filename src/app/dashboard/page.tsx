@@ -1,5 +1,4 @@
 import { auth } from "~/lib/auth";
-import { DashboardPosts } from "~/app/dashboard/dashboard-posts";
 import { DashboardNote } from "~/app/dashboard/dashboard-note";
 
 export default async function DashboardPage() {
@@ -14,7 +13,6 @@ export default async function DashboardPage() {
         </p>
       </div>
       <DashboardNote />
-      <DashboardPosts />
     </div>
   );
 }

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 const NAV: DashboardNavItem[] = [
   { href: "/portal", label: "Projects", icon: "projects", section: "Workspace" },
+  { href: "/portal/activity", label: "Activity", icon: "overview", section: "Workspace" },
   { href: "/portal/messages", label: "Messages", icon: "messages", section: "Workspace" },
   {
     href: "/portal/notifications",

@@ -1,6 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import { env } from "~/env";
+import { refreshAuthTokenFromDb } from "~/lib/auth-token-refresh";
 import { normalizeRole } from "~/lib/roles";
 import type { UserRole } from "~/server/db/schema";
 
@@ -28,17 +29,19 @@ export default {
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
         if (user.role) token.role = normalizeRole(user.role);
+        token.totpRequired = !!(user as { totpRequired?: boolean }).totpRequired;
       }
-      return token;
+      return refreshAuthTokenFromDb(token);
     },
     session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         session.user.role = normalizeRole(token.role as UserRole | undefined);
+        session.totpRequired = !!token.totpRequired;
       }
       return session;
     },
