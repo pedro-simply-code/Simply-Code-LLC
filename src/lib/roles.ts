@@ -36,6 +36,12 @@ export function canManageReviews(role?: UserRole | null): boolean {
   return isFounder(role);
 }
 
+/** Founders and leads can create/edit pages and posts. */
+export function canManageContent(role?: UserRole | null): boolean {
+  const normalized = normalizeRole(role);
+  return normalized === "founder" || normalized === "lead";
+}
+
 export function roleLabel(role?: UserRole | null): string {
   return {
     founder: "Founder",

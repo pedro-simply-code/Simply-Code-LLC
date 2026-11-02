@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
 import { submitContact } from "~/app/(site)/contact/actions";
 import { INITIAL_CONTACT_STATE } from "~/app/(site)/contact/schema";
@@ -228,12 +229,12 @@ export function ContactForm() {
       <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[12px] text-[#6f6a60]">
           By sending this form you agree to our{" "}
-          <a
+          <Link
             href="/privacy"
             className="hover:text-sc-accent underline underline-offset-4"
           >
             privacy policy
-          </a>
+          </Link>
           .
         </p>
         <button

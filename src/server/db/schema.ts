@@ -14,6 +14,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { env } from "~/env";
+import type { ContentDocument } from "~/lib/content";
 
 /** All app tables are prefixed via `DB_TABLE_PREFIX` (multi-app Neon clusters). */
 export const createTable = pgTableCreator(
@@ -668,7 +669,62 @@ export const siteSettings = createTable("site_settings", {
   }),
 });
 
+export const contentKindEnum = pgEnum(`${env.DB_TABLE_PREFIX}_content_kind`, [
+  "page",
+  "post",
+]);
+
+export const contentStatusEnum = pgEnum(
+  `${env.DB_TABLE_PREFIX}_content_status`,
+  ["draft", "published"],
+);
+
+/**
+ * Pages and posts share one table: same editor, same slug rules, same
+ * publishing flow. `kind` decides the public route (`/{slug}` vs `/blog/{slug}`).
+ * `body` is the serialized Lexical editor state.
+ */
+export const contentEntries = createTable(
+  "content_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: contentKindEnum("kind").notNull().default("page"),
+    slug: text("slug").notNull(),
+    title: text("title").notNull(),
+    excerpt: text("excerpt").notNull().default(""),
+    coverImageUrl: text("cover_image_url"),
+    status: contentStatusEnum("status").notNull().default("draft"),
+    body: jsonb("body").$type<ContentDocument>().notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    authorId: uuid("author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    kindSlugUnique: uniqueIndex(
+      `${env.DB_TABLE_PREFIX}_content_entries_kind_slug_unique`,
+    ).on(table.kind, table.slug),
+    statusIdx: index(`${env.DB_TABLE_PREFIX}_content_entries_status_idx`).on(
+      table.status,
+      table.publishedAt,
+    ),
+    kindIdx: index(`${env.DB_TABLE_PREFIX}_content_entries_kind_idx`).on(
+      table.kind,
+      table.updatedAt,
+    ),
+  }),
+);
+
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 export type Project = typeof projects.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type ContentEntry = typeof contentEntries.$inferSelect;
+export type ContentKind = (typeof contentKindEnum.enumValues)[number];
+export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];

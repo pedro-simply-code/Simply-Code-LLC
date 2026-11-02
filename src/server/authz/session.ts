@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
 import { auth } from "~/lib/auth";
-import { isFounder, isTeam } from "~/lib/roles";
+import { canManageContent, isFounder, isTeam } from "~/lib/roles";
 import { db } from "~/server/db";
 import { projectMembers, type UserRole } from "~/server/db/schema";
 import { isUuid } from "~/server/studio/queries";
@@ -31,6 +31,13 @@ export async function requireTeam(): Promise<AuthSession> {
 export async function requireFounder(): Promise<AuthSession> {
   const session = await requireTeam();
   if (!isFounder(session.user.role)) redirect("/studio");
+  return session;
+}
+
+/** Pages and posts: founders and leads. */
+export async function requireContentManager(): Promise<AuthSession> {
+  const session = await requireTeam();
+  if (!canManageContent(session.user.role)) redirect("/studio");
   return session;
 }
 

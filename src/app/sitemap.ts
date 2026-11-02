@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { PROJECTS } from "~/content/projects";
+import { contentHref } from "~/lib/content";
 import { env } from "~/env";
+import { listPublishedContentSafe } from "~/server/content/queries";
 import { getPublicProjectsSafe } from "~/server/studio/queries";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -30,6 +32,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/about`,
       lastModified: now,
       changeFrequency: "yearly",
+      priority: 0.7,
+    },
+    {
+      url: `${base}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
       priority: 0.7,
     },
     {
@@ -66,5 +74,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...projectRoutes];
+  const content = await listPublishedContentSafe();
+  const contentRoutes: MetadataRoute.Sitemap = content.map((entry) => ({
+    url: `${base}${contentHref(entry.kind, entry.slug)}`,
+    lastModified: entry.updatedAt,
+    changeFrequency: entry.kind === "post" ? "monthly" : "yearly",
+    priority: entry.kind === "post" ? 0.6 : 0.5,
+  }));
+
+  return [...staticRoutes, ...projectRoutes, ...contentRoutes];
 }

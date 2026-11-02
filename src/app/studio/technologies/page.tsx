@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
 import { isFounder } from "~/lib/roles";
@@ -61,12 +62,12 @@ export default async function TechnologiesPage({
                 </button>
               </form>
             </StudioFormDialog>
-            <a
+            <Link
               href="/studio/team"
               className={cn("inline-flex", appGhostButtonLg)}
             >
               Assign on Team
-            </a>
+            </Link>
           </div>
         }
       />

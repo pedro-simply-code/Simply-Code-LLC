@@ -14,4 +14,5 @@ export default defineConfig({
     url: env.DATABASE_URL,
   },
   tablesFilter: [`${env.DB_TABLE_PREFIX}_*`],
+  schemaFilter: ["public"],
 });

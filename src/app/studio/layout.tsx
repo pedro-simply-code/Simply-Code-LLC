@@ -9,7 +9,13 @@ import { NotificationBell } from "~/components/notification-bell";
 import { SignOutButton } from "~/components/sign-out-button";
 import { auth } from "~/lib/auth";
 import { sidebarCookieName } from "~/lib/dashboard";
-import { canManageReviews, isFounder, isTeam, roleLabel } from "~/lib/roles";
+import {
+  canManageContent,
+  canManageReviews,
+  isFounder,
+  isTeam,
+  roleLabel,
+} from "~/lib/roles";
 
 export const metadata: Metadata = {
   title: "Studio",
@@ -30,6 +36,7 @@ export default async function StudioLayout({
     cookieStore.get(sidebarCookieName("studio"))?.value === "1";
   const founder = isFounder(session.user.role);
   const reviewer = canManageReviews(session.user.role);
+  const contentEditor = canManageContent(session.user.role);
 
   const nav: DashboardNavItem[] = [
     {
@@ -56,6 +63,16 @@ export default async function StudioLayout({
       icon: "projects",
       section: "Manage",
     },
+    ...(contentEditor
+      ? [
+          {
+            href: "/studio/content",
+            label: "Content",
+            icon: "content" as const,
+            section: "Manage",
+          },
+        ]
+      : []),
     ...(reviewer
       ? [
           {

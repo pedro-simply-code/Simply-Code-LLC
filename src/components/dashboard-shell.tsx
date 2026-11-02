@@ -7,6 +7,7 @@ import {
   Bell,
   Building2,
   Cpu,
+  FileText,
   FolderKanban,
   Globe,
   LayoutDashboard,
@@ -35,7 +36,8 @@ export type DashboardIcon =
   | "technologies"
   | "clients"
   | "settings"
-  | "profile";
+  | "profile"
+  | "content";
 
 export type DashboardNavItem = {
   href: string;
@@ -55,6 +57,7 @@ const ICONS: Record<DashboardIcon, LucideIcon> = {
   clients: Building2,
   settings: Settings,
   profile: User,
+  content: FileText,
 };
 
 type DashboardShellProps = {

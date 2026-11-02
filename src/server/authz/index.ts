@@ -1,4 +1,5 @@
 export {
+  requireContentManager,
   requireFounder,
   requireProjectManager,
   requireProjectTeamMember,

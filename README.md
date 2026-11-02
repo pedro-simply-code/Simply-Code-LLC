@@ -48,6 +48,8 @@ Uses **`@neondatabase/serverless`** + **`drizzle-orm/neon-http`**. Set `DATABASE
 
 Each app should use a **unique `DB_TABLE_PREFIX`** when sharing one Neon project. Schema is defined in `src/server/db/schema.ts`; table names are `${DB_TABLE_PREFIX}_*`.
 
+`pnpm db:push` is interactive when it detects schema conflicts. If a non-TTY shell exits with `Interactive prompts require a TTY terminal`, rerun it in a terminal or apply the generated SQL manually.
+
 ## Auth routes
 
 - `/login`
@@ -56,6 +58,16 @@ Each app should use a **unique `DB_TABLE_PREFIX`** when sharing one Neon project
 - `/studio` (team), `/portal` (client), `/dashboard` (legacy role redirect)
 
 Founders invite team and client accounts from `/studio/team` and `/studio/clients`. Invite emails are sent through Google SMTP; see `.env.example` for `GOOGLE_SMTP_USER` and `GOOGLE_SMTP_APP_PASSWORD`.
+
+## Content (pages & posts)
+
+The Studio ships a small CMS at `/studio/content` for **founders and leads**.
+
+- One table (`content_entries`) stores both pages (`kind = "page"`) and posts (`kind = "post"`); the serialized Lexical editor state lives in `body` (jsonb).
+- Pages publish at `/{slug}`. Posts publish at `/blog/{slug}` and are listed at `/blog`. Drafts stay hidden.
+- The editor uses **Lexical** (`lexical` + `@lexical/react`). The custom **Hero** block (`src/components/lexical/hero-node.tsx`) mirrors the homepage hero: insert it from the toolbar and edit every field (eyebrow, headline, highlight, links, stats) in place.
+- Public rendering (`src/components/content/content-renderer.tsx`) walks the Lexical JSON on the server, so the editor bundle never ships to visitors.
+- Slugs are unique per kind; page slugs cannot reuse existing routes (`work`, `services`, `about`, `contact`, `faq`, `blog`, `studio`, `portal`, etc.). Changing a slug does not create a redirect.
 
 ## Security & operations
 

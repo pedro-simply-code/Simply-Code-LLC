@@ -24,6 +24,9 @@ Opinionated **Next.js 16** starter: Auth.js v5 (JWT + Google + credentials), Dri
 | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `src/app/`                          | App Router pages and API routes                                                                 |
 | `src/server/db/schema.ts`           | Drizzle schema; tables = `${DB_TABLE_PREFIX}_*`                                                 |
+| `src/server/content/`               | CMS queries and server actions (pages, posts, publishing)                                       |
+| `src/components/lexical/`           | Lexical editor, toolbar, and the editable Hero decorator node                                   |
+| `src/components/content/`           | Hero block, content form fields, and the server-side Lexical renderer                           |
 | `src/lib/auth.ts`, `auth.config.ts` | Auth.js                                                                                         |
 | `src/env.js`                        | Validated env (imported from `next.config.ts` — build needs vars set)                           |
 | `src/proxy.ts`                      | Auth guards for `/dashboard`, `/login`, `/studio`, `/portal`; `/register` redirects to `/login` |
@@ -46,7 +49,7 @@ Update `package.json` name, `.env.example` / `DB_TABLE_PREFIX`, and `NEXT_PUBLIC
 
 | Path         | Access                   | Purpose                                                                                                        |
 | ------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `/studio`    | founder, lead, developer | Internal studio: projects, technologies, team, reviews, clients, messages, notifications                       |
+| `/studio`    | founder, lead, developer | Internal studio: projects, technologies, team, reviews, clients, messages, notifications, content             |
 | `/portal`    | client                   | Client portal: project progress, updates, requests, notifications, review submission (completed projects only) |
 | `/dashboard` | any signed-in user       | Legacy route; proxy redirects by role to `/studio`, `/portal`, or `/login`                                     |
 
