@@ -25,6 +25,8 @@ const ERROR_MESSAGES: Record<string, string> = {
     "Check the form and try again. The password needs upper, lower and a number.",
   match: "The passwords do not match.",
   expired: "This invitation has expired or has already been used.",
+  "rate-limit":
+    "Too many attempts. Please wait a few minutes before trying again.",
 };
 
 export default async function AcceptInvitePage({

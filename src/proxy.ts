@@ -37,7 +37,7 @@ export const proxy = auth((req) => {
       req.cookies.get(twoFactorCookieName())?.value,
     );
 
-  // Only `/login` — not `/login/two-factor` (founders verify 2FA there while signed in).
+  // Only `/login` — not `/login/two-factor` (users verify 2FA there while signed in).
   if (pathname === "/login") {
     if (isLoggedIn) {
       return withPathname(
@@ -94,6 +94,11 @@ export const proxy = auth((req) => {
     }
     if (isTeam(role)) {
       return withPathname(NextResponse.redirect(new URL("/studio", req.url)));
+    }
+    if (totpRequired && !twoFactorOk) {
+      const verify = new URL(twoFactorPath, req.url);
+      verify.searchParams.set("callbackUrl", pathname);
+      return withPathname(NextResponse.redirect(verify));
     }
   }
 

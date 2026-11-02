@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { users } from "~/server/db/schema";
 import { AvatarUpload } from "~/components/profile/avatar-upload";
 import {
@@ -18,11 +19,14 @@ export function ProfileForm({
   user,
   showAboutFields,
   canEditAboutVisibility = false,
+  securitySlot,
 }: {
   user: typeof users.$inferSelect;
   showAboutFields: boolean;
   /** Founders only — leads and developers are listed on About by founder from Team. */
   canEditAboutVisibility?: boolean;
+  /** Optional security card (2FA) rendered under Account. */
+  securitySlot?: ReactNode;
 }) {
   return (
     <form action={updateUserProfile} className="flex w-full flex-col">
@@ -68,6 +72,8 @@ export function ProfileForm({
               </Field>
             </div>
           </StudioCard>
+
+          {securitySlot}
 
           <StudioCard
             title="Contact & scheduling"

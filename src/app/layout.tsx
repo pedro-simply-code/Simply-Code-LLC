@@ -3,9 +3,6 @@ import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { MaintenanceScreen } from "~/components/maintenance-screen";
-import { isPublicMarketingPath } from "~/lib/public-paths";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "~/app/api/uploadthing/core";
 import { SITE } from "~/content/site";
@@ -14,8 +11,6 @@ import { Providers } from "~/providers/providers";
 import { siteSettingsHtmlProps } from "~/lib/site-settings";
 import { getSiteSettings } from "~/server/site-settings/queries";
 import "~/styles/globals.css";
-
-export const dynamic = "force-dynamic";
 
 const siteUrl = env.NEXT_PUBLIC_SITE_URL;
 
@@ -77,33 +72,21 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const siteSettings = await getSiteSettings();
   const siteHtmlProps = siteSettingsHtmlProps(siteSettings);
-  const pathname = (await headers()).get("x-pathname") ?? "";
-  const showMaintenance =
-    siteSettings.maintenanceMode && isPublicMarketingPath(pathname);
 
   return (
     <html lang="en" suppressHydrationWarning {...siteHtmlProps}>
       <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>
         <Script src="/theme-init.js" strategy="beforeInteractive" />
-        {showMaintenance ? (
-          <MaintenanceScreen message={siteSettings.maintenanceMessage} />
-        ) : (
-          <>
-            <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-            <Script
-              id="organization-jsonld"
-              type="application/ld+json"
-              strategy="lazyOnload"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify(organizationJsonLd).replace(
-                  /</g,
-                  "\\u003c",
-                ),
-              }}
-            />
-            <Providers>{children}</Providers>
-          </>
-        )}
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+        <Script
+          id="organization-jsonld"
+          type="application/ld+json"
+          strategy="lazyOnload"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

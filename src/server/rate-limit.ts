@@ -1,12 +1,15 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { rateLimits } from "~/server/db/schema";
 
 /**
  * Fixed-window rate limit backed by Postgres (works on serverless).
- * Returns true when the request is allowed.
+ *
+ * Performed as a single atomic upsert so concurrent requests cannot both read
+ * the same counter and exceed the limit. Returns true when the request is
+ * allowed.
  */
 export async function consumeRateLimit(
   bucket: string,
@@ -17,37 +20,18 @@ export async function consumeRateLimit(
   const now = new Date();
   const resetAt = new Date(now.getTime() + windowMs);
 
-  const [existing] = await db
-    .select()
-    .from(rateLimits)
-    .where(eq(rateLimits.bucket, key))
-    .limit(1);
+  const [row] = await db
+    .insert(rateLimits)
+    .values({ bucket: key, count: 1, resetAt })
+    .onConflictDoUpdate({
+      target: rateLimits.bucket,
+      set: {
+        // Expired window -> start over; otherwise increment in place.
+        count: sql`case when ${rateLimits.resetAt} <= ${now} then 1 else ${rateLimits.count} + 1 end`,
+        resetAt: sql`case when ${rateLimits.resetAt} <= ${now} then ${resetAt} else ${rateLimits.resetAt} end`,
+      },
+    })
+    .returning({ count: rateLimits.count });
 
-  if (!existing) {
-    await db.insert(rateLimits).values({
-      bucket: key,
-      count: 1,
-      resetAt,
-    });
-    return true;
-  }
-
-  if (existing.resetAt.getTime() <= now.getTime()) {
-    await db
-      .update(rateLimits)
-      .set({ count: 1, resetAt })
-      .where(eq(rateLimits.bucket, key));
-    return true;
-  }
-
-  if (existing.count >= limit) {
-    return false;
-  }
-
-  await db
-    .update(rateLimits)
-    .set({ count: existing.count + 1 })
-    .where(eq(rateLimits.bucket, key));
-
-  return true;
+  return (row?.count ?? 0) <= limit;
 }

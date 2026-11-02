@@ -98,16 +98,26 @@ export const accounts = createTable(
     providerAccountUnique: uniqueIndex(
       `${env.DB_TABLE_PREFIX}_accounts_provider_account_unique`,
     ).on(table.provider, table.providerAccountId),
+    userIdx: index(`${env.DB_TABLE_PREFIX}_accounts_user_idx`).on(table.userId),
   }),
 );
 
-export const sessions = createTable("sessions", {
-  sessionToken: text("session_token").primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: timestamp("expires", { mode: "date" }).notNull(),
-});
+export const sessions = createTable(
+  "sessions",
+  {
+    sessionToken: text("session_token").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
+  },
+  (table) => ({
+    userIdx: index(`${env.DB_TABLE_PREFIX}_sessions_user_idx`).on(table.userId),
+    expiresIdx: index(`${env.DB_TABLE_PREFIX}_sessions_expires_idx`).on(
+      table.expires,
+    ),
+  }),
+);
 
 export const verificationTokens = createTable(
   "verification_tokens",
@@ -191,6 +201,9 @@ export const clientMembers = createTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.clientId, table.userId] }),
+    userIdx: index(`${env.DB_TABLE_PREFIX}_client_members_user_idx`).on(
+      table.userId,
+    ),
   }),
 );
 
@@ -287,6 +300,9 @@ export const projectMembers = createTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.projectId, table.userId] }),
+    userIdx: index(`${env.DB_TABLE_PREFIX}_project_members_user_idx`).on(
+      table.userId,
+    ),
   }),
 );
 
@@ -305,22 +321,31 @@ export const projectTechnologies = createTable(
   }),
 );
 
-export const projectUpdates = createTable("project_updates", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  projectId: uuid("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  authorId: uuid("author_id").references(() => users.id, {
-    onDelete: "set null",
+export const projectUpdates = createTable(
+  "project_updates",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    title: text("title").notNull(),
+    body: text("body").notNull().default(""),
+    /** `client` is visible in the portal; `internal` is studio-only. */
+    visibility: text("visibility").notNull().default("client"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    projectIdx: index(`${env.DB_TABLE_PREFIX}_project_updates_project_idx`).on(
+      table.projectId,
+      table.createdAt,
+    ),
   }),
-  title: text("title").notNull(),
-  body: text("body").notNull().default(""),
-  /** `client` is visible in the portal; `internal` is studio-only. */
-  visibility: text("visibility").notNull().default("client"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
+);
 
 export const projectMilestones = createTable(
   "project_milestones",
@@ -376,61 +401,86 @@ export const projectDeliverables = createTable(
   }),
 );
 
-export const projectRequests = createTable("project_requests", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  projectId: uuid("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  clientId: uuid("client_id").references(() => clients.id, {
-    onDelete: "set null",
+export const projectRequests = createTable(
+  "project_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").references(() => clients.id, {
+      onDelete: "set null",
+    }),
+    createdById: uuid("created_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    type: text("type").notNull().default("request"),
+    priority: text("priority").notNull().default("normal"),
+    /** `open` | `completed` | `rejected` */
+    status: text("status").notNull().default("open"),
+    /** Reason/note attached when a request is rejected or completed. */
+    resolutionNote: text("resolution_note"),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    projectIdx: index(`${env.DB_TABLE_PREFIX}_project_requests_project_idx`).on(
+      table.projectId,
+      table.status,
+    ),
+    clientIdx: index(`${env.DB_TABLE_PREFIX}_project_requests_client_idx`).on(
+      table.clientId,
+      table.createdAt,
+    ),
   }),
-  createdById: uuid("created_by_id").references(() => users.id, {
-    onDelete: "set null",
-  }),
-  title: text("title").notNull(),
-  description: text("description").notNull().default(""),
-  type: text("type").notNull().default("request"),
-  priority: text("priority").notNull().default("normal"),
-  /** `open` | `completed` | `rejected` */
-  status: text("status").notNull().default("open"),
-  /** Reason/note attached when a request is rejected or completed. */
-  resolutionNote: text("resolution_note"),
-  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
+);
 
-export const reviews = createTable("reviews", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  quote: text("quote").notNull(),
-  authorName: text("author_name").notNull().default("Client"),
-  authorRole: text("author_role"),
-  company: text("company"),
-  projectTitle: text("project_title"),
-  projectId: uuid("project_id").references(() => projects.id, {
-    onDelete: "set null",
+export const reviews = createTable(
+  "reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    quote: text("quote").notNull(),
+    authorName: text("author_name").notNull().default("Client"),
+    authorRole: text("author_role"),
+    company: text("company"),
+    projectTitle: text("project_title"),
+    projectId: uuid("project_id").references(() => projects.id, {
+      onDelete: "set null",
+    }),
+    rating: integer("rating").notNull().default(5),
+    /** `upwork` | `client` | `manual` | `google` */
+    source: text("source").notNull().default("manual"),
+    sourceUrl: text("source_url"),
+    period: text("period"),
+    /** `pending` | `approved` | `hidden` */
+    status: text("status").notNull().default("pending"),
+    createdById: uuid("created_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    clientId: uuid("client_id").references(() => clients.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    statusIdx: index(`${env.DB_TABLE_PREFIX}_reviews_status_idx`).on(
+      table.status,
+      table.createdAt,
+    ),
+    projectIdx: index(`${env.DB_TABLE_PREFIX}_reviews_project_idx`).on(
+      table.projectId,
+    ),
   }),
-  rating: integer("rating").notNull().default(5),
-  /** `upwork` | `client` | `manual` | `google` */
-  source: text("source").notNull().default("manual"),
-  sourceUrl: text("source_url"),
-  period: text("period"),
-  /** `pending` | `approved` | `hidden` */
-  status: text("status").notNull().default("pending"),
-  createdById: uuid("created_by_id").references(() => users.id, {
-    onDelete: "set null",
-  }),
-  clientId: uuid("client_id").references(() => clients.id, {
-    onDelete: "set null",
-  }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
+);
 
 export const notifications = createTable(
   "notifications",
@@ -469,23 +519,32 @@ export const notifications = createTable(
   }),
 );
 
-export const contactMessages = createTable("contact_messages", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  company: text("company"),
-  service: text("service"),
-  message: text("message").notNull(),
-  attachments: jsonb("attachments")
-    .$type<import("~/lib/message-attachments").MessageAttachment[]>()
-    .notNull()
-    .default([]),
-  /** new | replied | archived */
-  status: text("status").notNull().default("new"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
+export const contactMessages = createTable(
+  "contact_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    company: text("company"),
+    service: text("service"),
+    message: text("message").notNull(),
+    attachments: jsonb("attachments")
+      .$type<import("~/lib/message-attachments").MessageAttachment[]>()
+      .notNull()
+      .default([]),
+    /** new | replied | archived */
+    status: text("status").notNull().default("new"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    statusIdx: index(`${env.DB_TABLE_PREFIX}_contact_messages_status_idx`).on(
+      table.status,
+      table.createdAt,
+    ),
+  }),
+);
 
 /** Founder → client replies (portal inbox and/or email audit). */
 export const clientInboxMessages = createTable(
@@ -552,6 +611,10 @@ export const auditEvents = createTable(
     ),
     actorIdx: index(`${env.DB_TABLE_PREFIX}_audit_events_actor_idx`).on(
       table.actorUserId,
+      table.createdAt,
+    ),
+    actionIdx: index(`${env.DB_TABLE_PREFIX}_audit_events_action_idx`).on(
+      table.action,
       table.createdAt,
     ),
   }),

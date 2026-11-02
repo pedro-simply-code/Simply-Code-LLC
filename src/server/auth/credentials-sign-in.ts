@@ -5,7 +5,6 @@ import { AuthError } from "next-auth";
 import { getClientIp } from "~/lib/client-ip";
 import { eq } from "drizzle-orm";
 import { signIn } from "~/lib/auth";
-import { isFounder } from "~/lib/roles";
 import { loginSchema, type LoginInput } from "~/schemas/auth";
 import { consumeRateLimit } from "~/server/rate-limit";
 import { db } from "~/server/db";
@@ -52,12 +51,12 @@ export async function credentialsSignIn(
     });
 
     const [row] = await db
-      .select({ role: users.role, totpEnabled: users.totpEnabled })
+      .select({ totpEnabled: users.totpEnabled })
       .from(users)
       .where(eq(users.email, email))
       .limit(1);
 
-    const needs2fa = !!row && isFounder(row.role) && row.totpEnabled;
+    const needs2fa = !!row?.totpEnabled;
     return { ok: true, needs2fa };
   } catch (error) {
     if (error instanceof AuthError) {

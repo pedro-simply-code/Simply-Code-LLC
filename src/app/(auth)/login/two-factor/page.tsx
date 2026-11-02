@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { TwoFactorLoginForm } from "~/app/(auth)/login/two-factor/two-factor-login-form";
 import { AuthFooterLinks, AuthScreen } from "~/components/auth/auth-screen";
 import { auth } from "~/lib/auth";
+import { homePathForRole } from "~/lib/roles";
 
 export const metadata: Metadata = {
   title: "Two-factor authentication",
@@ -17,14 +18,20 @@ export default async function TwoFactorLoginPage({
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
-  if (!session.totpRequired) redirect("/studio");
+
+  const home = homePathForRole(session.user.role);
+  if (!session.totpRequired) redirect(home);
 
   const { callbackUrl } = await searchParams;
+  const safeCallback =
+    callbackUrl?.startsWith("/") && !callbackUrl.startsWith("//")
+      ? callbackUrl
+      : home;
 
   return (
     <AuthScreen
       title="Two-factor authentication"
-      description="Enter the 6-digit code from your authenticator app to access the studio."
+      description="Enter the 6-digit code from your authenticator app to continue."
       footer={
         <AuthFooterLinks
           secondary={
@@ -40,7 +47,7 @@ export default async function TwoFactorLoginPage({
         />
       }
     >
-      <TwoFactorLoginForm callbackUrl={callbackUrl ?? "/studio"} />
+      <TwoFactorLoginForm callbackUrl={safeCallback} />
     </AuthScreen>
   );
 }

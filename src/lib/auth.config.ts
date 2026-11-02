@@ -13,6 +13,8 @@ const google =
         // Invite-only: the founder has already approved the email address.
         // Google verifies ownership, so linking it to the invited account is safe.
         allowDangerousEmailAccountLinking: true,
+        // Restrict to a Google Workspace domain when configured.
+        ...(env.AUTH_GOOGLE_HD ? { hd: env.AUTH_GOOGLE_HD } : {}),
       })
     : null;
 
@@ -47,5 +49,7 @@ export default {
       return session;
     },
   },
+  // Auth.js validates the incoming Host header even when AUTH_URL is set.
+  // Keep trusting the proxy-provided host in every environment.
   trustHost: true,
 } satisfies NextAuthConfig;

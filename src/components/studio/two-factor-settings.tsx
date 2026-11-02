@@ -23,6 +23,11 @@ function formatSecretCompact(secret: string): string {
   return groups.join(" ");
 }
 
+/** Keep the code inputs from submitting the surrounding profile form on Enter. */
+function preventEnterSubmit(event: React.KeyboardEvent<HTMLInputElement>) {
+  if (event.key === "Enter") event.preventDefault();
+}
+
 export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
   const router = useRouter();
   const [setup, setSetup] = useState<SetupState | null>(null);
@@ -84,8 +89,8 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
 
   return (
     <StudioCard
-      title="Two-factor authentication (founders)"
-      description="Require an authenticator app code when accessing the studio."
+      title="Account security"
+      description="Add an authenticator app code as a second step when signing in. Available for every account."
     >
       {enabled ? (
         <div className="space-y-3">
@@ -97,6 +102,7 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
             inputMode="numeric"
             maxLength={6}
             value={code}
+            onKeyDown={preventEnterSubmit}
             onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
           />
           <button
@@ -170,6 +176,7 @@ export function TwoFactorSettings({ enabled }: { enabled: boolean }) {
               autoComplete="one-time-code"
               maxLength={6}
               value={code}
+              onKeyDown={preventEnterSubmit}
               onChange={(event) =>
                 setCode(event.target.value.replace(/\D/g, ""))
               }

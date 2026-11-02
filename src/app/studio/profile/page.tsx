@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ProfileForm } from "~/components/profile/profile-form";
 import { ProfileStatusBanner } from "~/components/profile/profile-status-banner";
+import { TwoFactorSettings } from "~/components/studio/two-factor-settings";
 import { StudioHeader } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
 import { isFounder, isTeam } from "~/lib/roles";
@@ -34,6 +35,7 @@ export default async function StudioProfilePage({
         user={user}
         showAboutFields
         canEditAboutVisibility={isFounder(session.user.role)}
+        securitySlot={<TwoFactorSettings enabled={user.totpEnabled} />}
       />
     </div>
   );

@@ -4,9 +4,10 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "~/lib/auth";
-import { isFounder } from "~/lib/roles";
+import { homePathForRole } from "~/lib/roles";
 import { logAuditEvent } from "~/server/audit/log";
 import {
+  twoFactorCookieMaxAgeSeconds,
   twoFactorCookieName,
   twoFactorCookieValue,
 } from "~/lib/two-factor-cookie";
@@ -26,7 +27,7 @@ export type TwoFactorSetupState = {
 
 export async function getTwoFactorSetup(): Promise<TwoFactorSetupState> {
   const session = await auth();
-  if (!session?.user?.id || !isFounder(session.user.role)) return null;
+  if (!session?.user?.id) return null;
 
   const [row] = await db
     .select({
@@ -56,7 +57,7 @@ export async function enableTwoFactor(
   code: string,
 ): Promise<{ ok: boolean }> {
   const session = await auth();
-  if (!session?.user?.id || !isFounder(session.user.role)) {
+  if (!session?.user?.id) {
     return { ok: false };
   }
 
@@ -78,7 +79,7 @@ export async function enableTwoFactor(
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 30 * 24 * 60 * 60,
+      maxAge: twoFactorCookieMaxAgeSeconds(),
     },
   );
 
@@ -94,7 +95,7 @@ export async function enableTwoFactor(
 
 export async function resetTwoFactorSetup(): Promise<{ ok: boolean }> {
   const session = await auth();
-  if (!session?.user?.id || !isFounder(session.user.role)) {
+  if (!session?.user?.id) {
     return { ok: false };
   }
 
@@ -116,7 +117,7 @@ export async function resetTwoFactorSetup(): Promise<{ ok: boolean }> {
 
 export async function disableTwoFactor(code: string): Promise<{ ok: boolean }> {
   const session = await auth();
-  if (!session?.user?.id || !isFounder(session.user.role)) {
+  if (!session?.user?.id) {
     return { ok: false };
   }
 
@@ -164,8 +165,9 @@ export async function verifyTwoFactorLogin(
     .where(eq(users.id, session.user.id))
     .limit(1);
 
-  if (!row?.totpEnabled || !row.totpSecret || !isFounder(row.role)) {
-    redirect("/studio");
+  if (!row) redirect("/login");
+  if (!row.totpEnabled || !row.totpSecret) {
+    redirect(homePathForRole(row.role));
   }
 
   if (!(await verifyTotpCode(row.totpSecret, code))) {
@@ -181,7 +183,7 @@ export async function verifyTwoFactorLogin(
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 30 * 24 * 60 * 60,
+      maxAge: twoFactorCookieMaxAgeSeconds(),
     },
   );
 

@@ -18,7 +18,8 @@
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "test": "vitest run",
-    "notifications:retention": "node --import tsx src/server/notifications/run-retention.ts"
+    "notifications:retention": "node --env-file-if-exists=.env --import tsx src/server/notifications/run-retention.ts",
+    "maintenance:cleanup": "node --env-file-if-exists=.env --import tsx src/server/cleanup/run-retention.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",

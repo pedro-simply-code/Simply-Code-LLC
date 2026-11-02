@@ -4,13 +4,15 @@ Opinionated **Next.js 16** starter: Auth.js v5 (JWT + Google + credentials), Dri
 
 ## Commands
 
-| Task | Command |
-|------|---------|
-| Dev | `pnpm dev` |
-| Lint + types | `pnpm check` |
-| DB sync (new apps) | `pnpm db:push` |
-| DB migrations | `pnpm db:generate` then `pnpm db:migrate` |
-| Production build | `pnpm build` |
+| Task                                      | Command                                   |
+| ----------------------------------------- | ----------------------------------------- |
+| Dev                                       | `pnpm dev`                                |
+| Lint + types                              | `pnpm check`                              |
+| DB sync (new apps)                        | `pnpm db:push`                            |
+| DB migrations                             | `pnpm db:generate` then `pnpm db:migrate` |
+| Production build                          | `pnpm build`                              |
+| Prune old notifications                   | `pnpm notifications:retention`            |
+| Prune expired rate limits & upload claims | `pnpm maintenance:cleanup`                |
 
 **Node 24.x** (`.node-version`). Native **argon2**: `.npmrc` allows build; `pnpm rebuild argon2` if password auth fails.
 
@@ -18,13 +20,13 @@ Opinionated **Next.js 16** starter: Auth.js v5 (JWT + Google + credentials), Dri
 
 ## Layout
 
-| Path | Purpose |
-|------|---------|
-| `src/app/` | App Router pages and API routes |
-| `src/server/db/schema.ts` | Drizzle schema; tables = `${DB_TABLE_PREFIX}_*` |
-| `src/lib/auth.ts`, `auth.config.ts` | Auth.js |
-| `src/env.js` | Validated env (imported from `next.config.ts` — build needs vars set) |
-| `src/proxy.ts` | Auth guards for `/dashboard`, `/login`, `/studio`, `/portal`; `/register` redirects to `/login` |
+| Path                                | Purpose                                                                                         |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `src/app/`                          | App Router pages and API routes                                                                 |
+| `src/server/db/schema.ts`           | Drizzle schema; tables = `${DB_TABLE_PREFIX}_*`                                                 |
+| `src/lib/auth.ts`, `auth.config.ts` | Auth.js                                                                                         |
+| `src/env.js`                        | Validated env (imported from `next.config.ts` — build needs vars set)                           |
+| `src/proxy.ts`                      | Auth guards for `/dashboard`, `/login`, `/studio`, `/portal`; `/register` redirects to `/login` |
 
 ## Conventions
 
@@ -42,11 +44,11 @@ Update `package.json` name, `.env.example` / `DB_TABLE_PREFIX`, and `NEXT_PUBLIC
 
 ## Studio & portal
 
-| Path | Access | Purpose |
-|------|--------|---------|
-| `/studio` | founder, lead, developer | Internal studio: projects, technologies, team, reviews, clients, messages, notifications |
-| `/portal` | client | Client portal: project progress, updates, requests, notifications, review submission (completed projects only) |
-| `/dashboard` | any signed-in user | Legacy route; proxy redirects by role to `/studio`, `/portal`, or `/login` |
+| Path         | Access                   | Purpose                                                                                                        |
+| ------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `/studio`    | founder, lead, developer | Internal studio: projects, technologies, team, reviews, clients, messages, notifications                       |
+| `/portal`    | client                   | Client portal: project progress, updates, requests, notifications, review submission (completed projects only) |
+| `/dashboard` | any signed-in user       | Legacy route; proxy redirects by role to `/studio`, `/portal`, or `/login`                                     |
 
 - Roles live in `src/lib/roles.ts` (`founder`, `lead`, `developer`, `client`). Legacy DB values `admin`/`user` are normalized to `founder`/`developer`; do not remove those enum values without a migration.
 - `founder` has full access. `lead` sees only projects assigned to them and can edit the projects they lead (including adding developers), but cannot create projects or manage reviews. `developer` sees only assigned projects. Clients never access `/studio`.
@@ -55,6 +57,7 @@ Update `package.json` name, `.env.example` / `DB_TABLE_PREFIX`, and `NEXT_PUBLIC
 - Transactional email uses Google Workspace / Gmail SMTP through Nodemailer (`src/server/email/sendEmail.ts`). Set `GOOGLE_SMTP_USER` and `GOOGLE_SMTP_APP_PASSWORD` (an App Password, not the account password). `CONTACT_FROM_EMAIL` is optional and defaults to the SMTP user. Without credentials, development logs instead of sending; production throws.
 - Multi-select fields use the shadcn Popover + Command component in `src/components/studio/multi-select.tsx`. It renders hidden inputs so server actions read values with `formData.getAll(name)`.
 - Client-submitted reviews are inserted as `pending`; approve them in `/studio/reviews` before they appear publicly.
+- Any role can enable TOTP 2FA from their own profile (`/studio/profile` or `/portal/profile`); after login a valid signed `sc_2fa` / `__Host-sc_2fa` cookie is required for `/studio` and `/portal`.
 - Public work/review pages read the DB but fall back to bundled static content when the DB is empty or unavailable.
 - Projects use `draft`, `published`, or `completed`. Published and completed projects are public. Only completed projects unlock the client review form and accept review submissions.
 - Client requests can be marked `completed` or `rejected` by the project lead/founder. Rejection requires a reason; clients see the outcome and reason in the portal, and both outcomes create a client notification.

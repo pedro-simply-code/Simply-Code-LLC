@@ -3,6 +3,7 @@
 import { randomBytes } from "node:crypto";
 import { and, eq, inArray, isNull, ne } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   canPublishClientVisibleUpdate,
@@ -13,6 +14,8 @@ import {
   requireTeam,
 } from "~/server/authz";
 import { logAuditEvent } from "~/server/audit/log";
+import { getClientIp } from "~/lib/client-ip";
+import { consumeRateLimit } from "~/server/rate-limit";
 import { resolveProjectImageFromForm } from "~/server/uploadthing-storage";
 import { inviteAcceptUrl } from "~/lib/public-site-url";
 import { isFounder, isTeam, normalizeRole } from "~/lib/roles";
@@ -65,6 +68,8 @@ function checked(formData: FormData, key: string): boolean {
 }
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const INVITE_ACCEPT_IP_LIMIT = 10;
+const INVITE_ACCEPT_WINDOW_MS = 15 * 60 * 1000;
 
 function inviteLink(token: string): string {
   return inviteAcceptUrl(token);
@@ -1126,6 +1131,14 @@ export async function addClientMember(formData: FormData) {
  */
 export async function acceptInvite(formData: FormData) {
   const token = text(formData, "token");
+  const ip = getClientIp(await headers());
+  const ipAllowed = await consumeRateLimit(
+    `invite:accept:ip:${ip}`,
+    INVITE_ACCEPT_IP_LIMIT,
+    INVITE_ACCEPT_WINDOW_MS,
+  );
+  if (!ipAllowed) redirect("/accept-invite?error=rate-limit");
+
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const parsed = acceptInviteSchema.safeParse({

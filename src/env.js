@@ -14,10 +14,13 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    AUTH_SECRET: z.string().min(1),
+    AUTH_SECRET: z
+      .string()
+      .min(32, "AUTH_SECRET must be at least 32 characters"),
     AUTH_URL: z.string().url().optional(),
     AUTH_GOOGLE_ID: z.string().min(1).optional(),
     AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
+    AUTH_GOOGLE_HD: z.string().min(1).optional(),
     UPLOADTHING_TOKEN: z.string().min(1).optional(),
     /** Google Workspace / Gmail SMTP. Use an App Password, not the account password. */
     GOOGLE_SMTP_USER: z.string().min(1).optional(),
@@ -37,6 +40,7 @@ export const env = createEnv({
     AUTH_URL: process.env.AUTH_URL,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+    AUTH_GOOGLE_HD: process.env.AUTH_GOOGLE_HD,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     GOOGLE_SMTP_USER: process.env.GOOGLE_SMTP_USER,
     GOOGLE_SMTP_APP_PASSWORD: process.env.GOOGLE_SMTP_APP_PASSWORD,

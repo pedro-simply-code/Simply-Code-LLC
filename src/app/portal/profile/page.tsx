@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ProfileForm } from "~/components/profile/profile-form";
 import { ProfileStatusBanner } from "~/components/profile/profile-status-banner";
+import { TwoFactorSettings } from "~/components/studio/two-factor-settings";
 import { StudioHeader } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
 import { isTeam } from "~/lib/roles";
@@ -30,7 +31,11 @@ export default async function PortalProfilePage({
         descriptionClassName="max-w-none"
       />
       <ProfileStatusBanner code={statusCode} />
-      <ProfileForm user={user} showAboutFields={false} />
+      <ProfileForm
+        user={user}
+        showAboutFields={false}
+        securitySlot={<TwoFactorSettings enabled={user.totpEnabled} />}
+      />
     </div>
   );
 }
