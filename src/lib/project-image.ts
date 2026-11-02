@@ -15,7 +15,7 @@ export function isUploadThingImageUrl(url: string): boolean {
   if (!url.startsWith("https://")) return false;
   try {
     const { hostname } = new URL(url);
-    if (hostname === "utfs.io") return true;
+    if (hostname === "utfs.io" || hostname.endsWith(".utfs.io")) return true;
     if (hostname.endsWith(".ufs.sh") || hostname === "ufs.sh") return true;
     if (hostname.endsWith(".uploadthing.com") || hostname === "uploadthing.com")
       return true;
@@ -23,6 +23,13 @@ export function isUploadThingImageUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** Skip Next.js optimizer for user-uploaded / external profile photos. */
+export function userProfileImageUnoptimized(src: string): boolean {
+  if (src.startsWith("blob:") || src.startsWith("/")) return true;
+  if (isUploadThingImageUrl(src)) return true;
+  return src.includes("googleusercontent.com");
 }
 
 export function isStoredProjectImageUrl(url: string): boolean {

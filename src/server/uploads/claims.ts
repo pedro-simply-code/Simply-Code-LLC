@@ -10,10 +10,15 @@ import { userUploadClaims } from "~/server/db/schema";
 const CLAIM_TTL_MS = 48 * 60 * 60 * 1000;
 
 export type UploadClaimKind =
-  "avatar" | "message_attachment" | "project_deliverable";
+  | "avatar"
+  | "message_attachment"
+  | "project_deliverable"
+  | "content_media";
 
 function isClaimableUploadUrl(url: string, kind: UploadClaimKind): boolean {
-  if (kind === "avatar") return isUploadThingImageUrl(url);
+  if (kind === "avatar" || kind === "content_media") {
+    return isUploadThingImageUrl(url);
+  }
   return isUploadThingFileUrl(url);
 }
 
@@ -21,13 +26,23 @@ export async function registerUserUploadClaim(
   userId: string,
   url: string,
   kind: UploadClaimKind,
+  sessionId?: string | null,
 ): Promise<void> {
   if (!isClaimableUploadUrl(url, kind)) return;
 
-  await db
-    .insert(userUploadClaims)
-    .values({ userId, url, kind })
-    .onConflictDoNothing({ target: userUploadClaims.url });
+  try {
+    await db
+      .insert(userUploadClaims)
+      .values({
+        userId,
+        url,
+        kind,
+        sessionId: sessionId?.trim() || null,
+      })
+      .onConflictDoNothing({ target: userUploadClaims.url });
+  } catch (error) {
+    console.error("[registerUserUploadClaim]", { kind, userId, error });
+  }
 }
 
 export async function userOwnsUploadClaim(
@@ -35,10 +50,13 @@ export async function userOwnsUploadClaim(
   url: string,
   kind?: UploadClaimKind,
 ): Promise<boolean> {
-  if (kind === "avatar" && !isUploadThingImageUrl(url)) return false;
-  if (kind !== "avatar" && !isUploadThingFileUrl(url)) return false;
-  if (!kind && !isUploadThingFileUrl(url) && !isUploadThingImageUrl(url))
+  if (kind === "avatar" || kind === "content_media") {
+    if (!isUploadThingImageUrl(url)) return false;
+  } else if (kind) {
+    if (!isUploadThingFileUrl(url)) return false;
+  } else if (!isUploadThingImageUrl(url) && !isUploadThingFileUrl(url)) {
     return false;
+  }
 
   const minCreated = new Date(Date.now() - CLAIM_TTL_MS);
   const conditions = [

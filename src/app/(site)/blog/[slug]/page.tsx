@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { ContentRenderer } from "~/components/content/content-renderer";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNav } from "~/components/site-nav";
 import {
   contentPlainText,
-  contentReadingTime,
-  formatContentDate,
   type ContentDocument,
 } from "~/lib/content";
 import { getPublishedEntrySafe } from "~/server/content/queries";
@@ -67,32 +63,8 @@ export default async function BlogPostPage({ params }: PostProps) {
     >
       <SiteNav />
 
-      <article className="pt-14 pb-16 lg:pt-20">
-        <header className="mx-auto w-full max-w-[860px] px-6">
-          <Link
-            href="/blog"
-            className="text-sc-muted hover:text-sc-ink inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.14em] uppercase transition-colors"
-          >
-            <ArrowLeft className="size-3.5" /> All posts
-          </Link>
-          <p className="text-sc-accent mt-6 text-[11px] font-bold tracking-[0.22em] uppercase">
-            Blog
-            <span className="mx-2 text-[#a8a29a]">·</span>
-            {formatContentDate(entry.publishedAt ?? entry.updatedAt)}
-            <span className="mx-2 text-[#a8a29a]">·</span>
-            {contentReadingTime(body)} min read
-          </p>
-          <h1 className="mt-4 text-[clamp(2.1rem,4.5vw,3.4rem)] leading-[1.03] font-black tracking-[-0.035em] uppercase">
-            {entry.title}
-          </h1>
-          {entry.excerpt ? (
-            <p className="mt-5 text-[17px] leading-relaxed text-[#57524a]">
-              {entry.excerpt}
-            </p>
-          ) : null}
-        </header>
-
-        <ContentRenderer document={body} className="mt-10" />
+      <article className="mx-auto w-full">
+        <ContentRenderer document={body} />
       </article>
 
       <CtaSection />

@@ -55,14 +55,14 @@ export function ProjectForm({
         <input type="hidden" name="projectId" value={project.id} />
       ) : null}
 
-      <section className={cn(studioProjectPanel, "p-5 md:p-6")}>
+      <section className={cn(studioProjectPanel, "px-6 py-5 md:px-8 md:py-6")}>
         <Field label="Title">
           <StudioInput
             name="title"
             defaultValue={project?.title}
             required
             placeholder="Project name"
-            className="focus:border-sc-accent border-0 border-b border-[#15130f]/20 px-0 py-2 text-2xl font-bold tracking-tight"
+            className="focus:border-sc-accent rounded-none border-0 border-b border-[#15130f]/20 bg-transparent px-0 py-1 text-lg font-semibold tracking-tight whitespace-nowrap shadow-none ring-0 focus:shadow-none focus:ring-0"
           />
         </Field>
 
@@ -70,9 +70,9 @@ export function ProjectForm({
           <Field
             label="Permalink"
             hint="Leave blank to generate from the title."
-            className="md:col-span-1"
+            className="md:col-span-2"
           >
-            <div className="flex flex-wrap items-center gap-2 text-sm text-[#6f6a60]">
+            <div className="flex w-full min-w-0 items-center gap-2 text-sm text-[#6f6a60]">
               <span className="shrink-0 font-mono text-xs">/work/</span>
               <StudioInput
                 name="slug"

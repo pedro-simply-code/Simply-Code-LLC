@@ -44,16 +44,19 @@ export function StudioCard({
   description,
   children,
   className,
+  padded = true,
 }: {
   title?: string;
   description?: string;
   children: ReactNode;
   className?: string;
+  /** When false, only the card shell is unpadded; title block keeps horizontal inset. */
+  padded?: boolean;
 }) {
   return (
-    <section className={cn(appPanel, "p-5", className)}>
+    <section className={cn(appPanel, padded ? "p-5" : "p-0", className)}>
       {title ? (
-        <div className="mb-4">
+        <div className={cn("mb-4", !padded && "px-5 pt-5")}>
           <h2 className="text-[12px] font-bold tracking-[0.16em] uppercase">
             {title}
           </h2>

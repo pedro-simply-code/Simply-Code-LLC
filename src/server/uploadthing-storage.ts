@@ -8,6 +8,7 @@ import {
   projectImageFromForm,
   uploadThingFileKeyFromUrl,
 } from "~/lib/project-image";
+import { contentMediaUrlInLibrary } from "~/server/studio/media";
 
 let utapi: UTApi | null = null;
 
@@ -130,12 +131,40 @@ export type ResolvedUserAvatar =
   { ok: true; image: string | null } | { ok: false; reason: "upload-failed" };
 
 export async function resolveUserAvatarFromForm(
-  _formData: FormData,
+  formData: FormData,
   existing: string | null,
   imageField: string,
 ): Promise<ResolvedUserAvatar> {
+  const avatarFile = formData.get("avatarFile");
+  if (avatarFile instanceof File && avatarFile.size > 0) {
+    const uploaded = await uploadUserAvatarFile(avatarFile);
+    if (!uploaded) return { ok: false, reason: "upload-failed" };
+    await replaceStoredUpload(existing, uploaded, "user-avatar");
+    return { ok: true, image: uploaded };
+  }
+
   const image = projectImageFromForm(imageField, existing);
   await replaceStoredUpload(existing, image, "user-avatar");
+  return { ok: true, image };
+}
+
+export type ResolvedContentCover = ResolvedProjectImage;
+
+export async function resolveContentCoverFromForm(
+  formData: FormData,
+  existing: string | null,
+  coverField: string,
+): Promise<ResolvedContentCover> {
+  const image = projectImageFromForm(coverField, existing);
+  if (
+    image &&
+    image !== existing &&
+    isUploadThingImageUrl(image) &&
+    !(await contentMediaUrlInLibrary(image))
+  ) {
+    return { ok: false, reason: "upload-failed" };
+  }
+  await replaceStoredUpload(existing, image, "content-cover");
   return { ok: true, image };
 }
 

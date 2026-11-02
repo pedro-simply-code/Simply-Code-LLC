@@ -6,6 +6,19 @@ export const appPanel =
 export const appPanelMuted =
   "site-elevated-muted site-radius-lg bg-sc-section-alt/90 text-sc-ink";
 
+/** CMS / marketing hero band — follows `--site-bg-section-alt`. */
+export const appHeroBand = "bg-sc-section-alt text-sc-ink";
+
+/** Inner hero layout — matches homepage `max-w-[1400px]`. */
+export const appHeroContainer = "mx-auto max-w-[1400px]";
+
+/** Quote outer band (padding only — border lives on inner span). */
+export const appQuoteOuter = "my-6 border-0 px-5";
+
+/** Quote inner bar — max width + left accent rule. */
+export const appQuoteInner =
+  "mx-auto block max-w-[1400px] border-l-2 border-sc-accent-bright pl-4 text-[17px] leading-relaxed text-[#57524a] italic";
+
 export const appPanelHover = "site-elevated-hover";
 
 /** Primary CTA (dark fill). Always use with size/layout classes or the presets below. */

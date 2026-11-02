@@ -75,7 +75,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning {...siteHtmlProps}>
-      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>
+      <body
+        className={`${GeistSans.variable} ${GeistMono.variable} site-scroll-body font-sans`}
+      >
         <Script src="/theme-init.js" strategy="beforeInteractive" />
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <Script

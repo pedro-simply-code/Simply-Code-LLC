@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { AuditLogPanel } from "~/components/studio/audit-log-panel";
+import { AuditLogDialog } from "~/components/studio/audit-log-dialog";
 import { SiteSettingsForm } from "~/components/studio/site-settings-form";
 import { StudioHeader } from "~/components/studio/ui";
 import { auth } from "~/lib/auth";
@@ -24,6 +24,7 @@ export default async function StudioSettingsPage() {
         title="Site settings"
         description="Global appearance and maintenance options for the public site, studio, and client portal. Only founders can change these."
         descriptionClassName="max-w-none"
+        actions={<AuditLogDialog events={auditEvents} />}
       />
 
       {settings.maintenanceMode ? (
@@ -41,10 +42,6 @@ export default async function StudioSettingsPage() {
           .
         </p>
       ) : null}
-
-      <div className="mb-8 space-y-6">
-        <AuditLogPanel events={auditEvents} />
-      </div>
 
       <SiteSettingsForm settings={settings} />
     </div>

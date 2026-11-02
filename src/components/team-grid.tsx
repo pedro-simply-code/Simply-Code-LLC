@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Github, Globe, Linkedin, Users } from "lucide-react";
 import type { TeamMember } from "~/content/team";
+import { userProfileImageUnoptimized } from "~/lib/project-image";
 import { appChip, appPanel } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -28,6 +29,7 @@ export function TeamGrid({ members }: TeamGridProps) {
                 fill
                 sizes="96px"
                 className="object-cover"
+                unoptimized={userProfileImageUnoptimized(member.image)}
               />
             ) : (
               <div className="flex size-full items-center justify-center">

@@ -105,6 +105,18 @@ async function main() {
     )
   `);
 
+  await run(`
+    DO $$ BEGIN
+      ALTER TYPE "${prefix}_upload_claim_kind" ADD VALUE IF NOT EXISTS 'content_media';
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$
+  `);
+
+  await run(`
+    ALTER TABLE "${prefix}_user_upload_claims"
+    ADD COLUMN IF NOT EXISTS session_id text
+  `);
+
   console.log(`Schema sync complete for prefix "${prefix}".`);
 }
 

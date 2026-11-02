@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { users } from "~/server/db/schema";
-import { AvatarUpload } from "~/components/profile/avatar-upload";
+import { ProfileAvatarUpload } from "~/components/profile/profile-avatar-upload";
 import {
   Field,
   StudioCard,
@@ -41,7 +41,7 @@ export function ProfileForm({
           className="lg:sticky lg:top-24 lg:col-span-4 lg:self-start xl:col-span-3"
         >
           <div className="flex justify-center lg:justify-start">
-            <AvatarUpload
+            <ProfileAvatarUpload
               key={user.image ?? "no-avatar"}
               defaultUrl={user.image}
             />

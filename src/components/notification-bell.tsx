@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { NotificationRowContent } from "~/components/notifications/notification-row";
+import { PerfectScrollArea } from "~/components/perfect-scroll-area";
 import { useNotificationsBell } from "~/hooks/use-notifications";
 import type { NotificationContext } from "~/lib/notifications-api";
 import type { NotificationDTO } from "~/server/notifications/types";
@@ -100,7 +101,8 @@ export function NotificationBell({
               Notifications
             </p>
           </div>
-          <ul className="max-h-80 overflow-auto" aria-live="polite">
+          <PerfectScrollArea className="max-h-80">
+            <ul aria-live="polite">
             {feed.isLoading ? (
               <li className="px-4 py-6 text-sm text-[#6f6a60]">Loading…</li>
             ) : feed.isError ? (
@@ -137,7 +139,8 @@ export function NotificationBell({
                 </li>
               ))
             )}
-          </ul>
+            </ul>
+          </PerfectScrollArea>
           <Link
             href={viewAllHref}
             onClick={() => setOpen(false)}

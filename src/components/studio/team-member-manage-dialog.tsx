@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,12 +11,10 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { MultiSelect } from "~/components/studio/multi-select";
+import { PerfectScrollArea } from "~/components/perfect-scroll-area";
 import { Field, StudioInput } from "~/components/studio/ui";
 import type { UserRole } from "~/server/db/schema";
-import {
-  removeUserTechnology,
-  updateTeamMember,
-} from "~/server/studio/actions";
+import { updateTeamMember } from "~/server/studio/actions";
 import { roleLabel, normalizeRole } from "~/lib/roles";
 import {
   appChip,
@@ -60,80 +59,84 @@ function roleChipClass(role: UserRole) {
   }
 }
 
-export function TeamMemberManageDialog({
+function TeamMemberManageForm({
   person,
   returnTo,
   technologyCatalog,
   canEditRole,
-  trigger = "manage",
 }: {
   person: TeamPerson;
   returnTo: string;
   technologyCatalog: TechnologyOption[];
   canEditRole: boolean;
-  trigger?: "manage" | "role";
 }) {
   const displayName = person.name ?? person.email ?? "Team member";
-  const assignedIds = new Set(
-    person.technologies.map((item) => item.technologyId),
+  const [draftSkills, setDraftSkills] = useState<AssignedTechnology[]>(() =>
+    person.technologies.map((skill) => ({ ...skill })),
   );
-  const addOptions = technologyCatalog
-    .filter((technology) => !assignedIds.has(technology.id))
-    .map((technology) => ({
-      value: technology.id,
-      label: technology.name,
-      description: technology.category ?? undefined,
-    }));
+  const [pickerKey, setPickerKey] = useState(0);
 
-  if (!canEditRole && trigger === "role") {
-    return (
-      <span
-        className={cn(
-          "inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] uppercase",
-          roleChipClass(person.role),
-        )}
-      >
-        {roleLabel(person.role)}
-      </span>
-    );
-  }
+  const draftIds = useMemo(
+    () => new Set(draftSkills.map((skill) => skill.technologyId)),
+    [draftSkills],
+  );
+
+  const addOptions = useMemo(
+    () =>
+      technologyCatalog
+        .filter((technology) => !draftIds.has(technology.id))
+        .map((technology) => ({
+          value: technology.id,
+          label: technology.name,
+          description: technology.category ?? undefined,
+        })),
+    [draftIds, technologyCatalog],
+  );
+
+  const mergePickerSelection = (ids: string[]) => {
+    if (ids.length === 0) return;
+    setDraftSkills((current) => {
+      const known = new Set(current.map((skill) => skill.technologyId));
+      const next = [...current];
+      for (const id of ids) {
+        if (known.has(id)) continue;
+        const technology = technologyCatalog.find((row) => row.id === id);
+        if (!technology) continue;
+        next.push({
+          technologyId: technology.id,
+          name: technology.name,
+          category: technology.category,
+        });
+      }
+      return next;
+    });
+    setPickerKey((value) => value + 1);
+  };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {trigger === "role" ? (
-          <button
-            type="button"
-            className={cn(
-              "inline-flex cursor-pointer rounded-md px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] uppercase transition-colors",
-              roleChipClass(person.role),
-            )}
-          >
-            {roleLabel(person.role)}
-          </button>
-        ) : (
-          <button
-            type="button"
-            className={cn(appGhostButtonLg, "inline-flex items-center gap-2")}
-          >
-            <Pencil className="size-3.5" />
-            Manage
-          </button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-h-[min(90vh,720px)] overflow-y-auto border-0 bg-white p-6 shadow-[0_8px_32px_rgba(21,19,15,0.14)] sm:max-w-lg">
-        <DialogHeader className="text-left">
-          <DialogTitle className="text-base font-black tracking-tight text-[#15130f] uppercase">
-            {displayName}
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed text-[#57524a]">
-            Studio role, public title, then stack skills from the catalog.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <DialogHeader className="shrink-0 pr-10 text-left">
+        <DialogTitle className="text-base font-black tracking-tight text-[#15130f] uppercase">
+          {displayName}
+        </DialogTitle>
+        <DialogDescription className="text-sm leading-relaxed text-[#57524a]">
+          Studio role, public title, then stack skills from the catalog. Changes
+          apply when you save.
+        </DialogDescription>
+      </DialogHeader>
 
-        <form action={updateTeamMember} className="mt-2 grid gap-4">
+      <PerfectScrollArea className="min-h-0 flex-1">
+        <form action={updateTeamMember} className="mt-2 grid gap-4 pr-1">
           <input type="hidden" name="userId" value={person.id} />
           <input type="hidden" name="returnTo" value={returnTo} />
+          {draftSkills.map((skill) => (
+            <input
+              key={skill.technologyId}
+              type="hidden"
+              name="technologyIds"
+              value={skill.technologyId}
+            />
+          ))}
 
           {canEditRole ? (
             <Field
@@ -174,8 +177,8 @@ export function TeamMemberManageDialog({
               />
               <p className="text-xs text-[#6f6a60]">
                 Studio role: <strong>{roleLabel(person.role)}</strong> — another
-                founder can change this; you can still update title, skills, and
-                About here.
+                founder can change this; you can still update title and skills
+                here.
               </p>
             </>
           )}
@@ -195,16 +198,16 @@ export function TeamMemberManageDialog({
                 Skills
               </h3>
               <p className="mt-1 text-xs text-[#6f6a60]">
-                Choose technologies from the catalog; they are assigned when you
-                save. Remove existing skills with ×.
+                Add or remove skills here; nothing is written to the database
+                until you save.
               </p>
             </div>
 
-            {person.technologies.length === 0 ? (
+            {draftSkills.length === 0 ? (
               <p className="text-sm text-[#6f6a60]">No skills assigned yet.</p>
             ) : (
               <ul className="flex flex-wrap gap-2">
-                {person.technologies.map((skill) => (
+                {draftSkills.map((skill) => (
                   <li
                     key={skill.technologyId}
                     className={cn(
@@ -214,8 +217,14 @@ export function TeamMemberManageDialog({
                   >
                     <span>{skill.name}</span>
                     <button
-                      type="submit"
-                      form={`team-member-remove-skill-${person.id}-${skill.technologyId}`}
+                      type="button"
+                      onClick={() =>
+                        setDraftSkills((current) =>
+                          current.filter(
+                            (row) => row.technologyId !== skill.technologyId,
+                          ),
+                        )
+                      }
                       aria-label={`Remove ${skill.name}`}
                       className="text-[#9a3b2e] hover:underline"
                     >
@@ -228,7 +237,8 @@ export function TeamMemberManageDialog({
 
             <Field label="Add from catalog">
               <MultiSelect
-                name="technologyIds"
+                key={pickerKey}
+                name="technologyIdsPicker"
                 options={addOptions}
                 placeholder="Select technologies…"
                 searchPlaceholder="Search stack…"
@@ -238,6 +248,9 @@ export function TeamMemberManageDialog({
                     : "All catalog items are already assigned."
                 }
                 ariaLabel="Technologies to assign on save"
+                submitHiddenInputs={false}
+                showSelectedBadges={false}
+                onChange={mergePickerSelection}
               />
             </Field>
           </section>
@@ -246,23 +259,72 @@ export function TeamMemberManageDialog({
             Save profile
           </button>
         </form>
+      </PerfectScrollArea>
+    </>
+  );
+}
 
-        {person.technologies.map((skill) => (
-          <form
-            key={skill.technologyId}
-            id={`team-member-remove-skill-${person.id}-${skill.technologyId}`}
-            action={removeUserTechnology}
-            className="hidden"
+export function TeamMemberManageDialog({
+  person,
+  returnTo,
+  technologyCatalog,
+  canEditRole,
+  trigger = "manage",
+}: {
+  person: TeamPerson;
+  returnTo: string;
+  technologyCatalog: TechnologyOption[];
+  canEditRole: boolean;
+  trigger?: "manage" | "role";
+}) {
+  const [open, setOpen] = useState(false);
+
+  if (!canEditRole && trigger === "role") {
+    return (
+      <span
+        className={cn(
+          "inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] uppercase",
+          roleChipClass(person.role),
+        )}
+      >
+        {roleLabel(person.role)}
+      </span>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger === "role" ? (
+          <button
+            type="button"
+            className={cn(
+              "inline-flex cursor-pointer rounded-md px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] uppercase transition-colors",
+              roleChipClass(person.role),
+            )}
           >
-            <input type="hidden" name="userId" value={person.id} />
-            <input
-              type="hidden"
-              name="technologyId"
-              value={skill.technologyId}
-            />
-            <input type="hidden" name="returnTo" value={returnTo} />
-          </form>
-        ))}
+            {roleLabel(person.role)}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={cn(appGhostButtonLg, "inline-flex items-center gap-2")}
+          >
+            <Pencil className="size-3.5" />
+            Manage
+          </button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="flex max-h-[min(90vh,720px)] flex-col gap-0 overflow-hidden border-0 bg-white p-6 text-[#15130f] shadow-[0_8px_32px_rgba(21,19,15,0.14)] sm:max-w-lg">
+        {open ? (
+          <TeamMemberManageForm
+            key={person.id}
+            person={person}
+            returnTo={returnTo}
+            technologyCatalog={technologyCatalog}
+            canEditRole={canEditRole}
+          />
+        ) : null}
       </DialogContent>
     </Dialog>
   );

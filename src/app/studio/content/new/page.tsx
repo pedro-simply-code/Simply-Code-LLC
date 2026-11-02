@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { ContentFormFields } from "~/components/content/content-form-fields";
 import { ContentEditor } from "~/components/lexical/content-editor";
-import { StudioCard, StudioHeader } from "~/components/studio/ui";
+import { ContentEditorWorkspace } from "~/components/content/content-editor-workspace";
+import { StudioHeader } from "~/components/studio/ui";
 import { contentErrorMessage } from "~/lib/content";
-import { appOutlineButton, appPrimaryButtonStudio } from "~/lib/surface";
-import { cn } from "~/lib/utils";
 import { requireContentManager } from "~/server/authz";
 import { createContentEntry } from "~/server/content/actions";
 
@@ -24,7 +22,7 @@ export default async function NewContentPage({
   const message = contentErrorMessage(error);
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       <Link
         href="/studio/content"
         className="text-sc-muted hover:text-sc-ink mb-4 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.14em] uppercase transition-colors"
@@ -43,26 +41,14 @@ export default async function NewContentPage({
         </p>
       ) : null}
 
-      <form action={createContentEntry} className="grid gap-6">
-        <StudioCard
-          title="Details"
-          description="Pages publish at the root, posts under /blog. Drafts stay hidden from the public site."
-        >
-          <ContentFormFields />
-        </StudioCard>
-
-        <StudioCard title="Body">
-          <ContentEditor />
-        </StudioCard>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" className={appPrimaryButtonStudio}>
-            Save content
-          </button>
-          <Link href="/studio/content" className={cn(appOutlineButton)}>
-            Cancel
-          </Link>
-        </div>
+      <form action={createContentEntry} className="space-y-6">
+        <ContentEditorWorkspace
+          header={{}}
+          sidebar={{}}
+          editor={<ContentEditor />}
+          submitLabel="Save content"
+          cancelHref="/studio/content"
+        />
       </form>
     </div>
   );

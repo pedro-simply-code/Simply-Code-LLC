@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { BrandLogo } from "~/components/brand-logo";
+import { PerfectScrollArea } from "~/components/perfect-scroll-area";
 import { appIconButton } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -72,8 +73,9 @@ export function SiteNav() {
       </div>
 
       {mobileOpen ? (
-        <div className="bg-sc-section-alt max-h-[80vh] overflow-y-auto border-t border-[#15130f]/10 px-6 py-6 lg:hidden">
-          <nav aria-label="Mobile" className="flex flex-col gap-4">
+        <PerfectScrollArea className="max-h-[80vh] border-t border-[#15130f]/10 lg:hidden">
+          <div className="bg-sc-section-alt px-6 py-6">
+            <nav aria-label="Mobile" className="flex flex-col gap-4">
             {MENU.map((entry) => (
               <Link
                 key={entry.label}
@@ -91,8 +93,9 @@ export function SiteNav() {
             >
               Request a quote
             </Link>
-          </nav>
-        </div>
+            </nav>
+          </div>
+        </PerfectScrollArea>
       ) : null}
     </header>
   );

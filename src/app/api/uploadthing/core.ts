@@ -3,7 +3,7 @@ import { UploadThingError } from "uploadthing/server";
 import { z } from "zod";
 import { MESSAGE_ATTACHMENT_MAX_COUNT } from "~/lib/message-attachments";
 import { auth } from "~/lib/auth";
-import { isTeam } from "~/lib/roles";
+import { canManageContent, isTeam } from "~/lib/roles";
 import { userHasStudioProjectAccess } from "~/server/authz/project-access";
 import { registerUserUploadClaim } from "~/server/uploads/claims";
 const f = createUploadthing();
@@ -29,6 +29,28 @@ export const ourFileRouter = {
       const url = file.ufsUrl ?? file.url;
       if (url) {
         await registerUserUploadClaim(metadata.userId, url, "avatar");
+      }
+      return { uploadedBy: metadata.userId, url };
+    }),
+
+  contentMedia: f({
+    image: { maxFileSize: "8MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const session = await auth();
+      if (!session?.user?.id || !canManageContent(session.user.role)) {
+        throw new UploadThingError("Unauthorized");
+      }
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      const url = file.ufsUrl ?? file.url;
+      if (url) {
+        try {
+          await registerUserUploadClaim(metadata.userId, url, "content_media");
+        } catch (error) {
+          console.error("[contentMedia] claim registration failed", error);
+        }
       }
       return { uploadedBy: metadata.userId, url };
     }),

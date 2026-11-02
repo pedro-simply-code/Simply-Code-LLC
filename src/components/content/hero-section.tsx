@@ -2,8 +2,12 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import type { HeroData } from "~/lib/content";
+import { heroButtonsInDisplayOrder } from "~/lib/content";
+import { buildLinkRel, isExternalHref } from "~/lib/link-options";
 import {
   appChip,
+  appHeroBand,
+  appHeroContainer,
   appOutlineButton,
   appPrimaryButtonMarketing,
 } from "~/lib/surface";
@@ -32,32 +36,44 @@ function Headline({
 
 function HeroAction({
   href,
+  newTab,
+  nofollow,
   className,
   children,
 }: {
   href: string;
+  newTab: boolean;
+  nofollow: boolean;
   className?: string;
   children: ReactNode;
 }) {
-  const target = href.trim() || "#";
-  const external =
-    /^(https?:)?\/\//i.test(target) || target.startsWith("mailto:");
+  const url = href.trim() || "#";
+  const rel = buildLinkRel({ newTab, nofollow }) ?? undefined;
+  const external = isExternalHref(url);
 
   if (external) {
     return (
       <a
-        href={target}
+        href={url}
         className={className}
-        rel="noreferrer noopener"
-        target="_blank"
+        rel={rel}
+        target={newTab ? "_blank" : undefined}
       >
         {children}
       </a>
     );
   }
 
+  if (newTab) {
+    return (
+      <Link href={url} className={className} rel={rel} target="_blank">
+        {children}
+      </Link>
+    );
+  }
+
   return (
-    <Link href={target} className={className}>
+    <Link href={url} className={className} rel={nofollow ? "nofollow" : undefined}>
       {children}
     </Link>
   );
@@ -77,15 +93,11 @@ export function HeroSection({
   const stats = data.stats.filter(
     (stat) => stat.value.trim() || stat.label.trim(),
   );
+  const buttonOrder = heroButtonsInDisplayOrder(data);
 
   return (
-    <section
-      className={cn(
-        "relative overflow-hidden border-b border-[#15130f]/10",
-        className,
-      )}
-    >
-      <div className="mx-auto max-w-[1400px] px-6 py-14 lg:py-20">
+    <section className={cn("relative overflow-hidden", appHeroBand, className)}>
+      <div className={cn(appHeroContainer, "px-5 py-14 lg:py-20")}>
         <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div>
             {data.eyebrow ? (
@@ -115,30 +127,37 @@ export function HeroSection({
               </p>
             ) : null}
 
-            {data.primaryLabel || data.secondaryLabel ? (
+            {buttonOrder.length > 0 ? (
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                {data.primaryLabel ? (
-                  <HeroAction
-                    href={data.primaryHref}
-                    className={appPrimaryButtonMarketing}
-                  >
-                    {data.primaryLabel} <ArrowRight className="size-4" />
-                  </HeroAction>
-                ) : null}
-                {data.secondaryLabel ? (
-                  <HeroAction
-                    href={data.secondaryHref}
-                    className={cn("gap-2", appOutlineButton)}
-                  >
-                    {data.secondaryLabel}
-                  </HeroAction>
-                ) : null}
+                {buttonOrder.map((slot) =>
+                  slot === "primary" ? (
+                    <HeroAction
+                      key="primary"
+                      href={data.primaryHref}
+                      newTab={data.primaryNewTab}
+                      nofollow={data.primaryNofollow}
+                      className={appPrimaryButtonMarketing}
+                    >
+                      {data.primaryLabel} <ArrowRight className="size-4" />
+                    </HeroAction>
+                  ) : (
+                    <HeroAction
+                      key="secondary"
+                      href={data.secondaryHref}
+                      newTab={data.secondaryNewTab}
+                      nofollow={data.secondaryNofollow}
+                      className={cn("gap-2", appOutlineButton)}
+                    >
+                      {data.secondaryLabel}
+                    </HeroAction>
+                  ),
+                )}
               </div>
             ) : null}
 
-            {data.badge ? (
+            {data.tagline ? (
               <p className="border-sc-accent-bright text-sc-muted mt-9 border-l-2 pl-4 text-[11px] leading-relaxed font-bold tracking-[0.14em] uppercase">
-                {data.badge}
+                {data.tagline}
               </p>
             ) : null}
           </div>

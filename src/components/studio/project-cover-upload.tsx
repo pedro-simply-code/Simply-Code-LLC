@@ -92,7 +92,7 @@ export function ProjectCoverUpload({
       />
 
       <div
-        className="bg-sc-section-alt relative aspect-[1000/560] overflow-hidden rounded-lg shadow-[inset_0_1px_2px_rgba(21,19,15,0.06),0_1px_3px_rgba(21,19,15,0.05)]"
+        className="relative aspect-[1000/560] overflow-hidden rounded-lg bg-sc-section-alt/95 shadow-[inset_0_1px_2px_rgba(21,19,15,0.04)] ring-1 ring-sc-accent/25"
         onDragOver={(event) => {
           event.preventDefault();
           event.dataTransfer.dropEffect = "copy";
@@ -115,9 +115,9 @@ export function ProjectCoverUpload({
             }
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center text-[#9a9488]">
-            <Upload className="size-8 opacity-40" />
-            <p className="text-xs font-semibold tracking-wide uppercase">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-sc-section-alt/90 px-4 text-center text-[#9a9488]">
+            <Upload className="text-sc-accent/45 size-8" />
+            <p className="text-[11px] font-semibold tracking-wide uppercase">
               No cover yet
             </p>
             <p className="text-[11px]">Choose or drop an image</p>
@@ -129,7 +129,7 @@ export function ProjectCoverUpload({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
+          className="rounded-md bg-sc-accent px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase transition-colors hover:bg-[#15130f]"
         >
           {previewSrc ? "Choose another image" : "Choose image"}
         </button>

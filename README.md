@@ -64,10 +64,10 @@ Founders invite team and client accounts from `/studio/team` and `/studio/client
 The Studio ships a small CMS at `/studio/content` for **founders and leads**.
 
 - One table (`content_entries`) stores both pages (`kind = "page"`) and posts (`kind = "post"`); the serialized Lexical editor state lives in `body` (jsonb).
-- Pages publish at `/{slug}`. Posts publish at `/blog/{slug}` and are listed at `/blog`. Drafts stay hidden.
-- The editor uses **Lexical** (`lexical` + `@lexical/react`). The custom **Hero** block (`src/components/lexical/hero-node.tsx`) mirrors the homepage hero: insert it from the toolbar and edit every field (eyebrow, headline, highlight, links, stats) in place.
+- Pages publish at `/page/{slug}`. Posts publish at `/blog/{slug}` and are listed at `/blog`. Drafts stay hidden. Old root-level page URLs (`/{slug}`) permanently redirect to `/page/{slug}`.
+- The editor uses **Lexical** (`lexical` + `@lexical/react`). Add paragraph, heading, quote or hero blocks from the toolbar's **Insert** menu; text blocks are edited directly on the canvas. The custom **Hero** block (`src/components/lexical/hero-node.tsx`) mirrors the homepage hero: content is pre-filled and every field (eyebrow, headline, highlight, links, stats) is edited in place, with a hover toolbar for the headline accent and block removal.
 - Public rendering (`src/components/content/content-renderer.tsx`) walks the Lexical JSON on the server, so the editor bundle never ships to visitors.
-- Slugs are unique per kind; page slugs cannot reuse existing routes (`work`, `services`, `about`, `contact`, `faq`, `blog`, `studio`, `portal`, etc.). Changing a slug does not create a redirect.
+- Slugs are unique per kind and used in public URLs (`/page/{slug}`, `/blog/{slug}`) instead of internal ids. Changing a slug does not create a redirect for the previous public URL.
 
 ## Security & operations
 

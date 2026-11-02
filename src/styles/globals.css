@@ -42,7 +42,8 @@
   :root {
     --site-radius-lg: 0.5rem;
     --site-radius-md: 0.375rem;
-    --site-elev-shadow: 0 1px 3px rgba(21, 19, 15, 0.06), 0 6px 18px rgba(21, 19, 15, 0.07);
+    --site-elev-shadow:
+      0 1px 3px rgba(21, 19, 15, 0.06), 0 6px 18px rgba(21, 19, 15, 0.07);
     --site-elev-shadow-hover:
       0 2px 8px rgba(21, 19, 15, 0.09), 0 12px 28px rgba(21, 19, 15, 0.08);
     --site-elev-shadow-muted: 0 1px 2px rgba(21, 19, 15, 0.05);
@@ -120,10 +121,61 @@
     @apply bg-background text-foreground antialiased;
   }
 
+  body.site-scroll-body {
+    overflow: hidden;
+  }
+
   :focus-visible:not(.site-input-surface):not(input):not(textarea):not(select) {
     outline: 2px solid var(--site-accent);
     outline-offset: 3px;
   }
+}
+
+/* Perfect Scrollbar — site-wide + nested regions (SiteScrollRoot / PerfectScrollArea). */
+.site-perfect-scroll-root {
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
+.site-perfect-scroll-area {
+  position: relative;
+}
+
+.site-shell-sidebar-scroll {
+  min-height: 0;
+}
+
+.site-perfect-scroll-root .ps__rail-y,
+.site-perfect-scroll-area .ps__rail-y,
+.scrollbar-container.site-perfect-scroll-area .ps__rail-y {
+  width: 8px !important;
+  background: transparent !important;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.site-perfect-scroll-root:hover .ps__rail-y,
+.site-perfect-scroll-area:hover .ps__rail-y,
+.scrollbar-container.site-perfect-scroll-area:hover .ps__rail-y,
+.site-perfect-scroll-root.ps--scrolling-y .ps__rail-y,
+.site-perfect-scroll-area.ps--scrolling-y .ps__rail-y,
+.scrollbar-container.site-perfect-scroll-area.ps--scrolling-y .ps__rail-y {
+  opacity: 1;
+}
+
+.site-perfect-scroll-root .ps__thumb-y,
+.site-perfect-scroll-area .ps__thumb-y,
+.scrollbar-container.site-perfect-scroll-area .ps__thumb-y {
+  right: 2px !important;
+  width: 4px !important;
+  border-radius: 999px;
+  background: rgba(21, 19, 15, 0.28) !important;
+}
+
+.site-perfect-scroll-root .ps__thumb-y:hover,
+.site-perfect-scroll-area .ps__thumb-y:hover,
+.scrollbar-container.site-perfect-scroll-area .ps__thumb-y:hover {
+  background: rgba(21, 19, 15, 0.45) !important;
 }
 
 /* Landing page scan line (see the build terminal section). */
@@ -205,7 +257,8 @@ html[data-site-motion="bold"] {
 @keyframes site-hero-rise {
   from {
     opacity: 0;
-    transform: translate3d(0, var(--site-motion-y), 0) scale(var(--site-motion-scale));
+    transform: translate3d(0, var(--site-motion-y), 0)
+      scale(var(--site-motion-scale));
   }
   to {
     opacity: 1;
@@ -216,7 +269,8 @@ html[data-site-motion="bold"] {
 html.site-motion-js[data-site-motion="subtle"] .site-hero-in,
 html.site-motion-js[data-site-motion="balanced"] .site-hero-in,
 html.site-motion-js[data-site-motion="bold"] .site-hero-in {
-  animation: site-hero-rise var(--site-motion-hero-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: site-hero-rise var(--site-motion-hero-duration)
+    cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 html.site-motion-js[data-site-motion="subtle"] .site-hero-in-delay-1,
@@ -241,7 +295,8 @@ html.site-motion-js[data-site-motion="subtle"] .site-reveal,
 html.site-motion-js[data-site-motion="balanced"] .site-reveal,
 html.site-motion-js[data-site-motion="bold"] .site-reveal {
   opacity: 0;
-  transform: translate3d(0, var(--site-motion-y), 0) scale(var(--site-motion-scale));
+  transform: translate3d(0, var(--site-motion-y), 0)
+    scale(var(--site-motion-scale));
   transition:
     opacity var(--site-motion-duration) cubic-bezier(0.22, 1, 0.36, 1),
     transform var(--site-motion-duration) cubic-bezier(0.22, 1, 0.36, 1);
@@ -249,39 +304,70 @@ html.site-motion-js[data-site-motion="bold"] .site-reveal {
 }
 
 html.site-motion-js[data-site-motion="subtle"] .site-reveal.site-reveal-visible,
-html.site-motion-js[data-site-motion="balanced"] .site-reveal.site-reveal-visible,
+html.site-motion-js[data-site-motion="balanced"]
+  .site-reveal.site-reveal-visible,
 html.site-motion-js[data-site-motion="bold"] .site-reveal.site-reveal-visible {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
 }
 
-html.site-motion-js[data-site-motion="subtle"] .site-stagger > .site-reveal:nth-child(1),
-html.site-motion-js[data-site-motion="balanced"] .site-stagger > .site-reveal:nth-child(1),
-html.site-motion-js[data-site-motion="bold"] .site-stagger > .site-reveal:nth-child(1) {
+html.site-motion-js[data-site-motion="subtle"]
+  .site-stagger
+  > .site-reveal:nth-child(1),
+html.site-motion-js[data-site-motion="balanced"]
+  .site-stagger
+  > .site-reveal:nth-child(1),
+html.site-motion-js[data-site-motion="bold"]
+  .site-stagger
+  > .site-reveal:nth-child(1) {
   transition-delay: calc(var(--site-motion-stagger) * 0);
 }
 
-html.site-motion-js[data-site-motion="subtle"] .site-stagger > .site-reveal:nth-child(2),
-html.site-motion-js[data-site-motion="balanced"] .site-stagger > .site-reveal:nth-child(2),
-html.site-motion-js[data-site-motion="bold"] .site-stagger > .site-reveal:nth-child(2) {
+html.site-motion-js[data-site-motion="subtle"]
+  .site-stagger
+  > .site-reveal:nth-child(2),
+html.site-motion-js[data-site-motion="balanced"]
+  .site-stagger
+  > .site-reveal:nth-child(2),
+html.site-motion-js[data-site-motion="bold"]
+  .site-stagger
+  > .site-reveal:nth-child(2) {
   transition-delay: calc(var(--site-motion-stagger) * 1);
 }
 
-html.site-motion-js[data-site-motion="subtle"] .site-stagger > .site-reveal:nth-child(3),
-html.site-motion-js[data-site-motion="balanced"] .site-stagger > .site-reveal:nth-child(3),
-html.site-motion-js[data-site-motion="bold"] .site-stagger > .site-reveal:nth-child(3) {
+html.site-motion-js[data-site-motion="subtle"]
+  .site-stagger
+  > .site-reveal:nth-child(3),
+html.site-motion-js[data-site-motion="balanced"]
+  .site-stagger
+  > .site-reveal:nth-child(3),
+html.site-motion-js[data-site-motion="bold"]
+  .site-stagger
+  > .site-reveal:nth-child(3) {
   transition-delay: calc(var(--site-motion-stagger) * 2);
 }
 
-html.site-motion-js[data-site-motion="subtle"] .site-stagger > .site-reveal:nth-child(4),
-html.site-motion-js[data-site-motion="balanced"] .site-stagger > .site-reveal:nth-child(4),
-html.site-motion-js[data-site-motion="bold"] .site-stagger > .site-reveal:nth-child(4) {
+html.site-motion-js[data-site-motion="subtle"]
+  .site-stagger
+  > .site-reveal:nth-child(4),
+html.site-motion-js[data-site-motion="balanced"]
+  .site-stagger
+  > .site-reveal:nth-child(4),
+html.site-motion-js[data-site-motion="bold"]
+  .site-stagger
+  > .site-reveal:nth-child(4) {
   transition-delay: calc(var(--site-motion-stagger) * 3);
 }
 
-html.site-motion-js[data-site-motion="subtle"] .site-stagger > .site-reveal:nth-child(n + 5),
-html.site-motion-js[data-site-motion="balanced"] .site-stagger > .site-reveal:nth-child(n + 5),
-html.site-motion-js[data-site-motion="bold"] .site-stagger > .site-reveal:nth-child(n + 5) {
+html.site-motion-js[data-site-motion="subtle"]
+  .site-stagger
+  > .site-reveal:nth-child(n + 5),
+html.site-motion-js[data-site-motion="balanced"]
+  .site-stagger
+  > .site-reveal:nth-child(n + 5),
+html.site-motion-js[data-site-motion="bold"]
+  .site-stagger
+  > .site-reveal:nth-child(n + 5) {
   transition-delay: calc(var(--site-motion-stagger) * 4);
 }
 
@@ -437,6 +523,57 @@ html[data-site-surface="flat"] {
 }
 
 @layer components {
+  .content-inline-edit {
+    cursor: text;
+    outline: none;
+    border-radius: 2px;
+    transition: background-color 0.15s ease;
+  }
+
+  .content-inline-edit:focus {
+    background-color: color-mix(
+      in srgb,
+      var(--site-accent-bright) 7%,
+      transparent
+    );
+  }
+
+  .content-inline-edit:empty::before {
+    content: attr(data-placeholder);
+    color: color-mix(in srgb, currentColor 38%, transparent);
+    pointer-events: none;
+  }
+
+  /*
+   * Studio Lexical canvas — 20px inset on root-level prose blocks only.
+   * Hero (`.content-hero-node`) and quote (`appQuoteOuter` on blockquote) set their own layout.
+   */
+  .content-editor-body [contenteditable="true"] > p,
+  .content-editor-body [contenteditable="true"] > h1,
+  .content-editor-body [contenteditable="true"] > h2,
+  .content-editor-body [contenteditable="true"] > h3,
+  .content-editor-body [contenteditable="true"] > ul,
+  .content-editor-body [contenteditable="true"] > ol {
+    padding-inline: 1.25rem;
+  }
+
+  /* Hero: flush under toolbar; +40px width, -20px left to center bleed */
+  .content-editor-body .content-hero-node {
+    margin-top: 0;
+    width: calc(100% + 40px);
+    max-width: none;
+    margin-left: -20px;
+  }
+
+  .content-editor-body .content-hero-node .group\/hero {
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .content-editor-body .content-hero-node section {
+    padding-inline: 0;
+  }
+
   .site-radius-lg {
     border-radius: var(--site-radius-lg);
   }
@@ -490,7 +627,8 @@ html[data-site-surface="flat"] {
   }
 
   .site-card-hover-accent:hover {
-    box-shadow: 0 20px 60px -30px color-mix(in srgb, var(--site-accent-bright) 35%, transparent);
+    box-shadow: 0 20px 60px -30px
+      color-mix(in srgb, var(--site-accent-bright) 35%, transparent);
   }
 
   .site-outline-cta {
@@ -509,7 +647,11 @@ html[data-site-surface="flat"] {
 
   .site-outline-cta:hover {
     border-color: color-mix(in srgb, var(--site-accent) 50%, transparent);
-    background-color: color-mix(in srgb, var(--site-accent-bright) 22%, transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--site-accent-bright) 22%,
+      transparent
+    );
     box-shadow: var(--site-control-shadow-hover);
     color: var(--site-fg);
   }
@@ -520,7 +662,11 @@ html[data-site-surface="flat"] {
   }
 
   .site-accent-tint-hover:hover {
-    background-color: color-mix(in srgb, var(--site-accent-bright) 20%, transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--site-accent-bright) 20%,
+      transparent
+    );
   }
 
   .site-shell-header {
@@ -544,7 +690,11 @@ html[data-site-surface="flat"] {
   }
 
   .app-notification-unread {
-    background-color: color-mix(in srgb, var(--site-accent-bright) 18%, var(--site-bg-section));
+    background-color: color-mix(
+      in srgb,
+      var(--site-accent-bright) 18%,
+      var(--site-bg-section)
+    );
   }
 
   .app-notification-unread-accent {
@@ -558,7 +708,8 @@ html[data-site-surface="flat"] {
   border: 1px solid var(--site-border-panel) !important;
   color: var(--site-fg) !important;
   box-shadow: var(--site-elev-shadow) !important;
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif !important;
+  font-family:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif !important;
 }
 
 .app-toast-title {
@@ -577,8 +728,16 @@ html[data-site-surface="flat"] {
 }
 
 .app-toast--success {
-  border-color: color-mix(in srgb, var(--site-accent) 40%, var(--site-border-panel)) !important;
-  background: color-mix(in srgb, var(--site-accent-bright) 12%, var(--site-bg-section)) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--site-accent) 40%,
+    var(--site-border-panel)
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--site-accent-bright) 12%,
+    var(--site-bg-section)
+  ) !important;
 }
 
 .app-toast--success .app-toast-title {
@@ -586,7 +745,11 @@ html[data-site-surface="flat"] {
 }
 
 .app-toast--error {
-  border-color: color-mix(in srgb, #b3261e 35%, var(--site-border-panel)) !important;
+  border-color: color-mix(
+    in srgb,
+    #b3261e 35%,
+    var(--site-border-panel)
+  ) !important;
   background: color-mix(in srgb, #b3261e 8%, var(--site-bg-section)) !important;
 }
 
@@ -595,8 +758,16 @@ html[data-site-surface="flat"] {
 }
 
 .app-toast--warning {
-  border-color: color-mix(in srgb, var(--site-accent) 45%, var(--site-border-panel)) !important;
-  background: color-mix(in srgb, var(--site-accent-bright) 16%, var(--site-bg-section)) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--site-accent) 45%,
+    var(--site-border-panel)
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--site-accent-bright) 16%,
+    var(--site-bg-section)
+  ) !important;
 }
 
 .app-toast--warning .app-toast-title {
@@ -604,8 +775,16 @@ html[data-site-surface="flat"] {
 }
 
 .app-toast--info {
-  border-color: color-mix(in srgb, var(--site-accent-bright) 35%, var(--site-border-panel)) !important;
-  background: color-mix(in srgb, var(--site-accent-subtle) 55%, var(--site-bg-section)) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--site-accent-bright) 35%,
+    var(--site-border-panel)
+  ) !important;
+  background: color-mix(
+    in srgb,
+    var(--site-accent-subtle) 55%,
+    var(--site-bg-section)
+  ) !important;
 }
 
 .app-toast--info .app-toast-title {

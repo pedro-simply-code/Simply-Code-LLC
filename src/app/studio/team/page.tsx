@@ -133,8 +133,9 @@ export default async function TeamPage({
       ) : null}
       {query.error === "self" ? (
         <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-[#9a3b2e]">
-          You cannot change your own role here. Ask another founder or use
-          Profile for your details.
+          You cannot change your own studio role on this page. Another founder
+          must do that; you can still update your title and skills here, or use
+          Profile for account details.
         </p>
       ) : null}
       {query.error === "last-founder" ? (

@@ -836,10 +836,23 @@ export async function updateTeamMember(formData: FormData) {
   const allowed: UserRole[] = ["founder", "lead", "developer", "client"];
   if (!isUuid(userId) || !allowed.includes(role as UserRole))
     redirect(returnTo);
-  if (userId === session.user.id)
-    redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=self`);
 
-  if (role !== "founder") {
+  const [targetUser] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (!targetUser) redirect(returnTo);
+
+  const isSelf = userId === session.user.id;
+  let roleToPersist = role as UserRole;
+
+  if (isSelf) {
+    if (normalizeRole(role as UserRole) !== normalizeRole(targetUser.role)) {
+      redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}error=self`);
+    }
+    roleToPersist = targetUser.role;
+  } else if (role !== "founder") {
     const founders = await db
       .select({ id: users.id })
       .from(users)
@@ -859,7 +872,7 @@ export async function updateTeamMember(formData: FormData) {
   await db
     .update(users)
     .set({
-      role: role as UserRole,
+      role: roleToPersist,
       title,
     })
     .where(eq(users.id, userId));
@@ -868,10 +881,31 @@ export async function updateTeamMember(formData: FormData) {
     .getAll("technologyIds")
     .map((value) => String(value))
     .filter((id) => isUuid(id));
-  if (technologyIds.length > 0) {
+  const desiredSkillIds = [...new Set(technologyIds)];
+
+  const existingSkills = await db
+    .select({ technologyId: userTechnologies.technologyId })
+    .from(userTechnologies)
+    .where(eq(userTechnologies.userId, userId));
+  const existingIds = new Set(existingSkills.map((row) => row.technologyId));
+
+  const toRemove = [...existingIds].filter((id) => !desiredSkillIds.includes(id));
+  const toAdd = desiredSkillIds.filter((id) => !existingIds.has(id));
+
+  if (toRemove.length > 0) {
+    await db
+      .delete(userTechnologies)
+      .where(
+        and(
+          eq(userTechnologies.userId, userId),
+          inArray(userTechnologies.technologyId, toRemove),
+        ),
+      );
+  }
+  if (toAdd.length > 0) {
     await db
       .insert(userTechnologies)
-      .values(technologyIds.map((technologyId) => ({ userId, technologyId })))
+      .values(toAdd.map((technologyId) => ({ userId, technologyId })))
       .onConflictDoNothing();
   }
 
@@ -880,7 +914,7 @@ export async function updateTeamMember(formData: FormData) {
     action: "team.role_updated",
     entityType: "user",
     entityId: userId,
-    metadata: { role, technologyIdsAdded: technologyIds },
+    metadata: { role: roleToPersist, technologyIds: desiredSkillIds },
   });
 
   revalidatePath("/studio/technologies");

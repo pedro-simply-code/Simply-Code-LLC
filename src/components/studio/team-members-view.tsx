@@ -3,6 +3,7 @@ import type { UserRole } from "~/server/db/schema";
 import { TeamAboutToggle } from "~/components/studio/team-about-toggle";
 import { TeamMemberManageDialog } from "~/components/studio/team-member-manage-dialog";
 import type { StudioViewMode } from "~/lib/studio-view";
+import { userProfileImageUnoptimized } from "~/lib/project-image";
 import { roleLabel } from "~/lib/roles";
 import { appChip, appPanel, appPanelHover } from "~/lib/surface";
 import { cn } from "~/lib/utils";
@@ -50,6 +51,7 @@ function TeamAvatar({ person }: { person: Person }) {
           fill
           sizes="80px"
           className="object-cover"
+          unoptimized={userProfileImageUnoptimized(person.image)}
         />
       ) : (
         <div className="flex size-full flex-col items-center justify-center text-white">

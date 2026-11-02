@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import type PerfectScrollbar from "react-perfect-scrollbar";
 import {
   Bell,
   Building2,
@@ -22,6 +23,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { BrandLogo } from "~/components/brand-logo";
+import { PerfectScrollArea } from "~/components/perfect-scroll-area";
 import { sidebarCookieName } from "~/lib/dashboard";
 import { appIconButton, appShellAside, appShellHeader } from "~/lib/surface";
 import { cn } from "~/lib/utils";
@@ -87,6 +89,11 @@ export function DashboardShell({
 
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const sidebarScrollRef = useRef<PerfectScrollbar | null>(null);
+
+  useEffect(() => {
+    sidebarScrollRef.current?.updateScroll();
+  }, [collapsed, pathname, nav.length]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -174,10 +181,14 @@ export function DashboardShell({
           </span>
         </div>
 
-        <nav
-          className="flex-1 overflow-y-auto px-3 py-4"
-          aria-label={`${subtitle} navigation`}
+        <PerfectScrollArea
+          ref={sidebarScrollRef}
+          className="site-shell-sidebar-scroll min-h-0 flex-1"
         >
+          <nav
+            className="px-3 py-4"
+            aria-label={`${subtitle} navigation`}
+          >
           {sections.map(([section, items], index) => (
             <div
               key={section}
@@ -226,7 +237,8 @@ export function DashboardShell({
               })}
             </div>
           ))}
-        </nav>
+          </nav>
+        </PerfectScrollArea>
 
         <div className="site-shell-aside-divider shrink-0 border-t px-3 pt-3 pb-12">
           <Link

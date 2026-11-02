@@ -1,0 +1,151 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { Upload } from "lucide-react";
+import { appToast } from "~/lib/app-toast";
+import { userProfileImageUnoptimized } from "~/lib/project-image";
+
+function assignFileToInput(input: HTMLInputElement | null, file: File | null) {
+  if (!input) return;
+  const dt = new DataTransfer();
+  if (file) dt.items.add(file);
+  input.files = dt.files;
+}
+
+/** Profile photo — file is uploaded on Save profile (same flow as project covers). */
+export function ProfileAvatarUpload({
+  defaultUrl,
+}: {
+  defaultUrl?: string | null;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const localPreviewRef = useRef<string | null>(null);
+
+  const [savedUrl, setSavedUrl] = useState(defaultUrl?.trim() ?? "");
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [hasPendingFile, setHasPendingFile] = useState(false);
+
+  const clearLocalPreview = () => {
+    if (localPreviewRef.current) {
+      URL.revokeObjectURL(localPreviewRef.current);
+      localPreviewRef.current = null;
+    }
+    setLocalPreview(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (localPreviewRef.current) {
+        URL.revokeObjectURL(localPreviewRef.current);
+      }
+    };
+  }, []);
+
+  const applyFile = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      appToast.error("Please choose an image file.");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      appToast.error("Image must be 4 MB or smaller.");
+      return;
+    }
+
+    clearLocalPreview();
+    const objectUrl = URL.createObjectURL(file);
+    localPreviewRef.current = objectUrl;
+    setLocalPreview(objectUrl);
+    setHasPendingFile(true);
+    assignFileToInput(inputRef.current, file);
+  };
+
+  const removePhoto = () => {
+    clearLocalPreview();
+    setHasPendingFile(false);
+    setSavedUrl("");
+    assignFileToInput(inputRef.current, null);
+    if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const previewSrc = localPreview || savedUrl || null;
+
+  return (
+    <div className="space-y-4">
+      <input
+        type="hidden"
+        name="image"
+        value={hasPendingFile ? "" : savedUrl}
+      />
+      <input
+        ref={inputRef}
+        type="file"
+        name="avatarFile"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        className="sr-only"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) applyFile(file);
+        }}
+      />
+
+      <div className="flex flex-wrap items-center gap-5">
+        <div
+          className="from-sc-accent-bright to-sc-accent relative size-28 shrink-0 overflow-hidden rounded-full bg-gradient-to-br shadow-[0_2px_12px_rgba(21,19,15,0.12)] ring-2 ring-white"
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            const file = event.dataTransfer.files[0];
+            if (file) applyFile(file);
+          }}
+        >
+          {previewSrc ? (
+            <Image
+              src={previewSrc}
+              alt="Profile photo preview"
+              fill
+              sizes="112px"
+              className="object-cover"
+              unoptimized={userProfileImageUnoptimized(previewSrc)}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-[#15130f]/50">
+              <Upload className="size-8" />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="hover:bg-sc-accent rounded-md bg-[#15130f] px-3 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase"
+          >
+            {previewSrc ? "Choose another" : "Upload photo"}
+          </button>
+          {previewSrc ? (
+            <button
+              type="button"
+              onClick={removePhoto}
+              className="rounded-md bg-white px-3 py-2 text-[10px] font-bold tracking-[0.12em] uppercase shadow-[0_1px_2px_rgba(21,19,15,0.08)] hover:text-[#9a3b2e] hover:shadow-[0_2px_8px_rgba(154,59,46,0.12)]"
+            >
+              Remove
+            </button>
+          ) : null}
+          {hasPendingFile ? (
+            <span className="text-sc-accent text-[10px] font-bold tracking-[0.1em] uppercase">
+              Unsaved — save profile to apply
+            </span>
+          ) : savedUrl ? (
+            <span className="text-[10px] font-bold tracking-[0.1em] text-[#2e7d32] uppercase">
+              Saved
+            </span>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -630,7 +630,7 @@ export const rateLimits = createTable("rate_limits", {
 
 export const uploadClaimKindEnum = pgEnum(
   `${env.DB_TABLE_PREFIX}_upload_claim_kind`,
-  ["avatar", "message_attachment", "project_deliverable"],
+  ["avatar", "message_attachment", "project_deliverable", "content_media"],
 );
 
 /** UploadThing URLs registered on upload; required before attach or discard. */
@@ -643,6 +643,8 @@ export const userUploadClaims = createTable(
       .references(() => users.id, { onDelete: "cascade" }),
     url: text("url").notNull(),
     kind: uploadClaimKindEnum("kind").notNull(),
+    /** Groups avatar/client uploads to the current edit session in Studio. */
+    sessionId: text("session_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -681,7 +683,7 @@ export const contentStatusEnum = pgEnum(
 
 /**
  * Pages and posts share one table: same editor, same slug rules, same
- * publishing flow. `kind` decides the public route (`/{slug}` vs `/blog/{slug}`).
+ * publishing flow. `kind` decides the public route (`/page/{slug}` vs `/blog/{slug}`).
  * `body` is the serialized Lexical editor state.
  */
 export const contentEntries = createTable(

@@ -34,6 +34,9 @@ export function MultiSelect({
   emptyText = "No results found.",
   className,
   ariaLabel,
+  onChange,
+  showSelectedBadges = true,
+  submitHiddenInputs = true,
 }: {
   name: string;
   options: MultiSelectOption[];
@@ -43,17 +46,24 @@ export function MultiSelect({
   emptyText?: string;
   className?: string;
   ariaLabel?: string;
+  /** Fires whenever the picker selection changes (local only until form submit). */
+  onChange?: (values: string[]) => void;
+  showSelectedBadges?: boolean;
+  /** When false, omit hidden inputs (parent submits values another way). */
+  submitHiddenInputs?: boolean;
 }) {
   const [selected, setSelected] = useState<string[]>(defaultValue);
   const [open, setOpen] = useState(false);
   const listId = useId();
 
   function toggle(value: string) {
-    setSelected((current) =>
-      current.includes(value)
+    setSelected((current) => {
+      const next = current.includes(value)
         ? current.filter((item) => item !== value)
-        : [...current, value],
-    );
+        : [...current, value];
+      onChange?.(next);
+      return next;
+    });
   }
 
   const selectedOptions = options.filter((option) =>
@@ -62,9 +72,11 @@ export function MultiSelect({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {selected.map((value) => (
-        <input key={value} type="hidden" name={name} value={value} />
-      ))}
+      {submitHiddenInputs
+        ? selected.map((value) => (
+            <input key={value} type="hidden" name={name} value={value} />
+          ))
+        : null}
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -148,7 +160,7 @@ export function MultiSelect({
         </PopoverContent>
       </Popover>
 
-      {selectedOptions.length > 0 ? (
+      {showSelectedBadges && selectedOptions.length > 0 ? (
         <div className="flex flex-wrap gap-1.5">
           {selectedOptions.map((option) => (
             <Badge

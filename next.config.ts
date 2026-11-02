@@ -14,17 +14,17 @@ const isProduction = process.env.NODE_ENV === "production";
  */
 function buildCsp() {
   const connectSrc = isProduction
-    ? "connect-src 'self' https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://vitals.vercel-insights.com"
+    ? "connect-src 'self' https://utfs.io https://*.utfs.io https://*.ufs.sh https://*.uploadthing.com https://vitals.vercel-insights.com"
     : // Local dev uses HMR over websockets.
-      "connect-src 'self' ws: wss: https://utfs.io https://*.ufs.sh https://*.uploadthing.com";
+      "connect-src 'self' ws: wss: https://utfs.io https://*.utfs.io https://*.ufs.sh https://*.uploadthing.com";
 
   return [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"} https://va.vercel-scripts.com`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://lh3.googleusercontent.com",
+    "img-src 'self' data: blob: https://utfs.io https://*.utfs.io https://*.ufs.sh https://*.uploadthing.com https://lh3.googleusercontent.com",
     "font-src 'self' data:",
-    "media-src 'self' https://utfs.io https://*.ufs.sh https://*.uploadthing.com",
+    "media-src 'self' https://utfs.io https://*.utfs.io https://*.ufs.sh https://*.uploadthing.com",
     connectSrc,
     "object-src 'none'",
     "base-uri 'self'",
@@ -81,6 +81,7 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "utfs.io" },
+      { protocol: "https", hostname: "*.utfs.io" },
       { protocol: "https", hostname: "*.ufs.sh" },
       { protocol: "https", hostname: "*.uploadthing.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },

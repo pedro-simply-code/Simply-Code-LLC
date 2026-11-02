@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { Suspense, useState } from "react";
 import { ActionToastFromUrl } from "~/components/action-toast-from-url";
 import { AppToaster } from "~/components/app-toaster";
+import { SiteScrollRoot } from "~/components/site-scroll-root";
 import { ThemeProvider } from "~/components/theme-provider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -30,11 +31,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          {children}
-          <AppToaster />
-          <Suspense fallback={null}>
-            <ActionToastFromUrl />
-          </Suspense>
+          <SiteScrollRoot>
+            {children}
+            <AppToaster />
+            <Suspense fallback={null}>
+              <ActionToastFromUrl />
+            </Suspense>
+          </SiteScrollRoot>
         </ThemeProvider>
         {process.env.NODE_ENV === "development" ? (
           <ReactQueryDevtools initialIsOpen={false} />

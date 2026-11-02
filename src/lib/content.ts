@@ -6,6 +6,8 @@
  * actions and client components alike.
  */
 
+import { isExternalHref } from "~/lib/link-options";
+
 export const CONTENT_KINDS = ["page", "post"] as const;
 export type ContentKindName = (typeof CONTENT_KINDS)[number];
 
@@ -45,6 +47,8 @@ export type HeroStat = {
   label: string;
 };
 
+export type HeroButtonSlot = "primary" | "secondary";
+
 export type HeroData = {
   eyebrow: string;
   headline: string;
@@ -53,8 +57,17 @@ export type HeroData = {
   description: string;
   primaryLabel: string;
   primaryHref: string;
+  primaryNewTab: boolean;
+  primaryNofollow: boolean;
   secondaryLabel: string;
   secondaryHref: string;
+  secondaryNewTab: boolean;
+  secondaryNofollow: boolean;
+  /** Visible hero actions in left-to-right order. */
+  buttonOrder: HeroButtonSlot[];
+  /** Left column footnote (accent border). */
+  tagline: string;
+  /** Dark panel chip label (e.g. “Since 2016”). */
   badge: string;
   panelText: string;
   stats: HeroStat[];
@@ -69,20 +82,99 @@ export const DEFAULT_HERO: HeroData = {
     "A full-service digital agency specializing in UX design, custom Next.js applications, WordPress solutions and scalable web platforms.",
   primaryLabel: "Start Your Project",
   primaryHref: "#contact",
-  secondaryLabel: "View Our Work",
+  primaryNewTab: false,
+  primaryNofollow: false,
+  secondaryLabel: "",
   secondaryHref: "/work",
+  secondaryNewTab: false,
+  secondaryNofollow: false,
+  buttonOrder: ["primary"],
+  tagline: "From first contact to production deploy",
   badge: "Since 2016",
   panelText: "Clean code and business outcomes — not generic templates.",
   stats: [
-    { value: "10+", label: "Years building" },
-    { value: "60+", label: "Projects shipped" },
-    { value: "98%", label: "Client retention" },
-    { value: "4.9", label: "Average rating" },
+    { value: "12+", label: "Years Experience" },
+    { value: "64+", label: "Projects Delivered" },
+    { value: "100%", label: "Upwork Job Success" },
+    { value: "8+", label: "Years with Zoom" },
   ],
 };
 
 function heroString(value: unknown, fallback: string): string {
   return typeof value === "string" ? value : fallback;
+}
+
+function heroBool(value: unknown, fallback: boolean): boolean {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function heroButtonSlot(value: unknown): value is HeroButtonSlot {
+  return value === "primary" || value === "secondary";
+}
+
+function heroHasPrimaryLabel(label: string): boolean {
+  return label.trim().length > 0;
+}
+
+function heroHasSecondaryLabel(label: string): boolean {
+  return label.trim().length > 0;
+}
+
+/** Legacy + persisted JSON → display order for filled / outline actions. */
+export function normalizeHeroButtonOrder(
+  source: Record<string, unknown>,
+  primaryLabel: string,
+  secondaryLabel: string,
+): HeroButtonSlot[] {
+  const hasPrimary = heroHasPrimaryLabel(primaryLabel);
+  const hasSecondary = heroHasSecondaryLabel(secondaryLabel);
+
+  const fromSource = Array.isArray(source.buttonOrder)
+    ? source.buttonOrder.filter(heroButtonSlot)
+    : null;
+
+  let order: HeroButtonSlot[];
+
+  if (fromSource && fromSource.length > 0) {
+    order = fromSource.filter((slot) =>
+      slot === "primary" ? hasPrimary : hasSecondary,
+    );
+    if (hasPrimary && !order.includes("primary")) order.push("primary");
+    if (hasSecondary && !order.includes("secondary")) order.push("secondary");
+  } else if (hasPrimary && hasSecondary) {
+    order = ["primary", "secondary"];
+  } else if (hasPrimary) {
+    order = ["primary"];
+  } else if (hasSecondary) {
+    order = ["secondary"];
+  } else {
+    order = [];
+  }
+
+  return order;
+}
+
+export function heroButtonsInDisplayOrder(data: HeroData): HeroButtonSlot[] {
+  return data.buttonOrder.filter((slot) =>
+    slot === "primary"
+      ? heroHasPrimaryLabel(data.primaryLabel)
+      : heroHasSecondaryLabel(data.secondaryLabel),
+  );
+}
+
+export function appendHeroButtonOrder(
+  order: HeroButtonSlot[],
+  slot: HeroButtonSlot,
+): HeroButtonSlot[] {
+  if (order.includes(slot)) return order;
+  return [...order, slot];
+}
+
+export function removeHeroButtonFromOrder(
+  order: HeroButtonSlot[],
+  slot: HeroButtonSlot,
+): HeroButtonSlot[] {
+  return order.filter((entry) => entry !== slot);
 }
 
 /** Coerce persisted JSON into a complete hero payload. */
@@ -91,6 +183,7 @@ export function normalizeHeroData(value: unknown): HeroData {
     return {
       ...DEFAULT_HERO,
       stats: DEFAULT_HERO.stats.map((stat) => ({ ...stat })),
+      buttonOrder: [...DEFAULT_HERO.buttonOrder],
     };
   }
 
@@ -118,11 +211,35 @@ export function normalizeHeroData(value: unknown): HeroData {
     description: heroString(source.description, DEFAULT_HERO.description),
     primaryLabel: heroString(source.primaryLabel, DEFAULT_HERO.primaryLabel),
     primaryHref: heroString(source.primaryHref, DEFAULT_HERO.primaryHref),
+    primaryNewTab: heroBool(
+      source.primaryNewTab,
+      isExternalHref(heroString(source.primaryHref, DEFAULT_HERO.primaryHref)),
+    ),
+    primaryNofollow: heroBool(
+      source.primaryNofollow,
+      DEFAULT_HERO.primaryNofollow,
+    ),
     secondaryLabel: heroString(
       source.secondaryLabel,
       DEFAULT_HERO.secondaryLabel,
     ),
     secondaryHref: heroString(source.secondaryHref, DEFAULT_HERO.secondaryHref),
+    secondaryNewTab: heroBool(
+      source.secondaryNewTab,
+      isExternalHref(
+        heroString(source.secondaryHref, DEFAULT_HERO.secondaryHref),
+      ),
+    ),
+    secondaryNofollow: heroBool(
+      source.secondaryNofollow,
+      DEFAULT_HERO.secondaryNofollow,
+    ),
+    buttonOrder: normalizeHeroButtonOrder(
+      source,
+      heroString(source.primaryLabel, DEFAULT_HERO.primaryLabel),
+      heroString(source.secondaryLabel, DEFAULT_HERO.secondaryLabel),
+    ),
+    tagline: heroString(source.tagline, DEFAULT_HERO.tagline),
     badge: heroString(source.badge, DEFAULT_HERO.badge),
     panelText: heroString(source.panelText, DEFAULT_HERO.panelText),
     stats,
@@ -254,6 +371,7 @@ function collectPlainText(node: ContentNode, parts: string[]): void {
       hero.eyebrow,
       hero.headline,
       hero.description,
+      hero.tagline,
       hero.badge,
       hero.panelText,
       hero.primaryLabel,
@@ -319,36 +437,16 @@ export function contentStartsWithHero(document: ContentDocument): boolean {
 /* Slugs & routes                                                              */
 /* -------------------------------------------------------------------------- */
 
-export const RESERVED_SLUGS = new Set([
-  "about",
-  "accept-invite",
-  "api",
-  "blog",
-  "contact",
-  "dashboard",
-  "faq",
-  "login",
-  "manifest.webmanifest",
-  "portal",
-  "privacy",
-  "register",
-  "robots.txt",
-  "services",
-  "sitemap.xml",
-  "studio",
-  "terms",
-  "work",
-]);
-
-export function isReservedSlug(slug: string): boolean {
-  return RESERVED_SLUGS.has(slug);
-}
-
 export function contentHref(kind: ContentKindName, slug: string): string {
-  return kind === "post" ? `/blog/${slug}` : `/${slug}`;
+  return kind === "post" ? `/blog/${slug}` : `/page/${slug}`;
 }
 
-/** Posts are collected under `/blog`; pages live at the site root. */
+/** Public URL prefix shown beside the slug field in the studio. */
+export function contentSlugPrefix(kind: ContentKindName): string {
+  return kind === "post" ? "/blog/" : "/page/";
+}
+
+/** Posts are collected under `/blog`; pages live under `/page`. */
 export function contentPublicPath(kind: ContentKindName, slug: string): string {
   return contentHref(kind, slug);
 }
@@ -371,11 +469,11 @@ const CONTENT_ERRORS: Record<string, string> = {
   kind: "Choose a valid content type.",
   title: "Add a title before saving.",
   slug: "Add a valid slug before saving.",
-  reserved: "That slug is reserved by an existing route. Pick another one.",
   status: "Choose a valid status.",
   body: "The editor content could not be read. Try again.",
   duplicate: "Another entry of that type already uses this slug.",
   missing: "That entry no longer exists.",
+  cover: "Could not upload the cover image. Try a smaller file or check UploadThing.",
 };
 
 export function contentErrorMessage(error?: string | null): string | null {

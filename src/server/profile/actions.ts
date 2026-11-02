@@ -59,6 +59,10 @@ export async function updateUserProfile(formData: FormData) {
   const name = text(formData, "name");
   if (!name) redirect(`${profilePath}?error=name`);
 
+  const avatarFile = formData.get("avatarFile");
+  const uploadedNewAvatar =
+    avatarFile instanceof File && avatarFile.size > 0;
+
   const resolvedImage = await resolveUserAvatarFromForm(
     formData,
     existing.image,
@@ -68,10 +72,11 @@ export async function updateUserProfile(formData: FormData) {
 
   const nextImage = resolvedImage.image;
   if (
+    !uploadedNewAvatar &&
     nextImage &&
     nextImage !== existing.image &&
     isUploadThingImageUrl(nextImage) &&
-    !(await userOwnsUploadClaim(session.user.id, nextImage))
+    !(await userOwnsUploadClaim(session.user.id, nextImage, "avatar"))
   ) {
     redirect(`${profilePath}?error=avatar-upload`);
   }

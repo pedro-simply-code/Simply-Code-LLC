@@ -1,6 +1,5 @@
 import {
   Field,
-  StudioInput,
   StudioSelect,
   StudioTextarea,
 } from "~/components/studio/ui";
@@ -13,34 +12,30 @@ import {
   type ContentStatusName,
 } from "~/lib/content";
 
-export function ContentFormFields({
+export function ContentFormSidebar({
   kind = "page",
   status = "draft",
-  title = "",
-  slug = "",
   excerpt = "",
-  coverImageUrl = "",
+  onKindChange,
 }: {
   kind?: ContentKindName;
   status?: ContentStatusName;
-  title?: string;
-  slug?: string;
   excerpt?: string;
-  coverImageUrl?: string;
+  onKindChange?: (kind: ContentKindName) => void;
 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Field label="Title" className="md:col-span-2">
-        <StudioInput name="title" defaultValue={title} required />
-      </Field>
-      <Field
-        label="Slug"
-        hint="Leave empty to generate it from the title. Reserved routes are rejected."
-      >
-        <StudioInput name="slug" defaultValue={slug} placeholder="about-us" />
-      </Field>
+    <div className="grid gap-4">
       <Field label="Type">
-        <StudioSelect name="kind" defaultValue={kind}>
+        <StudioSelect
+          name="kind"
+          defaultValue={kind}
+          onChange={(event) => {
+            const value = event.target.value;
+            if (value === "page" || value === "post") {
+              onKindChange?.(value);
+            }
+          }}
+        >
           {CONTENT_KINDS.map((value) => (
             <option key={value} value={value}>
               {CONTENT_KIND_LABEL[value]}
@@ -58,25 +53,13 @@ export function ContentFormFields({
         </StudioSelect>
       </Field>
       <Field
-        label="Cover image URL"
-        hint="Optional. Used in cards and social previews."
-      >
-        <StudioInput
-          name="coverImageUrl"
-          type="url"
-          defaultValue={coverImageUrl}
-          placeholder="https://…"
-        />
-      </Field>
-      <Field
         label="Excerpt"
         hint="Shown in the listing and used as the meta description."
-        className="md:col-span-2"
       >
         <StudioTextarea
           name="excerpt"
           defaultValue={excerpt}
-          className="min-h-20"
+          className="min-h-24"
         />
       </Field>
     </div>

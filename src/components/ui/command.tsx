@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
+import { PerfectScrollArea } from "~/components/perfect-scroll-area";
 import { cn } from "~/lib/utils";
-import { SearchIcon } from "lucide-react";
+import { Search } from "lucide-react";
 
 import {
   Dialog,
@@ -69,7 +70,7 @@ function CommandInput({
       data-slot="command-input-wrapper"
       className="flex h-9 items-center gap-2 border-b px-3"
     >
-      <SearchIcon className="size-4 shrink-0 opacity-50" />
+      <Search className="size-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
@@ -84,17 +85,17 @@ function CommandInput({
 
 function CommandList({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (
     <CommandPrimitive.List
       data-slot="command-list"
-      className={cn(
-        "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
-        className,
-      )}
+      className={cn("max-h-[300px] overflow-hidden p-0", className)}
       {...props}
-    />
+    >
+      <PerfectScrollArea className="max-h-[300px]">{children}</PerfectScrollArea>
+    </CommandPrimitive.List>
   );
 }
 

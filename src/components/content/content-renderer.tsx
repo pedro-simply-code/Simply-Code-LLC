@@ -7,6 +7,9 @@ import {
   type ContentDocument,
   type ContentNode,
 } from "~/lib/content";
+import { isExternalHref } from "~/lib/link-options";
+import { QUOTE_INNER_TYPE } from "~/components/lexical/quote-inner-node";
+import { appQuoteInner, appQuoteOuter } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 const FORMAT_BOLD = 1;
@@ -113,30 +116,47 @@ function LinkBlock({ node, keyName }: { node: ContentNode; keyName: string }) {
   const href = typeof node.url === "string" ? node.url : "";
   const content = renderChildren(node.children, keyName);
   const className = "text-sc-accent underline underline-offset-2";
+  const target =
+    typeof node.target === "string" && node.target.trim()
+      ? node.target
+      : undefined;
+  const rel =
+    typeof node.rel === "string" && node.rel.trim() ? node.rel : undefined;
+  const newTab = target === "_blank";
 
   if (!href) return <span key={keyName}>{content}</span>;
 
-  const external = /^(https?:)?\/\//i.test(href) || href.startsWith("mailto:");
+  const external = isExternalHref(href);
   if (external) {
     return (
       <a
         key={keyName}
         href={href}
         className={className}
-        rel="noreferrer noopener"
-        target="_blank"
+        rel={rel}
+        target={newTab ? "_blank" : undefined}
       >
         {content}
       </a>
     );
   }
 
+  if (newTab) {
+    return (
+      <Link key={keyName} href={href} className={className} rel={rel} target="_blank">
+        {content}
+      </Link>
+    );
+  }
+
   return (
-    <Link key={keyName} href={href} className={className}>
+    <Link key={keyName} href={href} className={className} rel={rel}>
       {content}
     </Link>
   );
 }
+
+const CONTENT_BLOCK_WRAP = "mx-auto w-full max-w-[1400px] px-6";
 
 function hasVisibleInlineContent(children: ContentNode[]): boolean {
   return children.some((child) =>
@@ -148,8 +168,8 @@ function hasVisibleInlineContent(children: ContentNode[]): boolean {
 
 /**
  * Renders the root children: block decorators (hero) stay full-bleed while
- * prose is centred in a readable column. Legacies where the hero was nested in
- * a paragraph are hoisted out so the layout matches the homepage.
+ * prose blocks span the page width. Legacies where the hero was nested in a
+ * paragraph are hoisted out so the layout matches the homepage.
  */
 function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
   if (!children) return [];
@@ -181,7 +201,7 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
             <div
               key={`${keyName}-wrap`}
               className={cn(
-                "mx-auto w-full max-w-[860px] px-6",
+                CONTENT_BLOCK_WRAP,
                 needsSpacingAfterHero && "pt-12",
               )}
             >
@@ -192,7 +212,9 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
         }
 
         heroes.forEach((hero, heroIndex) => {
-          nodes.push(renderNode(hero, `${keyName}-hero-${heroIndex}`));
+          nodes.push(
+            renderNode(hero, `${keyName}-hero-${heroIndex}`),
+          );
         });
         needsSpacingAfterHero = true;
         return;
@@ -210,7 +232,7 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
       <div
         key={`${keyName}-wrap`}
         className={cn(
-          "mx-auto w-full max-w-[860px] px-6",
+          CONTENT_BLOCK_WRAP,
           needsSpacingAfterHero && "pt-12",
         )}
       >
@@ -258,14 +280,25 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
     }
     case "heading":
       return <HeadingBlock key={keyName} node={node} keyName={keyName} />;
-    case "quote":
+    case "quote": {
+      const inner = node.children?.find((child) => child.type === QUOTE_INNER_TYPE);
       return (
-        <blockquote
-          key={keyName}
-          className="border-sc-accent-bright my-7 border-l-2 pl-5 text-[17px] leading-relaxed text-[#57524a] italic"
-        >
-          {renderChildren(node.children, keyName)}
+        <blockquote key={keyName} className={cn("my-7", appQuoteOuter)}>
+          {inner ? (
+            renderNode(inner, `${keyName}-inner`)
+          ) : (
+            <span className={appQuoteInner}>
+              {renderChildren(node.children, keyName)}
+            </span>
+          )}
         </blockquote>
+      );
+    }
+    case QUOTE_INNER_TYPE:
+      return (
+        <span key={keyName} className={appQuoteInner}>
+          {renderChildren(node.children, keyName)}
+        </span>
       );
     case "list":
       return <ListBlock key={keyName} node={node} keyName={keyName} />;
