@@ -103,12 +103,16 @@ export function testimonialsIncludeUpwork(
   );
 }
 
+/** Default intro under “What Clients Say” when the CMS field is empty. */
+export const STATIC_CLIENT_PROOF_INTRO =
+  "Verified reviews from our founder's public Upwork profile — published as written. Client names stay private on Upwork.";
+
 export function clientProofIntro(
   testimonials: { source?: string }[],
   staticFallback: boolean,
 ): string {
   if (staticFallback) {
-    return "Verified reviews from our founder's public Upwork profile — published as written. Client names stay private on Upwork.";
+    return STATIC_CLIENT_PROOF_INTRO;
   }
 
   const sources = new Set(
@@ -118,7 +122,17 @@ export function clientProofIntro(
     return "Feedback from clients on completed projects, submitted through our portal and published with their approval.";
   }
   if (sources.has("upwork") && !sources.has("client")) {
-    return "Verified reviews from our founder's public Upwork profile — published as written. Client names stay private on Upwork.";
+    return STATIC_CLIENT_PROOF_INTRO;
   }
   return "Published client feedback — from our portal and verified platforms where noted.";
+}
+
+export function resolveReviewsSectionDescription(
+  description: string,
+  testimonials: { source?: string }[],
+  fillLast: boolean,
+): string {
+  const trimmed = description.trim();
+  if (trimmed) return trimmed;
+  return clientProofIntro(testimonials, fillLast);
 }

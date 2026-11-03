@@ -605,6 +605,14 @@ html[data-site-surface="flat"] {
     padding-inline: 0;
   }
 
+  /* CMS blocks: show motion classes at full opacity in the studio editor. */
+  .content-editor-body .site-reveal,
+  .content-editor-body .site-hero-in {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
   .site-radius-lg {
     border-radius: var(--site-radius-lg);
   }

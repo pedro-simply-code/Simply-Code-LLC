@@ -12,6 +12,33 @@ export const appHeroBand = "bg-sc-section-alt text-sc-ink";
 /** Inner hero layout — matches homepage `max-w-[1400px]`. */
 export const appHeroContainer = "mx-auto max-w-[1400px]";
 
+export const appServicesBand =
+  "bg-sc-section border-b border-[#15130f]/10 py-20 lg:py-24";
+
+export const appServicesContainer = "mx-auto max-w-[1400px] px-6";
+
+export const appSectionBand = "border-b border-[#15130f]/10 py-20 lg:py-24";
+
+export const appSectionContainer = "mx-auto max-w-[1400px] px-6";
+
+export const appSectionAltBand =
+  "bg-sc-section border-b border-[#15130f]/10 py-20 lg:py-24";
+
+export const appContactBand =
+  "bg-sc-section scroll-mt-20 py-20 lg:py-24";
+
+export const appCtaBand =
+  "bg-sc-section border-t border-[#15130f]/10 py-20 lg:py-24";
+
+export const appCtaContainer = "mx-auto max-w-[1400px] px-6";
+
+/** Homepage scroll-reveal motion (requires `SiteMotionRoot` on public pages). */
+export const siteReveal = "site-reveal";
+export const siteStagger = "site-stagger";
+export const siteMotionLift = "site-motion-lift";
+export const siteCardMotion =
+  "site-reveal site-motion-lift group site-card-hover-accent";
+
 /** Quote blockquote element (inside `appQuotePageWrap` div). */
 export const appQuoteOuter = "w-full border-0";
 

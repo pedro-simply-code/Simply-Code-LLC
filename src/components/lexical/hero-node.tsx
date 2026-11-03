@@ -593,8 +593,13 @@ function HeroBlockEditor({
         </div>
       </div>
 
-      <section className={cn("relative overflow-hidden", appHeroBand)}>
-        <div className={cn(appHeroContainer, "px-5 py-14 lg:py-20")}>
+      <section
+        className={cn(
+          "relative overflow-hidden border-b border-[#15130f]/10",
+          appHeroBand,
+        )}
+      >
+        <div className={cn(appHeroContainer, "px-6 py-14 lg:py-20")}>
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
             <div>
               <div

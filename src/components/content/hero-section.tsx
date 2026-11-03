@@ -96,15 +96,21 @@ export function HeroSection({
   const buttonOrder = heroButtonsInDisplayOrder(data);
 
   return (
-    <section className={cn("relative overflow-hidden", appHeroBand, className)}>
-      <div className={cn(appHeroContainer, "px-5 py-14 lg:py-20")}>
+    <section
+      className={cn(
+        "relative overflow-hidden border-b border-[#15130f]/10",
+        appHeroBand,
+        className,
+      )}
+    >
+      <div className={cn(appHeroContainer, "px-6 py-14 lg:py-20")}>
         <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div>
             {data.eyebrow ? (
               <div
                 className={cn(
                   appChip,
-                  "inline-flex items-center gap-2.5 px-3.5 py-2",
+                  "site-hero-in site-hero-in-delay-1 inline-flex items-center gap-2.5 px-3.5 py-2",
                 )}
               >
                 <span
@@ -117,18 +123,18 @@ export function HeroSection({
               </div>
             ) : null}
 
-            <h1 className="mt-7 max-w-[26ch] text-[clamp(2.1rem,4vw,3.35rem)] leading-[1.06] font-black tracking-[-0.03em] uppercase">
+            <h1 className="site-hero-in site-hero-in-delay-2 mt-7 max-w-[26ch] text-[clamp(2.1rem,4vw,3.35rem)] leading-[1.06] font-black tracking-[-0.03em] uppercase">
               <Headline headline={data.headline} highlight={data.highlight} />
             </h1>
 
             {data.description ? (
-              <p className="mt-6 max-w-[34rem] text-[16px] leading-[1.7] text-[#57524a]">
+              <p className="site-hero-in site-hero-in-delay-3 mt-6 max-w-[34rem] text-[16px] leading-[1.7] text-[#57524a]">
                 {data.description}
               </p>
             ) : null}
 
             {buttonOrder.length > 0 ? (
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="site-hero-in site-hero-in-delay-3 mt-8 flex flex-wrap items-center gap-3">
                 {buttonOrder.map((slot) =>
                   slot === "primary" ? (
                     <HeroAction
@@ -162,7 +168,7 @@ export function HeroSection({
             ) : null}
           </div>
 
-          <div className="relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9">
+          <div className="site-hero-in site-hero-in-delay-2 site-motion-lift relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9">
             <div
               aria-hidden
               className="bg-sc-accent-bright/25 pointer-events-none absolute -top-16 -right-16 size-48 rounded-full blur-3xl"

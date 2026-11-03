@@ -1,46 +1,20 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { SITE } from "~/content/site";
-import { appPrimaryButtonMarketingLg } from "~/lib/surface";
+import { CtaMarketingSection } from "~/components/content/cta-marketing-section";
+import {
+  DEFAULT_CTA_SECTION,
+  normalizeCtaSectionData,
+} from "~/lib/homepage-sections";
 
 type CtaSectionProps = {
   title?: string;
   description?: string;
 };
 
-export function CtaSection({
-  title = "Let's talk about your project.",
-  description = "Tell us about your goals and we'll get back to you with a plan to bring your ideas to life. Direct communication with the developers building it — no middlemen.",
-}: CtaSectionProps) {
-  return (
-    <section className="bg-sc-section border-t border-[#15130f]/10 py-20 lg:py-24">
-      <div className="mx-auto max-w-[1400px] px-6">
-        <div className="grid gap-10 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
-          <div className="site-reveal">
-            <h2 className="max-w-3xl text-[clamp(2rem,4.8vw,3.6rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
-              {title}
-            </h2>
-            <p className="mt-6 max-w-xl text-[16px] leading-relaxed text-[#57524a]">
-              {description}
-            </p>
-          </div>
+/** Static-site footer CTA (about, services, work, FAQ, blog index). */
+export function CtaSection({ title, description }: CtaSectionProps) {
+  const data = normalizeCtaSectionData({
+    headline: title ?? DEFAULT_CTA_SECTION.headline,
+    description: description ?? DEFAULT_CTA_SECTION.description,
+  });
 
-          <div className="site-reveal flex flex-col items-start gap-4 lg:items-end">
-            <Link href="/contact" className={appPrimaryButtonMarketingLg}>
-              Start Your Project <ArrowRight className="size-4" />
-            </Link>
-            <a
-              href={`mailto:${SITE.email}`}
-              className="hover:text-sc-accent text-[14px] font-semibold text-[#15130f] underline underline-offset-8 transition-colors"
-            >
-              {SITE.email}
-            </a>
-            <p className="text-[12px] tracking-[0.12em] text-[#6f6a60] uppercase">
-              Reply {SITE.responseTime.toLowerCase()}
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+  return <CtaMarketingSection data={data} />;
 }

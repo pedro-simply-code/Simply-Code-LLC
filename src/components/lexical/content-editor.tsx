@@ -55,6 +55,30 @@ import {
   Undo2,
 } from "lucide-react";
 import { $createHeroNode, HeroNode } from "~/components/lexical/hero-node";
+import {
+  $createServicesSectionNode,
+  ServicesSectionNode,
+} from "~/components/lexical/services-node";
+import {
+  $createWorkSectionNode,
+  WorkSectionNode,
+} from "~/components/lexical/work-node";
+import {
+  $createReviewsSectionNode,
+  ReviewsSectionNode,
+} from "~/components/lexical/reviews-node";
+import {
+  $createWhySectionNode,
+  WhySectionNode,
+} from "~/components/lexical/why-node";
+import {
+  $createContactSectionNode,
+  ContactSectionNode,
+} from "~/components/lexical/contact-node";
+import {
+  $createCtaSectionNode,
+  CtaSectionNode,
+} from "~/components/lexical/cta-node";
 import { $insertDecoratorBlock } from "~/components/lexical/insert-decorator-block";
 import { BlockDecoratorRootPlugin } from "~/components/lexical/block-decorator-root-plugin";
 import { LinkUrlPopover } from "~/components/lexical/link-url-popover";
@@ -70,7 +94,13 @@ import {
   type LinkFieldValue,
 } from "~/lib/link-options";
 import {
+  DEFAULT_CONTACT_SECTION,
+  DEFAULT_CTA_SECTION,
   DEFAULT_HERO,
+  DEFAULT_REVIEWS_SECTION,
+  DEFAULT_SERVICES_SECTION,
+  DEFAULT_WHY_SECTION,
+  DEFAULT_WORK_SECTION,
   emptyContentDocument,
   parseContentDocument,
   type ContentDocument,
@@ -105,10 +135,48 @@ const EDITOR_THEME = {
 };
 
 type BlockType = "paragraph" | "h2" | "h3" | "quote";
-type InsertBlockType = BlockType | "hero";
+type InsertBlockType =
+  | BlockType
+  | "hero"
+  | "services"
+  | "work"
+  | "reviews"
+  | "why"
+  | "contact"
+  | "cta";
+
+function $insertCtaBlock() {
+  $insertDecoratorBlock(() => $createCtaSectionNode(DEFAULT_CTA_SECTION));
+}
 
 function $insertHeroBlock() {
   $insertDecoratorBlock(() => $createHeroNode(DEFAULT_HERO));
+}
+
+function $insertServicesBlock() {
+  $insertDecoratorBlock(() =>
+    $createServicesSectionNode(DEFAULT_SERVICES_SECTION),
+  );
+}
+
+function $insertWorkBlock() {
+  $insertDecoratorBlock(() => $createWorkSectionNode(DEFAULT_WORK_SECTION));
+}
+
+function $insertReviewsBlock() {
+  $insertDecoratorBlock(() =>
+    $createReviewsSectionNode(DEFAULT_REVIEWS_SECTION),
+  );
+}
+
+function $insertWhyBlock() {
+  $insertDecoratorBlock(() => $createWhySectionNode(DEFAULT_WHY_SECTION));
+}
+
+function $insertContactBlock() {
+  $insertDecoratorBlock(() =>
+    $createContactSectionNode(DEFAULT_CONTACT_SECTION),
+  );
 }
 
 function ToolbarButton({
@@ -243,6 +311,30 @@ function Toolbar() {
       () => {
         if (value === "hero") {
           $insertHeroBlock();
+          return;
+        }
+        if (value === "services") {
+          $insertServicesBlock();
+          return;
+        }
+        if (value === "work") {
+          $insertWorkBlock();
+          return;
+        }
+        if (value === "reviews") {
+          $insertReviewsBlock();
+          return;
+        }
+        if (value === "why") {
+          $insertWhyBlock();
+          return;
+        }
+        if (value === "contact") {
+          $insertContactBlock();
+          return;
+        }
+        if (value === "cta") {
+          $insertCtaBlock();
           return;
         }
 
@@ -383,6 +475,12 @@ function Toolbar() {
           <option value="h3">Heading 3</option>
           <option value="quote">Quote</option>
           <option value="hero">Hero section</option>
+          <option value="services">Services section</option>
+          <option value="work">Our work section</option>
+          <option value="reviews">Client proof section</option>
+          <option value="why">Why choose us section</option>
+          <option value="contact">Contact section</option>
+          <option value="cta">Marketing CTA</option>
         </select>
       </label>
     </div>
@@ -420,6 +518,12 @@ export function ContentEditor({
         ListItemNode,
         LinkNode,
         HeroNode,
+        ServicesSectionNode,
+        WorkSectionNode,
+        ReviewsSectionNode,
+        WhySectionNode,
+        ContactSectionNode,
+        CtaSectionNode,
         QuoteInnerNode,
       ],
       theme: EDITOR_THEME,

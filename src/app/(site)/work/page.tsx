@@ -1,5 +1,6 @@
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNav } from "~/components/site-nav";
+import { CtaSection } from "~/components/cta-section";
 import { WorkFilters } from "~/components/work-filters";
 import { PROJECTS } from "~/content/projects";
 import { pageMetadata } from "~/lib/seo";
@@ -45,6 +46,8 @@ export default async function WorkPage() {
             <WorkFilters projects={projects} />
           </div>
         </section>
+
+        <CtaSection title="Let's build something worth keeping." />
       </main>
 
       <SiteFooter />

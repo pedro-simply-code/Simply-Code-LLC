@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContentRenderer } from "~/components/content/content-renderer";
-import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNav } from "~/components/site-nav";
 import {
@@ -67,7 +66,6 @@ export default async function BlogPostPage({ params }: PostProps) {
         <ContentRenderer document={body} />
       </article>
 
-      <CtaSection />
       <SiteFooter />
     </div>
   );

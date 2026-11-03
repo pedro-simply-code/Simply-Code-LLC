@@ -250,7 +250,60 @@ export function normalizeHeroData(value: unknown): HeroData {
 /* Lexical document helpers                                                    */
 /* -------------------------------------------------------------------------- */
 
+import {
+  CONTACT_SECTION_NODE_TYPE,
+  CTA_SECTION_NODE_TYPE,
+  normalizeContactSectionData,
+  normalizeCtaSectionData,
+  normalizeReviewsSectionData,
+  normalizeServicesSectionData,
+  normalizeWhySectionData,
+  normalizeWorkSectionData,
+  REVIEWS_SECTION_NODE_TYPE,
+  SERVICES_SECTION_NODE_TYPE,
+  WHY_SECTION_NODE_TYPE,
+  WORK_SECTION_NODE_TYPE,
+} from "~/lib/homepage-sections";
+
 export const HERO_NODE_TYPE = "hero-section";
+
+export {
+  CONTACT_SECTION_NODE_TYPE,
+  CTA_SECTION_NODE_TYPE,
+  DEFAULT_CONTACT_SECTION,
+  DEFAULT_CTA_SECTION,
+  DEFAULT_REVIEWS_SECTION,
+  DEFAULT_SERVICES_SECTION,
+  DEFAULT_WHY_SECTION,
+  DEFAULT_WORK_SECTION,
+  HOMEPAGE_BLOCK_NODE_TYPES,
+  normalizeContactSectionData,
+  normalizeCtaSectionData,
+  normalizeReviewsSectionData,
+  normalizeServicesSectionData,
+  normalizeWhySectionData,
+  normalizeWorkSectionData,
+  REVIEWS_SECTION_NODE_TYPE,
+  SERVICES_SECTION_NODE_TYPE,
+  WHY_SECTION_NODE_TYPE,
+  WORK_SECTION_NODE_TYPE,
+  type ContactSectionData,
+  type CtaSectionData,
+  type ReviewsSectionData,
+  type ServicesSectionData,
+  type WhySectionData,
+  type WorkSectionData,
+} from "~/lib/homepage-sections";
+
+export const CONTENT_BLOCK_DECORATOR_TYPES = [
+  HERO_NODE_TYPE,
+  SERVICES_SECTION_NODE_TYPE,
+  WORK_SECTION_NODE_TYPE,
+  REVIEWS_SECTION_NODE_TYPE,
+  WHY_SECTION_NODE_TYPE,
+  CONTACT_SECTION_NODE_TYPE,
+  CTA_SECTION_NODE_TYPE,
+] as const;
 
 /** Minimal structural shape of a serialized Lexical node. */
 export type ContentNode = {
@@ -304,16 +357,19 @@ function isContentNode(value: unknown): value is ContentNode {
  */
 function liftNestedBlocks(children: ContentNode[]): ContentNode[] {
   const result: ContentNode[] = [];
+  const blockTypes = new Set<string>([
+    ...CONTENT_BLOCK_DECORATOR_TYPES,
+  ]);
 
   for (const child of children) {
     if (child.type === "paragraph" && Array.isArray(child.children)) {
-      const nestedBlocks = child.children.filter(
-        (grandchild) => grandchild.type === HERO_NODE_TYPE,
+      const nestedBlocks = child.children.filter((grandchild) =>
+        blockTypes.has(grandchild.type),
       );
 
       if (nestedBlocks.length > 0) {
         const inline = child.children.filter(
-          (grandchild) => grandchild.type !== HERO_NODE_TYPE,
+          (grandchild) => !blockTypes.has(grandchild.type),
         );
         const hasInlineContent = inline.some((grandchild) =>
           typeof grandchild.text === "string"
@@ -377,6 +433,63 @@ function collectPlainText(node: ContentNode, parts: string[]): void {
       hero.primaryLabel,
       hero.secondaryLabel,
       ...hero.stats.flatMap((stat) => [stat.value, stat.label]),
+    );
+  }
+
+  if (node.type === SERVICES_SECTION_NODE_TYPE) {
+    const section = normalizeServicesSectionData(node.data);
+    parts.push(section.eyebrow, section.headline, section.description);
+  }
+
+  if (node.type === WORK_SECTION_NODE_TYPE) {
+    const section = normalizeWorkSectionData(node.data);
+    parts.push(
+      section.eyebrow,
+      section.headline,
+      section.description,
+      section.ctaLabel,
+    );
+  }
+
+  if (node.type === REVIEWS_SECTION_NODE_TYPE) {
+    const section = normalizeReviewsSectionData(node.data);
+    parts.push(
+      section.eyebrow,
+      section.headline,
+      section.description,
+      section.emptyHeadline,
+    );
+  }
+
+  if (node.type === WHY_SECTION_NODE_TYPE) {
+    const section = normalizeWhySectionData(node.data);
+    parts.push(
+      section.eyebrow,
+      section.headline,
+      section.description,
+      section.linkLabel,
+      ...section.features.flatMap((f) => [f.title, f.summary]),
+    );
+  }
+
+  if (node.type === CONTACT_SECTION_NODE_TYPE) {
+    const section = normalizeContactSectionData(node.data);
+    parts.push(
+      section.eyebrow,
+      section.headline,
+      section.description,
+      section.faqLabel,
+    );
+  }
+
+  if (node.type === CTA_SECTION_NODE_TYPE) {
+    const section = normalizeCtaSectionData(node.data);
+    parts.push(
+      section.headline,
+      section.description,
+      section.buttonLabel,
+      section.email,
+      section.responseNote,
     );
   }
 

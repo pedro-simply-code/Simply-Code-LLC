@@ -1,9 +1,28 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ContactSection } from "~/components/content/contact-section";
+import { CtaMarketingSection } from "~/components/content/cta-marketing-section";
 import { HeroSection } from "~/components/content/hero-section";
+import { ReviewsSection } from "~/components/content/reviews-section";
+import { ServicesSection } from "~/components/content/services-section";
+import { WhySection } from "~/components/content/why-section";
+import { WorkSection } from "~/components/content/work-section";
 import {
+  CONTACT_SECTION_NODE_TYPE,
+  CONTENT_BLOCK_DECORATOR_TYPES,
+  CTA_SECTION_NODE_TYPE,
   HERO_NODE_TYPE,
+  normalizeContactSectionData,
+  normalizeCtaSectionData,
   normalizeHeroData,
+  normalizeReviewsSectionData,
+  normalizeServicesSectionData,
+  normalizeWhySectionData,
+  normalizeWorkSectionData,
+  REVIEWS_SECTION_NODE_TYPE,
+  SERVICES_SECTION_NODE_TYPE,
+  WHY_SECTION_NODE_TYPE,
+  WORK_SECTION_NODE_TYPE,
   type ContentDocument,
   type ContentNode,
 } from "~/lib/content";
@@ -199,41 +218,47 @@ function hasVisibleInlineContent(children: ContentNode[]): boolean {
   );
 }
 
+function isFullBleedBlockType(type: string | undefined): boolean {
+  return (
+    type !== undefined &&
+    (CONTENT_BLOCK_DECORATOR_TYPES as readonly string[]).includes(type)
+  );
+}
+
 /**
- * Renders the root children: block decorators (hero) stay full-bleed while
- * prose blocks span the page width. Legacies where the hero was nested in a
- * paragraph are hoisted out so the layout matches the homepage.
+ * Renders the root children: homepage section blocks stay full-bleed while
+ * prose blocks use CONTENT_BLOCK_WRAP.
  */
 function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
   if (!children) return [];
 
   const nodes: ReactNode[] = [];
-  let needsSpacingAfterHero = false;
+  let needsSpacingAfterFullBleed = false;
 
   children.forEach((child, index) => {
     const keyName = `root-${index}`;
 
-    if (child.type === HERO_NODE_TYPE) {
+    if (isFullBleedBlockType(child.type)) {
       nodes.push(renderNode(child, keyName));
-      needsSpacingAfterHero = true;
+      needsSpacingAfterFullBleed = true;
       return;
     }
 
     if (child.type === "quote" || child.type === QUOTE_WRAP_NODE_TYPE) {
       const rendered = renderQuoteRootBlock(child, keyName);
       if (rendered) nodes.push(rendered);
-      needsSpacingAfterHero = false;
+      needsSpacingAfterFullBleed = false;
       return;
     }
 
     if (child.type === "paragraph" && Array.isArray(child.children)) {
-      const heroes = child.children.filter(
-        (grandchild) => grandchild.type === HERO_NODE_TYPE,
+      const decorators = child.children.filter((grandchild) =>
+        isFullBleedBlockType(grandchild.type),
       );
 
-      if (heroes.length > 0) {
+      if (decorators.length > 0) {
         const inline = child.children.filter(
-          (grandchild) => grandchild.type !== HERO_NODE_TYPE,
+          (grandchild) => !isFullBleedBlockType(grandchild.type),
         );
 
         if (hasVisibleInlineContent(inline)) {
@@ -242,21 +267,19 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
               key={`${keyName}-wrap`}
               className={cn(
                 CONTENT_BLOCK_WRAP,
-                needsSpacingAfterHero && "pt-12",
+                needsSpacingAfterFullBleed && "pt-12",
               )}
             >
               {renderNode({ ...child, children: inline }, keyName)}
             </div>,
           );
-          needsSpacingAfterHero = false;
+          needsSpacingAfterFullBleed = false;
         }
 
-        heroes.forEach((hero, heroIndex) => {
-          nodes.push(
-            renderNode(hero, `${keyName}-hero-${heroIndex}`),
-          );
+        decorators.forEach((block, blockIndex) => {
+          nodes.push(renderNode(block, `${keyName}-block-${blockIndex}`));
         });
-        needsSpacingAfterHero = true;
+        needsSpacingAfterFullBleed = true;
         return;
       }
     }
@@ -273,13 +296,13 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
         key={`${keyName}-wrap`}
         className={cn(
           CONTENT_BLOCK_WRAP,
-          needsSpacingAfterHero && "pt-12",
+          needsSpacingAfterFullBleed && "pt-12",
         )}
       >
         {renderNode(child, keyName)}
       </div>,
     );
-    needsSpacingAfterHero = false;
+    needsSpacingAfterFullBleed = false;
   });
 
   return nodes;
@@ -298,7 +321,8 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
       // paragraph, which is invalid HTML (`<section>` inside `<p>`). Render the
       // container as a `<div>` in that case.
       const hasBlockChild = node.children?.some(
-        (child) => child.type === HERO_NODE_TYPE || child.type === "paragraph",
+        (child) =>
+          isFullBleedBlockType(child.type) || child.type === "paragraph",
       );
 
       if (hasBlockChild) {
@@ -334,6 +358,45 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
       return <LinkBlock key={keyName} node={node} keyName={keyName} />;
     case HERO_NODE_TYPE:
       return <HeroSection key={keyName} data={normalizeHeroData(node.data)} />;
+    case SERVICES_SECTION_NODE_TYPE:
+      return (
+        <ServicesSection
+          key={keyName}
+          data={normalizeServicesSectionData(node.data)}
+        />
+      );
+    case WORK_SECTION_NODE_TYPE:
+      return (
+        <WorkSection
+          key={keyName}
+          data={normalizeWorkSectionData(node.data)}
+        />
+      );
+    case REVIEWS_SECTION_NODE_TYPE:
+      return (
+        <ReviewsSection
+          key={keyName}
+          data={normalizeReviewsSectionData(node.data)}
+        />
+      );
+    case WHY_SECTION_NODE_TYPE:
+      return (
+        <WhySection key={keyName} data={normalizeWhySectionData(node.data)} />
+      );
+    case CONTACT_SECTION_NODE_TYPE:
+      return (
+        <ContactSection
+          key={keyName}
+          data={normalizeContactSectionData(node.data)}
+        />
+      );
+    case CTA_SECTION_NODE_TYPE:
+      return (
+        <CtaMarketingSection
+          key={keyName}
+          data={normalizeCtaSectionData(node.data)}
+        />
+      );
     default:
       return node.children ? (
         <div key={keyName}>{renderChildren(node.children, keyName)}</div>

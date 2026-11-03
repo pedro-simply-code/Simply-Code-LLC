@@ -10,8 +10,22 @@ import {
   type LexicalNode,
 } from "lexical";
 import { HeroNode } from "~/components/lexical/hero-node";
+import { ServicesSectionNode } from "~/components/lexical/services-node";
+import { WorkSectionNode } from "~/components/lexical/work-node";
+import { ReviewsSectionNode } from "~/components/lexical/reviews-node";
+import { WhySectionNode } from "~/components/lexical/why-node";
+import { ContactSectionNode } from "~/components/lexical/contact-node";
+import { CtaSectionNode } from "~/components/lexical/cta-node";
 
-const BLOCK_DECORATOR_TYPES = new Set<string>([HeroNode.getType()]);
+const BLOCK_DECORATOR_TYPES = new Set<string>([
+  HeroNode.getType(),
+  ServicesSectionNode.getType(),
+  WorkSectionNode.getType(),
+  ReviewsSectionNode.getType(),
+  WhySectionNode.getType(),
+  ContactSectionNode.getType(),
+  CtaSectionNode.getType(),
+]);
 
 export function registerBlockDecoratorType(type: string) {
   BLOCK_DECORATOR_TYPES.add(type);
