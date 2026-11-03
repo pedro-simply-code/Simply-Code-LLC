@@ -1,5 +1,5 @@
 import { Field, StudioInput } from "~/components/studio/ui";
-import { contentSlugPrefix, type ContentKindName } from "~/lib/content";
+import { contentSlugPrefix, HOMEPAGE_CMS_SLUG, type ContentKindName } from "~/lib/content";
 
 export function ContentFormHeader({
   title = "",
@@ -10,7 +10,9 @@ export function ContentFormHeader({
   slug?: string;
   kind?: ContentKindName;
 }) {
-  const prefix = contentSlugPrefix(kind);
+  const prefix = contentSlugPrefix(kind, slug);
+  const isHomepageSlug =
+    kind === "page" && (slug === HOMEPAGE_CMS_SLUG || slug === "home");
 
   return (
     <>
@@ -27,17 +29,27 @@ export function ContentFormHeader({
       <div className="mt-5 pt-1">
         <Field
           label="Slug"
-          hint="Leave empty to generate from the title."
+          hint={
+            kind === "page"
+              ? `Use slug "${HOMEPAGE_CMS_SLUG}" to publish at / (homepage). Leave empty to generate from the title.`
+              : "Leave empty to generate from the title."
+          }
         >
           <div className="flex w-full min-w-0 items-center gap-2 text-sm text-[#6f6a60]">
             <span className="shrink-0 font-mono text-xs">{prefix}</span>
             <StudioInput
               name="slug"
               defaultValue={slug}
-              placeholder="about-us"
+              placeholder={kind === "page" ? HOMEPAGE_CMS_SLUG : "about-us"}
               className="min-w-0 flex-1 font-mono text-sm"
             />
           </div>
+          {isHomepageSlug ? (
+            <p className="mt-2 text-xs leading-relaxed text-[#57524a]">
+              This page replaces the static homepage at{" "}
+              <span className="font-mono">/</span> when published.
+            </p>
+          ) : null}
         </Field>
       </div>
     </>

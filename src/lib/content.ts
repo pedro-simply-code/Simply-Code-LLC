@@ -550,13 +550,26 @@ export function contentStartsWithHero(document: ContentDocument): boolean {
 /* Slugs & routes                                                              */
 /* -------------------------------------------------------------------------- */
 
+/** Published CMS page with this slug is served at `/` instead of `/page/home`. */
+export const HOMEPAGE_CMS_SLUG = "home";
+
+export function isHomepageCmsSlug(slug: string): boolean {
+  return slug === HOMEPAGE_CMS_SLUG;
+}
+
 export function contentHref(kind: ContentKindName, slug: string): string {
+  if (kind === "page" && isHomepageCmsSlug(slug)) return "/";
   return kind === "post" ? `/blog/${slug}` : `/page/${slug}`;
 }
 
 /** Public URL prefix shown beside the slug field in the studio. */
-export function contentSlugPrefix(kind: ContentKindName): string {
-  return kind === "post" ? "/blog/" : "/page/";
+export function contentSlugPrefix(
+  kind: ContentKindName,
+  slug?: string,
+): string {
+  if (kind === "post") return "/blog/";
+  if (slug && isHomepageCmsSlug(slug)) return "/";
+  return "/page/";
 }
 
 /** Posts are collected under `/blog`; pages live under `/page`. */

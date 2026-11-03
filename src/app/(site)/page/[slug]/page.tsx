@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { ContentRenderer } from "~/components/content/content-renderer";
-import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { notFound, permanentRedirect } from "next/navigation";
+import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import {
   contentPlainText,
+  isHomepageCmsSlug,
   type ContentDocument,
 } from "~/lib/content";
 import { getPublishedEntrySafe } from "~/server/content/queries";
@@ -19,6 +18,15 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+
+  if (isHomepageCmsSlug(slug)) {
+    return {
+      title: "Home",
+      alternates: { canonical: "/" },
+      robots: { index: false, follow: true },
+    };
+  }
+
   const entry = await getPublishedEntrySafe("page", slug);
 
   if (!entry) {
@@ -46,24 +54,14 @@ export async function generateMetadata({
 
 export default async function CmsPage({ params }: PageProps) {
   const { slug } = await params;
+
+  if (isHomepageCmsSlug(slug)) {
+    permanentRedirect("/");
+  }
+
   const entry = await getPublishedEntrySafe("page", slug);
 
   if (!entry) notFound();
 
-  const body = entry.body as ContentDocument;
-
-  return (
-    <div
-      id="main"
-      className="bg-sc-canvas text-sc-ink min-h-screen antialiased"
-    >
-      <SiteNav />
-
-      <article className="mx-auto w-full">
-        <ContentRenderer document={body} />
-      </article>
-
-      <SiteFooter />
-    </div>
-  );
+  return <CmsDocumentPage entry={entry} />;
 }

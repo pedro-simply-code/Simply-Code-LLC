@@ -1,4 +1,7 @@
 import { notFound, permanentRedirect } from "next/navigation";
+import {
+  isHomepageCmsSlug,
+} from "~/lib/content";
 import { getPublishedEntrySafe } from "~/server/content/queries";
 
 export const revalidate = 60;
@@ -16,6 +19,10 @@ export default async function LegacyCmsPage({ params }: LegacyPageProps) {
   const entry = await getPublishedEntrySafe("page", slug);
 
   if (!entry) notFound();
+
+  if (isHomepageCmsSlug(entry.slug)) {
+    permanentRedirect("/");
+  }
 
   permanentRedirect(`/page/${entry.slug}`);
 }

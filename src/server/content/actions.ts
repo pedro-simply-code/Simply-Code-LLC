@@ -26,6 +26,7 @@ function field(formData: FormData, name: string): string {
 function revalidateContent(slug?: string, kind?: "page" | "post") {
   revalidatePath("/studio/content");
   revalidatePath("/blog");
+  revalidatePath("/");
   revalidatePath("/sitemap.xml");
   if (slug && kind) {
     revalidatePath(contentHref(kind, slug));

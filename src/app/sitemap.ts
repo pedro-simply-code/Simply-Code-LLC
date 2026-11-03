@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { PROJECTS } from "~/content/projects";
-import { contentHref } from "~/lib/content";
+import { contentHref, isHomepageCmsSlug } from "~/lib/content";
 import { env } from "~/env";
 import { listPublishedContentSafe } from "~/server/content/queries";
 import { getPublicProjectsSafe } from "~/server/studio/queries";
@@ -75,7 +75,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const content = await listPublishedContentSafe();
-  const contentRoutes: MetadataRoute.Sitemap = content.map((entry) => ({
+  const contentRoutes: MetadataRoute.Sitemap = content
+    .filter(
+      (entry) => !(entry.kind === "page" && isHomepageCmsSlug(entry.slug)),
+    )
+    .map((entry) => ({
     url: `${base}${contentHref(entry.kind, entry.slug)}`,
     lastModified: entry.updatedAt,
     changeFrequency: entry.kind === "post" ? "monthly" : "yearly",
