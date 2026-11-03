@@ -96,6 +96,10 @@ export class HeroNode extends DecoratorNode<ReactElement> {
     return false;
   }
 
+  isInline(): boolean {
+    return false;
+  }
+
   isKeyboardSelectable(): boolean {
     return false;
   }
@@ -549,7 +553,7 @@ function HeroBlockEditor({
     <div
       contentEditable={false}
       data-editor-block="hero"
-      className="group/hero text-sc-ink relative mb-8"
+      className="group/hero text-sc-ink relative"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-end p-3 opacity-0 transition-opacity group-hover/hero:opacity-100 focus-within:opacity-100">
         <div className="pointer-events-auto flex items-center gap-1 rounded-md bg-[#15130f]/90 px-1.5 py-1 text-white shadow-lg backdrop-blur">

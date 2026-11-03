@@ -557,17 +557,38 @@ html[data-site-surface="flat"] {
     padding-inline: 1.25rem;
   }
 
-  /* Hero: flush under toolbar; +40px width, -20px left to center bleed */
+  /* Empty editor caret — not when a decorator is nested in the sole paragraph. */
+  .content-editor-body
+    [contenteditable="true"]
+    > p:first-child:last-child:not(:has(.content-hero-node)):not(
+      :has(.content-services-node)
+    ) {
+    padding-top: 1rem;
+  }
+
+  /* Stray empty paragraph before full-bleed blocks. */
+  .content-editor-body
+    [contenteditable="true"]
+    > p:first-child:has(+ .content-hero-node),
+  .content-editor-body
+    [contenteditable="true"]
+    > p:first-child:has(+ .content-services-node) {
+    display: none;
+  }
+
+  .content-editor-body [contenteditable="true"] > .content-hero-node:first-child,
+  .content-editor-body
+    [contenteditable="true"]
+    > .content-services-node:first-child {
+    margin-top: 0;
+  }
+
   .content-editor-body .content-hero-node {
     margin-top: 0;
-    width: calc(100% + 40px);
-    max-width: none;
-    margin-left: -20px;
   }
 
   .content-editor-body .content-hero-node .group\/hero {
     margin-top: 0;
-    width: 100%;
   }
 
   .content-editor-body .content-hero-node section {

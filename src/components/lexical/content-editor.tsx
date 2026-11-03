@@ -32,14 +32,12 @@ import {
   $getRoot,
   $getSelection,
   $isElementNode,
-  $isParagraphNode,
   $isRangeSelection,
   FORMAT_TEXT_COMMAND,
   REDO_COMMAND,
   UNDO_COMMAND,
   type EditorState,
   type InitialEditorStateType,
-  type LexicalNode,
   type TextFormatType,
 } from "lexical";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -57,6 +55,8 @@ import {
   Undo2,
 } from "lucide-react";
 import { $createHeroNode, HeroNode } from "~/components/lexical/hero-node";
+import { $insertDecoratorBlock } from "~/components/lexical/insert-decorator-block";
+import { BlockDecoratorRootPlugin } from "~/components/lexical/block-decorator-root-plugin";
 import { LinkUrlPopover } from "~/components/lexical/link-url-popover";
 import { QuoteLayoutPlugin } from "~/components/lexical/quote-layout-plugin";
 import {
@@ -106,65 +106,8 @@ const EDITOR_THEME = {
 type BlockType = "paragraph" | "h2" | "h3" | "quote";
 type InsertBlockType = BlockType | "hero";
 
-function $getRootChildBlock(node: LexicalNode): LexicalNode | null {
-  let current: LexicalNode | null = node;
-  while (current !== null) {
-    const parent = current.getParent();
-    if (parent !== null && parent.getType() === "root") return current;
-    current = parent;
-  }
-  return null;
-}
-
-function $isEmptyParagraph(node: LexicalNode | null): boolean {
-  return (
-    node !== null &&
-    $isParagraphNode(node) &&
-    node.getTextContent().trim() === ""
-  );
-}
-
-function $removeEmptyParagraph(node: LexicalNode | null) {
-  if (node !== null && $isEmptyParagraph(node)) node.remove();
-}
-
-/** Lexical often nests decorators inside a paragraph — force a root-level sibling. */
-function $promoteHeroOutOfParagraph(hero: HeroNode) {
-  const parent = hero.getParent();
-  if (!$isParagraphNode(parent)) return;
-  parent.insertAfter(hero);
-  $removeEmptyParagraph(parent);
-}
-
 function $insertHeroBlock() {
-  const hero = $createHeroNode(DEFAULT_HERO);
-  const selection = $getSelection();
-  const root = $getRoot();
-
-  if ($isRangeSelection(selection)) {
-    const rootBlock = $getRootChildBlock(selection.anchor.getNode());
-
-    if (rootBlock !== null && $isParagraphNode(rootBlock)) {
-      if ($isEmptyParagraph(rootBlock)) {
-        const next = rootBlock.getNextSibling();
-        rootBlock.remove();
-        if (next) next.insertBefore(hero);
-        else root.append(hero);
-      } else {
-        rootBlock.insertAfter(hero);
-      }
-    } else if (rootBlock !== null && $isElementNode(rootBlock)) {
-      rootBlock.insertAfter(hero);
-    } else {
-      root.append(hero);
-    }
-  } else {
-    root.append(hero);
-  }
-
-  $promoteHeroOutOfParagraph(hero);
-  $removeEmptyParagraph(hero.getPreviousSibling());
-  $removeEmptyParagraph(hero.getNextSibling());
+  $insertDecoratorBlock(() => $createHeroNode(DEFAULT_HERO));
 }
 
 function ToolbarButton({
@@ -447,7 +390,7 @@ function Toolbar() {
 
 function Placeholder() {
   return (
-    <p className="pointer-events-none absolute top-4 left-5 text-[15px] text-[#a8a29a]">
+    <p className="pointer-events-none absolute top-4 left-[1.25rem] text-[15px] leading-[1.8] text-[#a8a29a]">
       Start writing your content…
     </p>
   );
@@ -510,6 +453,7 @@ export function ContentEditor({
           <ListPlugin />
             <LinkPlugin />
             <QuoteLayoutPlugin />
+            <BlockDecoratorRootPlugin />
             <OnChangePlugin onChange={handleChange} />
         </div>
       </LexicalComposer>
