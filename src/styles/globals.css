@@ -557,6 +557,16 @@ html[data-site-surface="flat"] {
     padding-inline: 1.25rem;
   }
 
+  /* Quote: outer div (`quote-wrap` node) + blockquote styles in Lexical theme. */
+  .content-editor-body [contenteditable="true"] > [data-editor-block="quote-wrap"] {
+    box-sizing: border-box;
+  }
+
+  .content-editor-body [contenteditable="true"] > blockquote {
+    padding: 0;
+    margin: 0;
+  }
+
   /* Empty editor caret — not when a decorator is nested in the sole paragraph. */
   .content-editor-body
     [contenteditable="true"]

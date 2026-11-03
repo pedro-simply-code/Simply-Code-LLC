@@ -58,7 +58,8 @@ import { $createHeroNode, HeroNode } from "~/components/lexical/hero-node";
 import { $insertDecoratorBlock } from "~/components/lexical/insert-decorator-block";
 import { BlockDecoratorRootPlugin } from "~/components/lexical/block-decorator-root-plugin";
 import { LinkUrlPopover } from "~/components/lexical/link-url-popover";
-import { QuoteLayoutPlugin } from "~/components/lexical/quote-layout-plugin";
+import { QuoteWrapPlugin } from "~/components/lexical/quote-wrap-plugin";
+import { QuoteWrapNode } from "~/components/lexical/quote-wrap-node";
 import {
   QuoteInnerNode,
 } from "~/components/lexical/quote-inner-node";
@@ -74,7 +75,7 @@ import {
   parseContentDocument,
   type ContentDocument,
 } from "~/lib/content";
-import { appQuoteOuter } from "~/lib/surface";
+import { appQuoteInner, appQuoteOuter } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 /** Typography only — horizontal inset for prose blocks lives in `globals.css` (`.content-editor-body`). */
@@ -86,7 +87,7 @@ const EDITOR_THEME = {
     h2: "mt-10 mb-4 text-[clamp(1.6rem,3vw,2.3rem)] leading-[1.08] font-black uppercase tracking-[-0.03em]",
     h3: "mt-8 mb-3 text-[1.35rem] leading-tight font-black tracking-[-0.02em]",
   },
-  quote: cn(appQuoteOuter, "not-italic font-normal"),
+  quote: cn(appQuoteOuter, appQuoteInner, "not-italic font-normal"),
   list: {
     ul: "mb-4 list-disc pl-6",
     ol: "mb-4 list-decimal pl-6",
@@ -414,6 +415,7 @@ export function ContentEditor({
       nodes: [
         HeadingNode,
         QuoteNode,
+        QuoteWrapNode,
         ListNode,
         ListItemNode,
         LinkNode,
@@ -452,7 +454,7 @@ export function ContentEditor({
           <HistoryPlugin />
           <ListPlugin />
             <LinkPlugin />
-            <QuoteLayoutPlugin />
+            <QuoteWrapPlugin />
             <BlockDecoratorRootPlugin />
             <OnChangePlugin onChange={handleChange} />
         </div>

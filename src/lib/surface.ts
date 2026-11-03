@@ -12,12 +12,15 @@ export const appHeroBand = "bg-sc-section-alt text-sc-ink";
 /** Inner hero layout — matches homepage `max-w-[1400px]`. */
 export const appHeroContainer = "mx-auto max-w-[1400px]";
 
-/** Quote outer band (padding only — border lives on inner span). */
-export const appQuoteOuter = "my-6 border-0 px-5";
+/** Quote blockquote element (inside `appQuotePageWrap` div). */
+export const appQuoteOuter = "w-full border-0";
 
-/** Quote inner bar — max width + left accent rule. */
+/** Page / editor shell around the blockquote. */
+export const appQuotePageWrap = "mx-auto w-full max-w-[1400px] px-5 py-5";
+
+/** Left accent bar + quote typography. */
 export const appQuoteInner =
-  "mx-auto block max-w-[1400px] border-l-2 border-sc-accent-bright pl-4 text-[17px] leading-relaxed text-[#57524a] italic";
+  "w-full border-l-2 border-sc-accent-bright pl-4 text-[17px] leading-relaxed text-[#57524a] italic";
 
 export const appPanelHover = "site-elevated-hover";
 

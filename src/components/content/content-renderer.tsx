@@ -9,7 +9,8 @@ import {
 } from "~/lib/content";
 import { isExternalHref } from "~/lib/link-options";
 import { QUOTE_INNER_TYPE } from "~/components/lexical/quote-inner-node";
-import { appQuoteInner, appQuoteOuter } from "~/lib/surface";
+import { QUOTE_WRAP_NODE_TYPE } from "~/components/lexical/quote-wrap-node";
+import { appQuoteInner, appQuoteOuter, appQuotePageWrap } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 const FORMAT_BOLD = 1;
@@ -156,6 +157,38 @@ function LinkBlock({ node, keyName }: { node: ContentNode; keyName: string }) {
   );
 }
 
+function renderQuoteBlockquote(node: ContentNode, keyName: string): ReactNode {
+  const inner = node.children?.find(
+    (child) => child.type === QUOTE_INNER_TYPE,
+  );
+  const content = inner?.children ?? node.children ?? [];
+  return (
+    <blockquote
+      key={keyName}
+      className={cn(appQuoteOuter, appQuoteInner)}
+    >
+      {renderChildren(content, keyName)}
+    </blockquote>
+  );
+}
+
+function renderQuoteRootBlock(node: ContentNode, keyName: string): ReactNode {
+  const quote =
+    node.type === QUOTE_WRAP_NODE_TYPE
+      ? node.children?.find((child) => child.type === "quote")
+      : node.type === "quote"
+        ? node
+        : undefined;
+
+  if (!quote) return null;
+
+  return (
+    <div key={`${keyName}-wrap`} className={appQuotePageWrap}>
+      {renderQuoteBlockquote(quote, keyName)}
+    </div>
+  );
+}
+
 const CONTENT_BLOCK_WRAP = "mx-auto w-full max-w-[1400px] px-6";
 
 function hasVisibleInlineContent(children: ContentNode[]): boolean {
@@ -183,6 +216,13 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
     if (child.type === HERO_NODE_TYPE) {
       nodes.push(renderNode(child, keyName));
       needsSpacingAfterHero = true;
+      return;
+    }
+
+    if (child.type === "quote" || child.type === QUOTE_WRAP_NODE_TYPE) {
+      const rendered = renderQuoteRootBlock(child, keyName);
+      if (rendered) nodes.push(rendered);
+      needsSpacingAfterHero = false;
       return;
     }
 
@@ -280,26 +320,12 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
     }
     case "heading":
       return <HeadingBlock key={keyName} node={node} keyName={keyName} />;
-    case "quote": {
-      const inner = node.children?.find((child) => child.type === QUOTE_INNER_TYPE);
-      return (
-        <blockquote key={keyName} className={cn("my-7", appQuoteOuter)}>
-          {inner ? (
-            renderNode(inner, `${keyName}-inner`)
-          ) : (
-            <span className={appQuoteInner}>
-              {renderChildren(node.children, keyName)}
-            </span>
-          )}
-        </blockquote>
-      );
-    }
+    case "quote":
+      return renderQuoteBlockquote(node, keyName);
+    case QUOTE_WRAP_NODE_TYPE:
+      return renderQuoteRootBlock(node, keyName);
     case QUOTE_INNER_TYPE:
-      return (
-        <span key={keyName} className={appQuoteInner}>
-          {renderChildren(node.children, keyName)}
-        </span>
-      );
+      return <>{renderChildren(node.children, keyName)}</>;
     case "list":
       return <ListBlock key={keyName} node={node} keyName={keyName} />;
     case "listitem":
