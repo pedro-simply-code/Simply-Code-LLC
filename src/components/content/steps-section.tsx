@@ -1,5 +1,10 @@
 import type { StepsSectionData } from "~/lib/site-page-sections";
-import { appSectionBand, appSectionContainer } from "~/lib/surface";
+import {
+  appSectionBand,
+  appSectionContainer,
+  siteReveal,
+  siteStagger,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 function renderMultiline(text: string) {
@@ -21,7 +26,7 @@ export function StepsSection({ data }: { data: StepsSectionData }) {
       )}
     >
       <div className={appSectionContainer}>
-        <div className="mb-14 max-w-2xl">
+        <div className={cn(siteReveal, "mb-14 max-w-2xl")}>
           <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
             {data.eyebrow}
           </p>
@@ -30,9 +35,17 @@ export function StepsSection({ data }: { data: StepsSectionData }) {
           </h2>
         </div>
 
-        <ol className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <ol
+          className={cn(
+            siteStagger,
+            "grid gap-6 md:grid-cols-2 lg:grid-cols-4",
+          )}
+        >
           {data.steps.map((step, index) => (
-            <li key={step.title} className="border-t-2 border-[#15130f] pt-5">
+            <li
+              key={step.title}
+              className={cn(siteReveal, "border-t-2 border-[#15130f] pt-5")}
+            >
               <span className="text-sc-accent text-[11px] font-bold tracking-[0.2em]">
                 0{index + 1}
               </span>

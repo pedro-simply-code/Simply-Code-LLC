@@ -619,6 +619,18 @@ html[data-site-surface="flat"] {
     animation: none !important;
   }
 
+  /*
+   * Add-block previews are portaled into <body>, outside `.content-editor-body`,
+   * so the override above does not reach them. Keep scroll-reveal content visible
+   * even when `site-motion-js` is still set on <html> after leaving the public site.
+   */
+  .content-block-preview .site-reveal,
+  .content-block-preview .site-hero-in {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
   /* Lexical draggable block handle + drop indicator (playground-style). */
   .content-editor-body .draggable-block-menu {
     will-change: transform;

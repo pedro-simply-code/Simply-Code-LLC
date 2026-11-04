@@ -61,6 +61,8 @@ import { PageIntroSectionNode } from "~/components/lexical/page-intro-node";
 import { FeatureGridSectionNode } from "~/components/lexical/feature-grid-node";
 import { StepsSectionNode } from "~/components/lexical/steps-node";
 import { TeamSectionNode } from "~/components/lexical/team-node";
+import { ServiceOfferingsSectionNode } from "~/components/lexical/service-offerings-node";
+import { EngagementModelsSectionNode } from "~/components/lexical/engagement-models-node";
 import { ContentBlockInserter } from "~/components/lexical/content-block-inserter";
 import { ContentDraggableBlockPlugin } from "~/components/lexical/content-draggable-block-plugin";
 import { ContentEditorProjectsProvider } from "~/components/lexical/content-editor-projects-context";
@@ -68,9 +70,7 @@ import { BlockDecoratorRootPlugin } from "~/components/lexical/block-decorator-r
 import { LinkUrlPopover } from "~/components/lexical/link-url-popover";
 import { QuoteWrapPlugin } from "~/components/lexical/quote-wrap-plugin";
 import { QuoteWrapNode } from "~/components/lexical/quote-wrap-node";
-import {
-  QuoteInnerNode,
-} from "~/components/lexical/quote-inner-node";
+import { QuoteInnerNode } from "~/components/lexical/quote-inner-node";
 import {
   buildLinkRel,
   EMPTY_LINK_FIELD,
@@ -137,7 +137,7 @@ function ToolbarButton({
         "inline-flex size-8 items-center justify-center rounded transition-colors",
         active
           ? "bg-sc-accent text-white"
-          : "text-[#57524a] hover:bg-sc-accent/10 hover:text-sc-accent",
+          : "hover:bg-sc-accent/10 hover:text-sc-accent text-[#57524a]",
       )}
     >
       {children}
@@ -250,7 +250,7 @@ function Toolbar() {
   };
 
   return (
-    <div className="sticky top-[8.75rem] z-[9] flex flex-wrap items-center gap-1.5 border-b border-sc-accent/25 bg-sc-section-alt/95 px-5 py-2 backdrop-blur-sm">
+    <div className="border-sc-accent/25 bg-sc-section-alt/95 sticky top-[8.75rem] z-[9] flex flex-wrap items-center gap-1.5 border-b px-5 py-2 backdrop-blur-sm">
       <select
         aria-label="Block type"
         value={block}
@@ -399,6 +399,8 @@ export function ContentEditor({
         FeatureGridSectionNode,
         StepsSectionNode,
         TeamSectionNode,
+        ServiceOfferingsSectionNode,
+        EngagementModelsSectionNode,
         QuoteInnerNode,
       ],
       theme: EDITOR_THEME,

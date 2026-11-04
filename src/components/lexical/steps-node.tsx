@@ -10,9 +10,9 @@ import {
 } from "lexical";
 import { Settings2 } from "lucide-react";
 import { type ReactElement } from "react";
-import { StepsSection } from "~/components/content/steps-section";
 import {
   BlockDecoratorToolbar,
+  InlineText,
   SectionOptionSelect,
   SectionOptionsDialog,
   useSectionNodeUpdate,
@@ -22,7 +22,15 @@ import {
   normalizeStepsSectionData,
   STEPS_SECTION_NODE_TYPE,
   type StepsSectionData,
+  type StepsSectionStep,
 } from "~/lib/site-page-sections";
+import {
+  appSectionBand,
+  appSectionContainer,
+  siteReveal,
+  siteStagger,
+} from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 export type SerializedStepsSectionNode = Spread<
   { data: StepsSectionData },
@@ -40,8 +48,12 @@ export class StepsSectionNode extends DecoratorNode<ReactElement> {
     return new StepsSectionNode(node.__data, node.__key);
   }
 
-  static importJSON(serializedNode: SerializedStepsSectionNode): StepsSectionNode {
-    return $createStepsSectionNode(normalizeStepsSectionData(serializedNode.data));
+  static importJSON(
+    serializedNode: SerializedStepsSectionNode,
+  ): StepsSectionNode {
+    return $createStepsSectionNode(
+      normalizeStepsSectionData(serializedNode.data),
+    );
   }
 
   constructor(data?: StepsSectionData, key?: NodeKey) {
@@ -118,6 +130,14 @@ function StepsSectionEditor({
     update({ steps: steps.slice(0, next) });
   };
 
+  const updateStep = (index: number, patch: Partial<StepsSectionStep>) => {
+    update({
+      steps: data.steps.map((step, stepIndex) =>
+        stepIndex === index ? { ...step, ...patch } : step,
+      ),
+    });
+  };
+
   return (
     <div
       contentEditable={false}
@@ -152,7 +172,66 @@ function StepsSectionEditor({
           />
         </SectionOptionsDialog>
       </BlockDecoratorToolbar>
-      <StepsSection data={data} />
+      <section
+        className={cn(
+          appSectionBand,
+          "border-b border-[#15130f]/10 py-16 lg:py-24",
+          data.surface === "alt" ? "bg-sc-section-alt" : "bg-sc-section",
+        )}
+      >
+        <div className={appSectionContainer}>
+          <div className="mb-14 max-w-2xl">
+            <InlineText
+              as="p"
+              value={data.eyebrow}
+              onChange={(eyebrow) => update({ eyebrow })}
+              placeholder="Process"
+              className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase"
+            />
+            <InlineText
+              as="h2"
+              multiline
+              value={data.headline}
+              onChange={(headline) => update({ headline })}
+              placeholder={"From First Call\nTo Production"}
+              className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] whitespace-pre-line uppercase"
+            />
+          </div>
+
+          <ol
+            className={cn(
+              siteStagger,
+              "grid gap-6 md:grid-cols-2 lg:grid-cols-4",
+            )}
+          >
+            {data.steps.map((step, index) => (
+              <li
+                key={index}
+                className={cn(siteReveal, "border-t-2 border-[#15130f] pt-5")}
+              >
+                <span className="text-sc-accent text-[11px] font-bold tracking-[0.2em]">
+                  0{index + 1}
+                </span>
+                <InlineText
+                  as="h3"
+                  value={step.title}
+                  onChange={(title) => updateStep(index, { title })}
+                  placeholder="Step title"
+                  className="mt-2 text-base font-black tracking-tight uppercase"
+                />
+                <InlineText
+                  as="p"
+                  multiline
+                  value={step.body}
+                  onChange={(body) => updateStep(index, { body })}
+                  placeholder="Describe this step…"
+                  className="mt-2 text-[14px] leading-relaxed whitespace-pre-wrap text-[#57524a]"
+                />
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
     </div>
   );
 }

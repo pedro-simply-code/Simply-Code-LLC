@@ -5,6 +5,7 @@ import {
   appPanelMuted,
   appSectionBand,
   appSectionContainer,
+  siteReveal,
 } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -36,7 +37,7 @@ export function TeamSection({
       )}
     >
       <div className={appSectionContainer}>
-        <div className="mb-14 max-w-2xl">
+        <div className={cn(siteReveal, "mb-14 max-w-2xl")}>
           <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
             {data.eyebrow}
           </p>

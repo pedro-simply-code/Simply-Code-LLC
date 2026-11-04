@@ -3,7 +3,13 @@ import Link from "next/link";
 import { Github, Globe, Linkedin, Users } from "lucide-react";
 import type { TeamMember } from "~/content/team";
 import { userProfileImageUnoptimized } from "~/lib/project-image";
-import { appChip, appPanel } from "~/lib/surface";
+import {
+  appChip,
+  appPanel,
+  siteMotionLift,
+  siteReveal,
+  siteStagger,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 type TeamGridProps = {
@@ -12,12 +18,14 @@ type TeamGridProps = {
 
 export function TeamGrid({ members }: TeamGridProps) {
   return (
-    <div className="flex flex-wrap justify-center gap-8">
+    <div className={cn(siteStagger, "flex flex-wrap justify-center gap-8")}>
       {members.map((member, index) => (
         <div
           key={member.id ?? `${member.name}-${index}`}
           className={cn(
             appPanel,
+            siteReveal,
+            siteMotionLift,
             "w-full p-8 text-center sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.334rem)]",
           )}
         >

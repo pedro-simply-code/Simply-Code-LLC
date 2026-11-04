@@ -9,6 +9,8 @@ import { PageHeaderSection } from "~/components/content/page-header-section";
 import { PageIntroSection } from "~/components/content/page-intro-section";
 import { ReviewsSection } from "~/components/content/reviews-section";
 import { ServicesSection } from "~/components/content/services-section";
+import { ServiceOfferingsSection } from "~/components/content/service-offerings-section";
+import { EngagementModelsSection } from "~/components/content/engagement-models-section";
 import { StepsSection } from "~/components/content/steps-section";
 import { TeamSection } from "~/components/content/team-section";
 import { WhySection } from "~/components/content/why-section";
@@ -20,12 +22,14 @@ import type { InsertContentBlockId } from "~/components/lexical/insert-content-b
 import {
   DEFAULT_CONTACT_SECTION,
   DEFAULT_CTA_SECTION,
+  DEFAULT_ENGAGEMENT_MODELS_SECTION,
   DEFAULT_FEATURE_GRID_SECTION,
   DEFAULT_HERO,
   DEFAULT_PAGE_HEADER_SECTION,
   DEFAULT_PAGE_INTRO_SECTION,
   DEFAULT_PROJECTS_SECTION,
   DEFAULT_REVIEWS_SECTION,
+  DEFAULT_SERVICE_OFFERINGS_SECTION,
   DEFAULT_SERVICES_SECTION,
   DEFAULT_STEPS_SECTION,
   DEFAULT_TEAM_SECTION,
@@ -63,7 +67,7 @@ function ScaledPreviewFrame({ children }: { children: ReactNode }) {
   return (
     <div
       ref={hostRef}
-      className="text-sc-ink relative mt-2 w-full overflow-hidden rounded-md border border-[#15130f]/10 bg-white shadow-[inset_0_0_0_1px_rgba(21,19,15,0.04)]"
+      className="content-block-preview text-sc-ink relative mt-2 w-full overflow-hidden rounded-md border border-[#15130f]/10 bg-white shadow-[inset_0_0_0_1px_rgba(21,19,15,0.04)]"
       style={{ height: PREVIEW_VIEWPORT_HEIGHT }}
     >
       <div
@@ -150,6 +154,14 @@ function SectionPreview({
       return <HeroSection data={DEFAULT_HERO} />;
     case "services":
       return <ServicesSection data={DEFAULT_SERVICES_SECTION} />;
+    case "service-offerings":
+      return (
+        <ServiceOfferingsSection data={DEFAULT_SERVICE_OFFERINGS_SECTION} />
+      );
+    case "engagement-models":
+      return (
+        <EngagementModelsSection data={DEFAULT_ENGAGEMENT_MODELS_SECTION} />
+      );
     case "work":
       return (
         <WorkSection

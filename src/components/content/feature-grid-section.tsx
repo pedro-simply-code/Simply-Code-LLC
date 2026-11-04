@@ -8,6 +8,9 @@ import {
   appPanelMuted,
   appSectionBand,
   appSectionContainer,
+  siteMotionLift,
+  siteReveal,
+  siteStagger,
 } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -17,6 +20,12 @@ const ICONS: Record<FeatureGridIcon, ComponentType<{ className?: string }>> = {
   message: MessageSquare,
   palette: Palette,
 };
+
+export function featureGridIcon(
+  icon: FeatureGridIcon,
+): ComponentType<{ className?: string }> {
+  return ICONS[icon] ?? Ruler;
+}
 
 function renderMultiline(text: string) {
   return text.split("\n").map((line, index) => (
@@ -37,11 +46,14 @@ export function FeatureGridSection({
   gridOnly?: boolean;
 }) {
   const grid = (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className={cn(siteStagger, "grid gap-6 lg:grid-cols-3")}>
       {data.features.map((feature) => {
-        const Icon = ICONS[feature.icon] ?? Ruler;
+        const Icon = featureGridIcon(feature.icon);
         return (
-          <div key={feature.title} className={cn(appPanelMuted, "p-8")}>
+          <div
+            key={feature.title}
+            className={cn(appPanelMuted, siteReveal, siteMotionLift, "p-8")}
+          >
             <span className="flex size-12 items-center justify-center bg-[#15130f] text-white">
               <Icon className="size-5" />
             </span>
@@ -69,7 +81,7 @@ export function FeatureGridSection({
     >
       <div className={appSectionContainer}>
         {hideHeader ? null : (
-          <div className="mb-14 max-w-2xl">
+          <div className={cn(siteReveal, "mb-14 max-w-2xl")}>
             <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
               {data.eyebrow}
             </p>

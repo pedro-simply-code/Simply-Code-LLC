@@ -1,14 +1,8 @@
 /**
  * Insert Lexical decorator blocks and prose blocks from the block inserter.
  */
-import {
-  $createHeadingNode,
-  $createQuoteNode,
-} from "@lexical/rich-text";
-import {
-  $createParagraphNode,
-  type LexicalEditor,
-} from "lexical";
+import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
+import { $createParagraphNode, $getRoot, type LexicalEditor } from "lexical";
 import { $createHeroNode } from "~/components/lexical/hero-node";
 import { $createServicesSectionNode } from "~/components/lexical/services-node";
 import { $createWorkSectionNode } from "~/components/lexical/work-node";
@@ -21,10 +15,20 @@ import { $createPageIntroSectionNode } from "~/components/lexical/page-intro-nod
 import { $createFeatureGridSectionNode } from "~/components/lexical/feature-grid-node";
 import { $createStepsSectionNode } from "~/components/lexical/steps-node";
 import { $createTeamSectionNode } from "~/components/lexical/team-node";
-import { $insertDecoratorBlock, $insertProseBlock } from "~/components/lexical/insert-decorator-block";
 import {
+  $createServiceOfferingsSectionNode,
+  $isServiceOfferingsSectionNode,
+} from "~/components/lexical/service-offerings-node";
+import { $createEngagementModelsSectionNode } from "~/components/lexical/engagement-models-node";
+import {
+  $insertDecoratorBlock,
+  $insertProseBlock,
+} from "~/components/lexical/insert-decorator-block";
+import {
+  createServiceOfferingsSectionData,
   DEFAULT_CONTACT_SECTION,
   DEFAULT_CTA_SECTION,
+  DEFAULT_ENGAGEMENT_MODELS_SECTION,
   DEFAULT_FEATURE_GRID_SECTION,
   DEFAULT_HERO,
   DEFAULT_PAGE_HEADER_SECTION,
@@ -56,7 +60,9 @@ export type InsertContentBlockId =
   | "page-intro"
   | "feature-grid"
   | "steps"
-  | "team";
+  | "team"
+  | "service-offerings"
+  | "engagement-models";
 
 export function insertContentBlock(
   editor: LexicalEditor,
@@ -131,7 +137,49 @@ export function insertContentBlock(
         return;
       }
       if (value === "team") {
-        $insertDecoratorBlock(() => $createTeamSectionNode(DEFAULT_TEAM_SECTION));
+        $insertDecoratorBlock(() =>
+          $createTeamSectionNode(DEFAULT_TEAM_SECTION),
+        );
+        return;
+      }
+      if (value === "service-offerings") {
+        const existing = $getRoot()
+          .getChildren()
+          .filter($isServiceOfferingsSectionNode);
+        const usedNumbers = new Set(
+          existing.map((node) => node.getData().service.number.trim()),
+        );
+        const usedSlugs = new Set(
+          existing.map((node) => node.getData().service.slug.trim()),
+        );
+
+        let index = 1;
+        let number = String(index).padStart(2, "0");
+        while (usedNumbers.has(number)) {
+          index += 1;
+          number = String(index).padStart(2, "0");
+        }
+
+        let slug = `service-${number}`;
+        let suffix = 2;
+        while (usedSlugs.has(slug)) {
+          slug = `service-${number}-${suffix}`;
+          suffix += 1;
+        }
+
+        $insertDecoratorBlock(() =>
+          $createServiceOfferingsSectionNode(
+            createServiceOfferingsSectionData({
+              service: { number, slug },
+            }),
+          ),
+        );
+        return;
+      }
+      if (value === "engagement-models") {
+        $insertDecoratorBlock(() =>
+          $createEngagementModelsSectionNode(DEFAULT_ENGAGEMENT_MODELS_SECTION),
+        );
         return;
       }
 

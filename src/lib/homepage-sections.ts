@@ -187,14 +187,14 @@ export function normalizeWorkSectionData(value: unknown): WorkSectionData {
     ctaNewTab: bool(source.ctaNewTab, isExternalHref(href)),
     showCta: bool(source.showCta, DEFAULT_WORK_SECTION.showCta),
     projectCount:
-      count >= 1 && count <= 6 ? Math.floor(count) : DEFAULT_WORK_SECTION.projectCount,
+      count >= 1 && count <= 6
+        ? Math.floor(count)
+        : DEFAULT_WORK_SECTION.projectCount,
     emptyMessage: str(source.emptyMessage, DEFAULT_WORK_SECTION.emptyMessage),
     variant,
     showTagFilter: bool(
       source.showTagFilter,
-      variant === "portfolio"
-        ? DEFAULT_PROJECTS_SECTION.showTagFilter
-        : false,
+      variant === "portfolio" ? DEFAULT_PROJECTS_SECTION.showTagFilter : false,
     ),
   };
 }
@@ -231,7 +231,10 @@ export function normalizeReviewsSectionData(
     eyebrow: str(source.eyebrow, DEFAULT_REVIEWS_SECTION.eyebrow),
     headline: str(source.headline, DEFAULT_REVIEWS_SECTION.headline),
     description: str(source.description, DEFAULT_REVIEWS_SECTION.description),
-    emptyEyebrow: str(source.emptyEyebrow, DEFAULT_REVIEWS_SECTION.emptyEyebrow),
+    emptyEyebrow: str(
+      source.emptyEyebrow,
+      DEFAULT_REVIEWS_SECTION.emptyEyebrow,
+    ),
     emptyHeadline: str(
       source.emptyHeadline,
       DEFAULT_REVIEWS_SECTION.emptyHeadline,
@@ -429,7 +432,11 @@ export type CtaSectionData = {
   buttonLabel: string;
   buttonHref: string;
   buttonNewTab: boolean;
+  buttonNofollow: boolean;
   email: string;
+  emailHref: string;
+  emailNewTab: boolean;
+  emailNofollow: boolean;
   responseNote: string;
   showEmail: boolean;
   showResponseNote: boolean;
@@ -442,7 +449,11 @@ export const DEFAULT_CTA_SECTION: CtaSectionData = {
   buttonLabel: "Start Your Project",
   buttonHref: "/contact",
   buttonNewTab: false,
+  buttonNofollow: false,
   email: "hello@simplycode.io",
+  emailHref: "mailto:hello@simplycode.io",
+  emailNewTab: false,
+  emailNofollow: false,
   responseNote: "Reply within one business day",
   showEmail: true,
   showResponseNote: true,
@@ -454,13 +465,21 @@ export function normalizeCtaSectionData(value: unknown): CtaSectionData {
   }
   const source = value as Record<string, unknown>;
   const buttonHref = str(source.buttonHref, DEFAULT_CTA_SECTION.buttonHref);
+  const email = str(source.email, DEFAULT_CTA_SECTION.email);
   return {
     headline: str(source.headline, DEFAULT_CTA_SECTION.headline),
     description: str(source.description, DEFAULT_CTA_SECTION.description),
     buttonLabel: str(source.buttonLabel, DEFAULT_CTA_SECTION.buttonLabel),
     buttonHref,
     buttonNewTab: bool(source.buttonNewTab, isExternalHref(buttonHref)),
-    email: str(source.email, DEFAULT_CTA_SECTION.email),
+    buttonNofollow: bool(source.buttonNofollow, false),
+    email,
+    emailHref: str(
+      source.emailHref,
+      email ? `mailto:${email}` : DEFAULT_CTA_SECTION.emailHref,
+    ),
+    emailNewTab: bool(source.emailNewTab, false),
+    emailNofollow: bool(source.emailNofollow, false),
     responseNote: str(source.responseNote, DEFAULT_CTA_SECTION.responseNote),
     showEmail: bool(source.showEmail, DEFAULT_CTA_SECTION.showEmail),
     showResponseNote: bool(

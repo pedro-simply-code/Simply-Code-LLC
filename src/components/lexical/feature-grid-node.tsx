@@ -10,7 +10,7 @@ import {
 } from "lexical";
 import { Settings2 } from "lucide-react";
 import { type ReactElement } from "react";
-import { FeatureGridSection } from "~/components/content/feature-grid-section";
+import { featureGridIcon } from "~/components/content/feature-grid-section";
 import {
   BlockDecoratorToolbar,
   InlineText,
@@ -22,9 +22,17 @@ import {
   DEFAULT_FEATURE_GRID_SECTION,
   normalizeFeatureGridSectionData,
   FEATURE_GRID_SECTION_NODE_TYPE,
+  type FeatureGridItem,
   type FeatureGridSectionData,
 } from "~/lib/site-page-sections";
-import { appSectionBand, appSectionContainer } from "~/lib/surface";
+import {
+  appPanelMuted,
+  appSectionBand,
+  appSectionContainer,
+  siteMotionLift,
+  siteReveal,
+  siteStagger,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 export type SerializedFeatureGridSectionNode = Spread<
@@ -134,6 +142,14 @@ function FeatureGridSectionEditor({
     update({ features: features.slice(0, next) });
   };
 
+  const updateFeature = (index: number, patch: Partial<FeatureGridItem>) => {
+    update({
+      features: data.features.map((feature, featureIndex) =>
+        featureIndex === index ? { ...feature, ...patch } : feature,
+      ),
+    });
+  };
+
   return (
     <div
       contentEditable={false}
@@ -187,12 +203,53 @@ function FeatureGridSectionEditor({
               as="h2"
               value={data.headline}
               onChange={(headline) => update({ headline })}
-              className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase whitespace-pre-line"
+              className="mt-5 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] whitespace-pre-line uppercase"
             />
           </div>
-          <FeatureGridSection data={data} gridOnly />
+          <FeatureGridCards data={data} onUpdateFeature={updateFeature} />
         </div>
       </section>
+    </div>
+  );
+}
+
+function FeatureGridCards({
+  data,
+  onUpdateFeature,
+}: {
+  data: FeatureGridSectionData;
+  onUpdateFeature: (index: number, patch: Partial<FeatureGridItem>) => void;
+}) {
+  return (
+    <div className={cn(siteStagger, "grid gap-6 lg:grid-cols-3")}>
+      {data.features.map((feature, index) => {
+        const Icon = featureGridIcon(feature.icon);
+        return (
+          <div
+            key={index}
+            className={cn(appPanelMuted, siteReveal, siteMotionLift, "p-8")}
+          >
+            <span className="flex size-12 items-center justify-center bg-[#15130f] text-white">
+              <Icon className="size-5" />
+            </span>
+            <InlineText
+              as="h3"
+              value={feature.title}
+              onChange={(title) => onUpdateFeature(index, { title })}
+              placeholder="Feature title"
+              className="mt-6 text-lg font-black tracking-tight uppercase"
+            />
+            <InlineText
+              as="p"
+              multiline
+              value={feature.body}
+              onChange={(body) => onUpdateFeature(index, { body })}
+              placeholder="Describe this value…"
+              className="mt-3 text-[14px] leading-relaxed whitespace-pre-wrap text-[#57524a]"
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

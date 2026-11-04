@@ -8,6 +8,8 @@ import { PageHeaderSection } from "~/components/content/page-header-section";
 import { PageIntroSection } from "~/components/content/page-intro-section";
 import { ReviewsSection } from "~/components/content/reviews-section";
 import { ServicesSection } from "~/components/content/services-section";
+import { ServiceOfferingsSection } from "~/components/content/service-offerings-section";
+import { EngagementModelsSection } from "~/components/content/engagement-models-section";
 import { StepsSection } from "~/components/content/steps-section";
 import { TeamSection } from "~/components/content/team-section";
 import { WhySection } from "~/components/content/why-section";
@@ -23,6 +25,8 @@ import {
   normalizeCtaSectionData,
   normalizeHeroData,
   normalizeReviewsSectionData,
+  normalizeServiceOfferingsSectionData,
+  normalizeEngagementModelsSectionData,
   normalizeServicesSectionData,
   normalizeWhySectionData,
   normalizeWorkSectionData,
@@ -34,6 +38,8 @@ import {
   PAGE_HEADER_SECTION_NODE_TYPE,
   PAGE_INTRO_SECTION_NODE_TYPE,
   FEATURE_GRID_SECTION_NODE_TYPE,
+  SERVICE_OFFERINGS_SECTION_NODE_TYPE,
+  ENGAGEMENT_MODELS_SECTION_NODE_TYPE,
   STEPS_SECTION_NODE_TYPE,
   TEAM_SECTION_NODE_TYPE,
   REVIEWS_SECTION_NODE_TYPE,
@@ -193,7 +199,13 @@ function LinkBlock({ node, keyName }: { node: ContentNode; keyName: string }) {
 
   if (newTab) {
     return (
-      <Link key={keyName} href={href} className={className} rel={rel} target="_blank">
+      <Link
+        key={keyName}
+        href={href}
+        className={className}
+        rel={rel}
+        target="_blank"
+      >
         {content}
       </Link>
     );
@@ -207,15 +219,10 @@ function LinkBlock({ node, keyName }: { node: ContentNode; keyName: string }) {
 }
 
 function renderQuoteBlockquote(node: ContentNode, keyName: string): ReactNode {
-  const inner = node.children?.find(
-    (child) => child.type === QUOTE_INNER_TYPE,
-  );
+  const inner = node.children?.find((child) => child.type === QUOTE_INNER_TYPE);
   const content = inner?.children ?? node.children ?? [];
   return (
-    <blockquote
-      key={keyName}
-      className={cn(appQuoteOuter, appQuoteInner)}
-    >
+    <blockquote key={keyName} className={cn(appQuoteOuter, appQuoteInner)}>
       {renderChildren(content, keyName)}
     </blockquote>
   );
@@ -310,7 +317,9 @@ function renderRoot(
         }
 
         decorators.forEach((block, blockIndex) => {
-          nodes.push(renderNode(block, `${keyName}-block-${blockIndex}`, context));
+          nodes.push(
+            renderNode(block, `${keyName}-block-${blockIndex}`, context),
+          );
         });
         needsSpacingAfterFullBleed = true;
         return;
@@ -392,7 +401,9 @@ function renderNode(
     case "list":
       return <ListBlock key={keyName} node={node} keyName={keyName} />;
     case "listitem":
-      return <li key={keyName}>{renderChildren(node.children, keyName, context)}</li>;
+      return (
+        <li key={keyName}>{renderChildren(node.children, keyName, context)}</li>
+      );
     case "link":
       return <LinkBlock key={keyName} node={node} keyName={keyName} />;
     case HERO_NODE_TYPE:
@@ -465,6 +476,20 @@ function renderNode(
           data={normalizeStepsSectionData(node.data)}
         />
       );
+    case SERVICE_OFFERINGS_SECTION_NODE_TYPE:
+      return (
+        <ServiceOfferingsSection
+          key={keyName}
+          data={normalizeServiceOfferingsSectionData(node.data)}
+        />
+      );
+    case ENGAGEMENT_MODELS_SECTION_NODE_TYPE:
+      return (
+        <EngagementModelsSection
+          key={keyName}
+          data={normalizeEngagementModelsSectionData(node.data)}
+        />
+      );
     case TEAM_SECTION_NODE_TYPE:
       return (
         <TeamSection
@@ -476,7 +501,9 @@ function renderNode(
       );
     default:
       return node.children ? (
-        <div key={keyName}>{renderChildren(node.children, keyName, context)}</div>
+        <div key={keyName}>
+          {renderChildren(node.children, keyName, context)}
+        </div>
       ) : null;
   }
 }

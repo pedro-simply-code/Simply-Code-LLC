@@ -7,6 +7,7 @@ import {
   Heading2,
   Heading3,
   LayoutGrid,
+  Layers,
   ListOrdered,
   Megaphone,
   MessageSquareQuote,
@@ -43,6 +44,20 @@ export const CONTENT_BLOCK_CATALOG: ContentBlockDefinition[] = [
     description: "Service cards grid",
     category: "sections",
     icon: Wrench,
+  },
+  {
+    id: "service-offerings",
+    label: "Service offering",
+    description: "One detailed service with deliverables, tools and a button",
+    category: "sections",
+    icon: Layers,
+  },
+  {
+    id: "engagement-models",
+    label: "Engagement models",
+    description: "Three ways to work together band",
+    category: "sections",
+    icon: Users,
   },
   {
     id: "work",

@@ -18,7 +18,10 @@ import {
   SectionOptionsDialog,
   useSectionNodeUpdate,
 } from "~/components/lexical/decorator-section-shared";
-import { LinkUrlPopover } from "~/components/lexical/link-url-popover";
+import {
+  LinkUrlPopover,
+  linkFieldSummary,
+} from "~/components/lexical/link-url-popover";
 import {
   CTA_SECTION_NODE_TYPE,
   DEFAULT_CTA_SECTION,
@@ -26,6 +29,8 @@ import {
   type CtaSectionData,
 } from "~/lib/homepage-sections";
 import type { LinkFieldValue } from "~/lib/link-options";
+import { appPrimaryButtonMarketingLg } from "~/lib/surface";
+import { cn } from "~/lib/utils";
 
 export type SerializedCtaSectionNode = Spread<
   { data: CtaSectionData },
@@ -159,44 +164,106 @@ function CtaSectionEditor({
         }
         actionsOverride={
           <div className="flex flex-col items-start gap-4 lg:items-end">
-            <div className="flex flex-wrap items-center gap-2">
-              <InlineText
-                value={data.buttonLabel}
-                onChange={(v) => update({ buttonLabel: v })}
-                className="inline-flex items-center gap-2 rounded-md bg-[#15130f] px-8 py-4 text-[12px] font-bold tracking-[0.18em] text-white uppercase"
-              />
+            <span className="group/action relative inline-flex">
+              <span className={cn(appPrimaryButtonMarketingLg, "cursor-text")}>
+                <InlineText
+                  value={data.buttonLabel}
+                  onChange={(v) => update({ buttonLabel: v })}
+                  placeholder="Start Your Project"
+                />
+                <ArrowRight className="size-4" aria-hidden />
+              </span>
               <LinkUrlPopover
                 value={{
                   href: data.buttonHref,
                   newTab: data.buttonNewTab,
-                  nofollow: false,
+                  nofollow: data.buttonNofollow,
                 }}
                 onPrepare={() => ({
                   href: data.buttonHref,
                   newTab: data.buttonNewTab,
-                  nofollow: false,
+                  nofollow: data.buttonNofollow,
                 })}
                 onSave={(value: LinkFieldValue) =>
-                  update({ buttonHref: value.href, buttonNewTab: value.newTab })
+                  update({
+                    buttonHref: value.href,
+                    buttonNewTab: value.newTab,
+                    buttonNofollow: value.nofollow,
+                  })
                 }
+                title="Button link"
+                hint="Use a path, an anchor or a full URL."
+                placeholder="/contact or https://…"
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex size-9 items-center justify-center rounded border bg-white"
+                    title={`Edit link (${linkFieldSummary({
+                      href: data.buttonHref,
+                      newTab: data.buttonNewTab,
+                      nofollow: data.buttonNofollow,
+                    })})`}
                     aria-label="Edit button link"
+                    className="absolute -top-2 -right-2 inline-flex size-6 items-center justify-center rounded-full bg-[#15130f] text-white opacity-0 shadow-md transition-opacity group-hover/action:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
                   >
-                    <Link2 className="size-4" />
+                    <Link2 className="size-3" />
                   </button>
                 }
               />
-              <ArrowRight className="size-4" aria-hidden />
-            </div>
+            </span>
             {data.showEmail && data.email.trim() ? (
-              <InlineText
-                value={data.email}
-                onChange={(v) => update({ email: v })}
-                className="text-[14px] font-semibold text-[#15130f] underline underline-offset-8"
-              />
+              <span className="inline-flex items-center gap-2">
+                <span className="cursor-text text-[14px] font-semibold text-[#15130f] underline underline-offset-8">
+                  <InlineText
+                    value={data.email}
+                    onChange={(email) =>
+                      update({
+                        email,
+                        emailHref:
+                          data.emailHref === `mailto:${data.email}`
+                            ? `mailto:${email}`
+                            : data.emailHref,
+                      })
+                    }
+                    placeholder="hello@simplycode.io"
+                  />
+                </span>
+                <LinkUrlPopover
+                  value={{
+                    href: data.emailHref,
+                    newTab: data.emailNewTab,
+                    nofollow: data.emailNofollow,
+                  }}
+                  onPrepare={() => ({
+                    href: data.emailHref,
+                    newTab: data.emailNewTab,
+                    nofollow: data.emailNofollow,
+                  })}
+                  onSave={(value) =>
+                    update({
+                      emailHref: value.href,
+                      emailNewTab: value.newTab,
+                      emailNofollow: value.nofollow,
+                    })
+                  }
+                  title="Email link"
+                  hint="Use mailto:hello@simplycode.io or a contact URL."
+                  placeholder="mailto:hello@simplycode.io"
+                  trigger={
+                    <button
+                      type="button"
+                      title={`Edit link (${linkFieldSummary({
+                        href: data.emailHref,
+                        newTab: data.emailNewTab,
+                        nofollow: data.emailNofollow,
+                      })})`}
+                      aria-label="Edit email link"
+                      className="inline-flex size-6 items-center justify-center rounded-full bg-[#15130f]/5 text-[#6f6a60] ring-1 ring-[#15130f]/15 transition-colors hover:bg-[#15130f] hover:text-white focus-visible:bg-[#15130f] focus-visible:text-white data-[state=open]:bg-[#15130f] data-[state=open]:text-white"
+                    >
+                      <Link2 className="size-3.5" />
+                    </button>
+                  }
+                />
+              </span>
             ) : null}
             {data.showResponseNote && data.responseNote.trim() ? (
               <InlineText

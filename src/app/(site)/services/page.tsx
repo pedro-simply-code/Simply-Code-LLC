@@ -8,18 +8,20 @@ import {
   PenTool,
 } from "lucide-react";
 import { CmsDocumentPage } from "~/components/content/cms-document-page";
+import { EngagementModelsSection } from "~/components/content/engagement-models-section";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNavShell } from "~/components/site-nav-shell";
-import { ENGAGEMENT_MODELS, SERVICES } from "~/content/services";
-import { SITE } from "~/content/site";
+import { SERVICES } from "~/content/services";
 import { pageMetadata } from "~/lib/seo";
 import {
-  appAccentBrightButtonMarketingSm,
   appChip,
   appGhostButton,
   appPanel,
+  siteMotionLift,
+  siteReveal,
 } from "~/lib/surface";
+import { DEFAULT_ENGAGEMENT_MODELS_SECTION } from "~/lib/site-page-sections";
 import { cn } from "~/lib/utils";
 import { getPublishedCmsPageOverride } from "~/server/content/cms-site-page";
 
@@ -50,21 +52,24 @@ export default async function ServicesPage() {
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">
           <div className="mx-auto max-w-[1400px] px-6">
-            <p className="text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
+            <p className="site-hero-in site-hero-in-delay-1 text-sc-accent text-[11px] font-bold tracking-[0.24em] uppercase">
               Services
             </p>
-            <h1 className="mt-5 max-w-4xl text-[clamp(2.5rem,6vw,5rem)] leading-[0.98] font-black tracking-[-0.045em] uppercase">
+            <h1 className="site-hero-in site-hero-in-delay-2 mt-5 max-w-4xl text-[clamp(2.5rem,6vw,5rem)] leading-[0.98] font-black tracking-[-0.045em] uppercase">
               Design, Build
               <br />
               And Everything Between
             </h1>
-            <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-[#57524a]">
+            <p className="site-hero-in site-hero-in-delay-3 mt-6 max-w-2xl text-[16px] leading-relaxed text-[#57524a]">
               We are a small, senior team. The people who scope your project are
               the people who design and build it — from the first flow to the
               final deploy.
             </p>
 
-            <nav aria-label="Services" className="mt-10 flex flex-wrap gap-2">
+            <nav
+              aria-label="Services"
+              className="site-hero-in site-hero-in-delay-3 mt-10 flex flex-wrap gap-2"
+            >
               {SERVICES.map((service) => (
                 <a
                   key={service.slug}
@@ -95,7 +100,7 @@ export default async function ServicesPage() {
               }`}
             >
               <div className="mx-auto grid max-w-[1400px] gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
-                <div>
+                <div className={siteReveal}>
                   <div className="flex items-center gap-4">
                     <span className="text-sc-accent-bright flex size-12 items-center justify-center bg-[#15130f]">
                       <Icon className="size-5" />
@@ -136,7 +141,9 @@ export default async function ServicesPage() {
                   </div>
                 </div>
 
-                <div className={cn(appPanel, "p-8")}>
+                <div
+                  className={cn(appPanel, siteReveal, siteMotionLift, "p-8")}
+                >
                   <p className="text-sc-accent text-[11px] font-bold tracking-[0.2em] uppercase">
                     What you get
                   </p>
@@ -163,60 +170,7 @@ export default async function ServicesPage() {
           );
         })}
 
-        <section className="bg-[#15130f] py-16 text-white lg:py-24">
-          <div className="mx-auto max-w-[1400px] px-6">
-            <p className="text-sc-accent-bright text-[11px] font-bold tracking-[0.24em] uppercase">
-              How We Work
-            </p>
-            <h2 className="mt-5 max-w-3xl text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] font-black tracking-[-0.035em] uppercase">
-              Three Ways To Work Together
-            </h2>
-            <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-white/60">
-              No hourly surprises and no open-ended scopes. Pick the model that
-              matches how your team already works.
-            </p>
-
-            <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              {ENGAGEMENT_MODELS.map((model, index) => (
-                <div
-                  key={model.title}
-                  className="flex flex-col rounded-lg bg-white/[0.03] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.2)] ring-1 ring-white/10"
-                >
-                  <span className="text-sc-accent-bright text-[11px] font-bold tracking-[0.2em]">
-                    0{index + 1}
-                  </span>
-                  <h3 className="mt-4 text-xl font-black tracking-tight uppercase">
-                    {model.title}
-                  </h3>
-                  <p className="mt-4 flex-1 text-[14px] leading-relaxed text-white/60">
-                    {model.description}
-                  </p>
-                  <p className="mt-6 border-t border-white/10 pt-4 text-[12px] leading-relaxed text-white/45">
-                    <span className="font-bold tracking-[0.12em] text-white/70 uppercase">
-                      Best for:
-                    </span>{" "}
-                    {model.bestFor}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-12 flex flex-wrap items-center gap-5">
-              <Link
-                href="/contact"
-                className={appAccentBrightButtonMarketingSm}
-              >
-                Request a quote <ArrowRight className="size-4" />
-              </Link>
-              <a
-                href={`mailto:${SITE.email}`}
-                className="hover:text-sc-accent-bright text-[14px] font-semibold text-white/70 underline underline-offset-8 transition-colors"
-              >
-                {SITE.email}
-              </a>
-            </div>
-          </div>
-        </section>
+        <EngagementModelsSection data={DEFAULT_ENGAGEMENT_MODELS_SECTION} />
 
         <CtaSection />
       </main>

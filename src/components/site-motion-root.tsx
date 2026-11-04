@@ -22,7 +22,9 @@ export function SiteMotionRoot({ children }: { children: React.ReactNode }) {
       document.querySelectorAll(".site-reveal").forEach((el) => {
         el.classList.add("site-reveal-visible");
       });
-      return;
+      return () => {
+        document.documentElement.classList.remove("site-motion-js");
+      };
     }
 
     const observer = new IntersectionObserver(
@@ -84,6 +86,9 @@ export function SiteMotionRoot({ children }: { children: React.ReactNode }) {
       mutations.disconnect();
       observer.disconnect();
       reduced.removeEventListener("change", onReducedMotion);
+      // The class lives on <html>, which survives client-side navigation into
+      // the studio/portal. Leaving it would hide `.site-reveal` content there.
+      document.documentElement.classList.remove("site-motion-js");
     };
   }, [pathname]);
 

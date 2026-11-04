@@ -14,22 +14,29 @@ import { cn } from "~/lib/utils";
 function CtaButton({
   href,
   newTab,
+  nofollow,
   className,
   children,
 }: {
   href: string;
   newTab: boolean;
+  nofollow: boolean;
   className?: string;
   children: ReactNode;
 }) {
   const url = href.trim() || "/contact";
+  const rel =
+    [newTab ? "noreferrer noopener" : "", nofollow ? "nofollow" : ""]
+      .filter(Boolean)
+      .join(" ") || undefined;
+
   if (isExternalHref(url)) {
     return (
       <a
         href={url}
         className={className}
         target={newTab ? "_blank" : undefined}
-        rel={newTab ? "noreferrer noopener" : undefined}
+        rel={rel}
       >
         {children}
       </a>
@@ -37,13 +44,13 @@ function CtaButton({
   }
   if (newTab) {
     return (
-      <Link href={url} className={className} target="_blank" rel="noreferrer">
+      <Link href={url} className={className} target="_blank" rel={rel}>
         {children}
       </Link>
     );
   }
   return (
-    <Link href={url} className={className}>
+    <Link href={url} className={className} rel={rel}>
       {children}
     </Link>
   );
@@ -90,18 +97,21 @@ export function CtaMarketingSection({
                 <CtaButton
                   href={data.buttonHref}
                   newTab={data.buttonNewTab}
+                  nofollow={data.buttonNofollow}
                   className={appPrimaryButtonMarketingLg}
                 >
                   {data.buttonLabel} <ArrowRight className="size-4" />
                 </CtaButton>
               ) : null}
               {data.showEmail && data.email.trim() ? (
-                <a
-                  href={`mailto:${data.email.trim()}`}
+                <CtaButton
+                  href={data.emailHref.trim() || `mailto:${data.email.trim()}`}
+                  newTab={data.emailNewTab}
+                  nofollow={data.emailNofollow}
                   className="hover:text-sc-accent text-[14px] font-semibold text-[#15130f] underline underline-offset-8 transition-colors"
                 >
                   {data.email.trim()}
-                </a>
+                </CtaButton>
               ) : null}
               {data.showResponseNote && data.responseNote.trim() ? (
                 <p className="text-[12px] tracking-[0.12em] text-[#6f6a60] uppercase">

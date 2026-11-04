@@ -311,34 +311,50 @@ export {
 } from "~/lib/homepage-sections";
 
 export {
+  createServiceOffering,
+  createServiceOfferingsSectionData,
+  DEFAULT_ENGAGEMENT_MODELS_SECTION,
   DEFAULT_FEATURE_GRID_FEATURES,
   DEFAULT_FEATURE_GRID_SECTION,
   DEFAULT_PAGE_HEADER_SECTION,
   DEFAULT_PAGE_INTRO_SECTION,
+  DEFAULT_SERVICE_OFFERINGS_SECTION,
   DEFAULT_STEPS_SECTION,
   DEFAULT_TEAM_SECTION,
+  ENGAGEMENT_MODELS_SECTION_NODE_TYPE,
   FEATURE_GRID_SECTION_NODE_TYPE,
+  normalizeEngagementModelsSectionData,
   normalizeFeatureGridSectionData,
   normalizePageHeaderSectionData,
   normalizePageIntroSectionData,
+  normalizeServiceOfferingsSectionData,
   normalizeStepsSectionData,
   normalizeTeamSectionData,
   PAGE_HEADER_SECTION_NODE_TYPE,
   PAGE_INTRO_SECTION_NODE_TYPE,
+  SERVICE_OFFERINGS_SECTION_NODE_TYPE,
   SITE_PAGE_BLOCK_NODE_TYPES,
   STEPS_SECTION_NODE_TYPE,
   TEAM_SECTION_NODE_TYPE,
+  type EngagementCard,
+  type EngagementModelsSectionData,
   type FeatureGridSectionData,
+  type PageHeaderLink,
   type PageHeaderSectionData,
   type PageIntroSectionData,
+  type ServiceOffering,
+  type ServiceOfferingTool,
+  type ServiceOfferingsSectionData,
   type StepsSectionData,
   type TeamSectionData,
 } from "~/lib/site-page-sections";
 
 import {
+  ENGAGEMENT_MODELS_SECTION_NODE_TYPE,
   FEATURE_GRID_SECTION_NODE_TYPE,
   PAGE_HEADER_SECTION_NODE_TYPE,
   PAGE_INTRO_SECTION_NODE_TYPE,
+  SERVICE_OFFERINGS_SECTION_NODE_TYPE,
   STEPS_SECTION_NODE_TYPE,
   TEAM_SECTION_NODE_TYPE,
 } from "~/lib/site-page-sections";
@@ -356,6 +372,8 @@ export const CONTENT_BLOCK_DECORATOR_TYPES = [
   FEATURE_GRID_SECTION_NODE_TYPE,
   STEPS_SECTION_NODE_TYPE,
   TEAM_SECTION_NODE_TYPE,
+  SERVICE_OFFERINGS_SECTION_NODE_TYPE,
+  ENGAGEMENT_MODELS_SECTION_NODE_TYPE,
 ] as const;
 
 /** Minimal structural shape of a serialized Lexical node. */
@@ -410,9 +428,7 @@ function isContentNode(value: unknown): value is ContentNode {
  */
 function liftNestedBlocks(children: ContentNode[]): ContentNode[] {
   const result: ContentNode[] = [];
-  const blockTypes = new Set<string>([
-    ...CONTENT_BLOCK_DECORATOR_TYPES,
-  ]);
+  const blockTypes = new Set<string>([...CONTENT_BLOCK_DECORATOR_TYPES]);
 
   for (const child of children) {
     if (child.type === "paragraph" && Array.isArray(child.children)) {
@@ -669,7 +685,8 @@ const CONTENT_ERRORS: Record<string, string> = {
   body: "The editor content could not be read. Try again.",
   duplicate: "Another entry of that type already uses this slug.",
   missing: "That entry no longer exists.",
-  cover: "Could not upload the cover image. Try a smaller file or check UploadThing.",
+  cover:
+    "Could not upload the cover image. Try a smaller file or check UploadThing.",
 };
 
 export function contentErrorMessage(error?: string | null): string | null {
