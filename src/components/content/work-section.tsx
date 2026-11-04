@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { WorkCard } from "~/components/work-card";
 import { WorkFilters } from "~/components/work-filters";
 import type { Project } from "~/content/projects";
-import { PROJECTS } from "~/content/projects";
 import type { WorkSectionData } from "~/lib/homepage-sections";
 import { appEmptyState, appSectionBand, appSectionContainer, siteReveal, siteStagger } from "~/lib/surface";
 import { cn } from "~/lib/utils";
@@ -44,7 +43,7 @@ function WorkSectionHeader({
 export function WorkSection({
   data,
   className,
-  projects = PROJECTS,
+  projects = [],
   introOverride,
   ctaSlot,
   emptyMessageOverride,

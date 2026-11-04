@@ -6,7 +6,10 @@ import { Suspense, type ReactNode } from "react";
 import {
   type StudioOverviewViewScope,
   type StudioViewMode,
+  type StudioViewPersistScope,
+  readStudioViewCookie,
   studioOverviewViewParam,
+  writeStudioViewCookie,
 } from "~/lib/studio-view";
 import { appIconButton } from "~/lib/surface";
 import { cn } from "~/lib/utils";
@@ -14,15 +17,28 @@ import { cn } from "~/lib/utils";
 const viewToggleActiveClass =
   "bg-sc-accent text-white shadow-[0_1px_2px_rgba(21,19,15,0.12)] hover:bg-sc-accent";
 
-function StudioViewToggleInner({ scope }: { scope?: StudioOverviewViewScope }) {
+function StudioViewToggleInner({
+  scope,
+  persistScope,
+}: {
+  scope?: StudioOverviewViewScope;
+  persistScope?: StudioViewPersistScope;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const paramKey = scope ? studioOverviewViewParam[scope] : "view";
+  const urlValue = searchParams.get(paramKey);
+  const persisted = persistScope ? readStudioViewCookie(persistScope) : null;
   const view: StudioViewMode =
-    searchParams.get(paramKey) === "list" ? "list" : "grid";
+    urlValue === "list"
+      ? "list"
+      : urlValue === "grid"
+        ? "grid"
+        : (persisted ?? "grid");
 
   const setView = (next: StudioViewMode) => {
+    if (persistScope) writeStudioViewCookie(persistScope, next);
     const params = new URLSearchParams(searchParams.toString());
     if (next === "list") params.set(paramKey, "list");
     else params.delete(paramKey);
@@ -74,12 +90,14 @@ function StudioViewToggleInner({ scope }: { scope?: StudioOverviewViewScope }) {
 
 export function StudioViewToggle({
   scope,
+  persistScope,
 }: {
   scope?: StudioOverviewViewScope;
+  persistScope?: StudioViewPersistScope;
 }) {
   return (
     <Suspense fallback={<span className="inline-block size-8" aria-hidden />}>
-      <StudioViewToggleInner scope={scope} />
+      <StudioViewToggleInner scope={scope} persistScope={persistScope} />
     </Suspense>
   );
 }

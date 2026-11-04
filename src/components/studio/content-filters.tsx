@@ -123,7 +123,7 @@ function StudioContentFiltersInner() {
         ) : null}
       </div>
       <div className="flex shrink-0 items-center sm:mb-0.5">
-        <StudioViewToggle />
+        <StudioViewToggle persistScope="content" />
       </div>
     </div>
   );

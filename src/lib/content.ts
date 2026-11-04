@@ -63,6 +63,8 @@ export type HeroStat = {
 
 export type HeroButtonSlot = "primary" | "secondary";
 
+export type HeroSurface = "alt" | "default" | "canvas";
+
 export type HeroData = {
   eyebrow: string;
   headline: string;
@@ -85,7 +87,28 @@ export type HeroData = {
   badge: string;
   panelText: string;
   stats: HeroStat[];
+  /** Section background band. */
+  surface: HeroSurface;
+  /** Right-hand dark stats panel. */
+  showPanel: boolean;
 };
+
+export function normalizeHeroSurface(value: unknown): HeroSurface {
+  if (value === "default" || value === "canvas") return value;
+  return "alt";
+}
+
+/** Public + editor hero band background. */
+export function heroSectionSurfaceClass(surface: HeroSurface): string {
+  switch (surface) {
+    case "default":
+      return "bg-sc-section text-sc-ink";
+    case "canvas":
+      return "bg-sc-canvas text-sc-ink";
+    default:
+      return "bg-sc-section-alt text-sc-ink";
+  }
+}
 
 /** Mirrors the homepage hero so new pages start from the same design. */
 export const DEFAULT_HERO: HeroData = {
@@ -112,6 +135,8 @@ export const DEFAULT_HERO: HeroData = {
     { value: "100%", label: "Upwork Job Success" },
     { value: "8+", label: "Years with Zoom" },
   ],
+  surface: "alt",
+  showPanel: true,
 };
 
 function heroString(value: unknown, fallback: string): string {
@@ -257,6 +282,8 @@ export function normalizeHeroData(value: unknown): HeroData {
     badge: heroString(source.badge, DEFAULT_HERO.badge),
     panelText: heroString(source.panelText, DEFAULT_HERO.panelText),
     stats,
+    surface: normalizeHeroSurface(source.surface),
+    showPanel: heroBool(source.showPanel, DEFAULT_HERO.showPanel),
   };
 }
 

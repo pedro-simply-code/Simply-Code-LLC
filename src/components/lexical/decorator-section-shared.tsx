@@ -117,18 +117,24 @@ export function ToolbarIconButton({
   label,
   onClick,
   icon: Icon,
+  /** Run handler on mouse down (keeps text selection for accent tools). */
+  fireOnMouseDown = false,
 }: {
   label: string;
   onClick: () => void;
   icon: LucideIcon;
+  fireOnMouseDown?: boolean;
 }) {
   return (
     <button
       type="button"
       title={label}
       aria-label={label}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        if (fireOnMouseDown) onClick();
+      }}
+      onClick={fireOnMouseDown ? undefined : onClick}
       className="inline-flex size-7 items-center justify-center rounded text-[#6f6a60] transition-colors hover:bg-sc-accent/10 hover:text-sc-accent"
     >
       <Icon className="size-3.5" />

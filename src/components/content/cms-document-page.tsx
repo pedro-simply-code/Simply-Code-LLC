@@ -1,10 +1,6 @@
 import { ContentRenderer } from "~/components/content/content-renderer";
-import {
-  teamSectionFallbackMembers,
-} from "~/components/content/team-section";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNavShell } from "~/components/site-nav-shell";
-import { PROJECTS } from "~/content/projects";
 import {
   contentDocumentUsesBlockType,
   BLOG_SECTION_NODE_TYPE,
@@ -30,7 +26,7 @@ export async function CmsDocumentPage({ entry }: { entry: ContentEntry }) {
     needsBlog ? listPublishedEntriesSafe("post") : Promise.resolve([]),
   ]);
 
-  const workProjects = needsWork ? (projectsFromDb ?? PROJECTS) : [];
+  const workProjects = needsWork ? (projectsFromDb ?? []) : [];
 
   return (
     <div
@@ -42,7 +38,7 @@ export async function CmsDocumentPage({ entry }: { entry: ContentEntry }) {
       <article className="mx-auto w-full">
         <ContentRenderer
           document={body}
-          teamMembers={teamFromDb ?? teamSectionFallbackMembers()}
+          teamMembers={teamFromDb ?? []}
           teamFromStudio={teamFromDb !== null}
           workProjects={workProjects}
           blogPosts={blogPosts}

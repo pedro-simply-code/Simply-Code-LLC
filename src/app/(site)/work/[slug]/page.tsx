@@ -6,7 +6,6 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, Star } from "lucide-react";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteNavShell } from "~/components/site-nav-shell";
-import { PROJECTS, getAdjacentProjects, getProject } from "~/content/projects";
 import {
   getApprovedReviewForProjectSlugSafe,
   getPublicProjectSafe,
@@ -30,18 +29,32 @@ function liveSiteLabel(url: string): string {
 
 export const revalidate = 60;
 
-export function generateStaticParams() {
-  return PROJECTS.map((project) => ({ slug: project.slug }));
+function adjacentInList<T extends { slug: string }>(
+  items: T[],
+  slug: string,
+): { previous: T; next: T } {
+  if (items.length === 0) {
+    throw new Error("adjacentInList requires at least one item");
+  }
+  if (items.length === 1) {
+    return { previous: items[0]!, next: items[0]! };
+  }
+  const index = items.findIndex((item) => item.slug === slug);
+  const safeIndex = index === -1 ? 0 : index;
+  return {
+    previous: items[(safeIndex - 1 + items.length) % items.length]!,
+    next: items[(safeIndex + 1) % items.length]!,
+  };
 }
 
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = (await getPublicProjectSafe(slug)) ?? getProject(slug);
+  const project = await getPublicProjectSafe(slug);
 
   if (!project) {
-    return { title: "Project not found" };
+    return { title: "Project not found", robots: { index: false, follow: false } };
   }
 
   return {
@@ -65,25 +78,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     getPublicProjectSafe(slug),
     getApprovedReviewForProjectSlugSafe(slug),
   ]);
-  const project = dbProject ?? getProject(slug);
+  const project = dbProject;
 
   if (!project) {
     notFound();
   }
 
-  const allProjects = (await getPublicProjectsSafe()) ?? PROJECTS;
-  const index = allProjects.findIndex((item) => item.slug === project.slug);
-  const previous =
-    index > 0
-      ? allProjects[index - 1]
-      : (allProjects[allProjects.length - 1] ?? project);
-  const next =
-    index >= 0 && index < allProjects.length - 1
-      ? allProjects[index + 1]
-      : (allProjects[0] ?? project);
-  const fallbackAdjacent = getAdjacentProjects(project.slug);
-  const previousProject = previous ?? fallbackAdjacent.previous ?? project;
-  const nextProject = next ?? fallbackAdjacent.next ?? project;
+  const allProjects = (await getPublicProjectsSafe()) ?? [];
+  const { previous: previousProject, next: nextProject } = adjacentInList(
+    allProjects.length > 0 ? allProjects : [project],
+    project.slug,
+  );
   const url = `${env.NEXT_PUBLIC_SITE_URL}/work/${project.slug}`;
 
   const jsonLd = {

@@ -2,11 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import type { HeroData } from "~/lib/content";
-import { heroButtonsInDisplayOrder } from "~/lib/content";
+import { heroButtonsInDisplayOrder, heroSectionSurfaceClass } from "~/lib/content";
 import { buildLinkRel, isExternalHref } from "~/lib/link-options";
 import {
   appChip,
-  appHeroBand,
   appHeroContainer,
   appOutlineButton,
   appPrimaryButtonMarketing,
@@ -94,17 +93,23 @@ export function HeroSection({
     (stat) => stat.value.trim() || stat.label.trim(),
   );
   const buttonOrder = heroButtonsInDisplayOrder(data);
+  const showPanel = data.showPanel !== false;
 
   return (
     <section
       className={cn(
         "relative overflow-hidden border-b border-[#15130f]/10",
-        appHeroBand,
+        heroSectionSurfaceClass(data.surface),
         className,
       )}
     >
       <div className={cn(appHeroContainer, "px-6 py-14 lg:py-20")}>
-        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+        <div
+          className={cn(
+            "grid items-center gap-12",
+            showPanel && "lg:grid-cols-[1.1fr_0.9fr] lg:gap-16",
+          )}
+        >
           <div>
             {data.eyebrow ? (
               <div
@@ -168,6 +173,7 @@ export function HeroSection({
             ) : null}
           </div>
 
+          {showPanel ? (
           <div className="site-hero-in site-hero-in-delay-2 site-motion-lift relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9">
             <div
               aria-hidden
@@ -202,6 +208,7 @@ export function HeroSection({
               ) : null}
             </div>
           </div>
+          ) : null}
         </div>
       </div>
     </section>

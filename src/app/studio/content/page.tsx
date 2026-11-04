@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ListOrdered, Plus } from "lucide-react";
 import { StudioContentFilters } from "~/components/studio/content-filters";
 import {
@@ -15,7 +16,7 @@ import {
   parseStudioPage,
   studioPageSummary,
 } from "~/lib/studio-pagination";
-import { parseStudioView } from "~/lib/studio-view";
+import { resolveStudioView, studioViewCookieName } from "~/lib/studio-view";
 import {
   appEmptyState,
   appOutlineButtonStudio,
@@ -52,7 +53,12 @@ export default async function ContentIndexPage({
     view: viewParam,
     page: pageParam,
   } = await searchParams;
-  const view = parseStudioView(viewParam);
+  const cookieStore = await cookies();
+  const view = resolveStudioView(
+    "content",
+    viewParam,
+    cookieStore.get(studioViewCookieName("content"))?.value,
+  );
   const page = parseStudioPage(pageParam);
 
   const entries = await listContentEntries();

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { StudioProjectsFilters } from "~/components/studio/projects-filters";
 import { StudioProjectsList } from "~/components/studio/projects-list";
 import { StudioHeader } from "~/components/studio/ui";
@@ -12,7 +13,7 @@ import {
   parseStudioPage,
   studioPageSummary,
 } from "~/lib/studio-pagination";
-import { parseStudioView } from "~/lib/studio-view";
+import { resolveStudioView, studioViewCookieName } from "~/lib/studio-view";
 import { getStudioProjects } from "~/server/studio/queries";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +34,12 @@ export default async function StudioProjectsPage({
     view: viewParam,
     page: pageParam,
   } = await searchParams;
-  const view = parseStudioView(viewParam);
+  const cookieStore = await cookies();
+  const view = resolveStudioView(
+    "projects",
+    viewParam,
+    cookieStore.get(studioViewCookieName("projects"))?.value,
+  );
   const page = parseStudioPage(pageParam);
   const session = await auth();
   const canCreate = canCreateProjects(session?.user.role);

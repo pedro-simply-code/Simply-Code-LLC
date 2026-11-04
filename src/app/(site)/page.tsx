@@ -1,26 +1,22 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import {
   contentPlainText,
   type ContentDocument,
 } from "~/lib/content";
 import { getPublishedHomepageEntrySafe } from "~/server/content/queries";
-import { StaticHomePage } from "./static-home-page";
 
 export const revalidate = 60;
-
-const STATIC_HOME_METADATA: Metadata = {
-  title: { absolute: "Simply Code — Web Development Agency" },
-  description:
-    "Web development agency specializing in UX design, custom Next.js platforms and WordPress solutions.",
-  alternates: { canonical: "/" },
-};
 
 export async function generateMetadata(): Promise<Metadata> {
   const entry = await getPublishedHomepageEntrySafe();
 
   if (!entry) {
-    return STATIC_HOME_METADATA;
+    return {
+      title: { absolute: "Simply Code — Web Development Agency" },
+      robots: { index: false, follow: false },
+    };
   }
 
   const description =
@@ -45,9 +41,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const entry = await getPublishedHomepageEntrySafe();
 
-  if (entry) {
-    return <CmsDocumentPage entry={entry} />;
+  if (!entry) {
+    notFound();
   }
 
-  return <StaticHomePage />;
+  return <CmsDocumentPage entry={entry} />;
 }

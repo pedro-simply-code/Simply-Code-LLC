@@ -14,6 +14,7 @@ import {
   useEffect,
   useRef,
   useState,
+  forwardRef,
   type ElementType,
   type ReactElement,
 } from "react";
@@ -27,9 +28,12 @@ import {
   HERO_NODE_TYPE,
   normalizeHeroData,
   type HeroData,
+  type HeroSurface,
   appendHeroButtonOrder,
   removeHeroButtonFromOrder,
   heroButtonsInDisplayOrder,
+  heroSectionSurfaceClass,
+  normalizeHeroSurface,
   type HeroStat,
 } from "~/lib/content";
 import { LinkUrlPopover, linkFieldSummary } from "~/components/lexical/link-url-popover";
@@ -44,7 +48,6 @@ import {
 import type { LinkFieldValue } from "~/lib/link-options";
 import {
   appChip,
-  appHeroBand,
   appHeroContainer,
   appOutlineButton,
   appPrimaryButtonMarketing,
@@ -211,21 +214,28 @@ function InlineText({
   );
 }
 
-function InlineHeadline({
-  headline,
-  highlight,
-  onChange,
-  className,
-}: {
-  headline: string;
-  highlight: string;
-  onChange: (value: string) => void;
-  className?: string;
-}) {
-  const ref = useRef<HTMLHeadingElement>(null);
+const InlineHeadline = forwardRef<
+  HTMLHeadingElement,
+  {
+    headline: string;
+    highlight: string;
+    onChange: (value: string) => void;
+    onSelectionCapture?: () => void;
+    className?: string;
+  }
+>(function InlineHeadline(
+  { headline, highlight, onChange, onSelectionCapture, className },
+  ref,
+) {
+  const innerRef = useRef<HTMLHeadingElement>(null);
+  const setRef = (node: HTMLHeadingElement | null) => {
+    innerRef.current = node;
+    if (typeof ref === "function") ref(node);
+    else if (ref) ref.current = node;
+  };
 
   useEffect(() => {
-    const element = ref.current;
+    const element = innerRef.current;
     if (!element) return;
     if (document.activeElement === element) return;
     const html = headlineHtml(headline, highlight);
@@ -234,7 +244,7 @@ function InlineHeadline({
 
   return (
     <h1
-      ref={ref}
+      ref={setRef}
       contentEditable
       suppressContentEditableWarning
       role="textbox"
@@ -251,7 +261,72 @@ function InlineHeadline({
         if (event.key === "Enter" && !event.shiftKey) event.preventDefault();
       }}
       onPaste={(event) => event.stopPropagation()}
+      onMouseUp={() => onSelectionCapture?.()}
+      onKeyUp={() => onSelectionCapture?.()}
     />
+  );
+});
+
+function heroToolbarSelectClass() {
+  return "h-7 min-w-0 max-w-[6.5rem] rounded border border-[#15130f]/15 bg-white px-2 text-[10px] font-semibold text-[#15130f] shadow-none focus-visible:ring-1 focus-visible:ring-sc-accent/40 focus-visible:outline-none";
+}
+
+function HeroBlockToolbarOptions({
+  data,
+  onApplyAccentFromSelection,
+  onClearAccent,
+  onSurfaceChange,
+  onShowPanelChange,
+}: {
+  data: HeroData;
+  onApplyAccentFromSelection: () => void;
+  onClearAccent: () => void;
+  onSurfaceChange: (surface: HeroSurface) => void;
+  onShowPanelChange: (show: boolean) => void;
+}) {
+  return (
+    <>
+      <ToolbarIconButton
+        label="Accent selected headline text"
+        icon={Highlighter}
+        fireOnMouseDown
+        onClick={onApplyAccentFromSelection}
+      />
+      {data.highlight.trim() ? (
+        <ToolbarIconButton
+          label="Clear headline accent"
+          icon={X}
+          onClick={onClearAccent}
+        />
+      ) : null}
+      <select
+        aria-label="Hero background"
+        title="Background"
+        value={data.surface}
+        onChange={(event) =>
+          onSurfaceChange(normalizeHeroSurface(event.target.value))
+        }
+        className={heroToolbarSelectClass()}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <option value="alt">Alt band</option>
+        <option value="default">Default</option>
+        <option value="canvas">Canvas</option>
+      </select>
+      <label
+        className="flex cursor-pointer items-center gap-1 px-1 text-[9px] font-bold tracking-[0.12em] text-[#6f6a60] uppercase"
+        title="Show dark stats panel"
+      >
+        <input
+          type="checkbox"
+          checked={data.showPanel !== false}
+          onChange={(event) => onShowPanelChange(event.target.checked)}
+          className="size-3.5 rounded border-[#15130f]/20"
+          onMouseDown={(event) => event.stopPropagation()}
+        />
+        Panel
+      </label>
+    </>
   );
 }
 
@@ -463,6 +538,49 @@ function HeroBlockEditor({
   data: HeroData;
 }) {
   const [editor] = useLexicalComposerContext();
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const headlineSelectionRef = useRef<Range | null>(null);
+
+  const captureHeadlineSelection = () => {
+    const el = headlineRef.current;
+    const sel = window.getSelection();
+    if (!el || !sel || sel.rangeCount === 0) {
+      headlineSelectionRef.current = null;
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    if (!el.contains(range.commonAncestorContainer)) {
+      headlineSelectionRef.current = null;
+      return;
+    }
+    const text = sel.toString().trim();
+    if (!text) {
+      headlineSelectionRef.current = null;
+      return;
+    }
+    headlineSelectionRef.current = range.cloneRange();
+  };
+
+  const readHeadlineSelectedText = (): string => {
+    const el = headlineRef.current;
+    if (!el) return "";
+
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      if (el.contains(range.commonAncestorContainer)) {
+        const live = sel.toString().trim();
+        if (live) return live;
+      }
+    }
+
+    const saved = headlineSelectionRef.current;
+    if (saved && el.contains(saved.commonAncestorContainer)) {
+      return saved.toString().trim();
+    }
+
+    return "";
+  };
 
   const update = (patch: Partial<HeroData>) => {
     editor.update(() => {
@@ -486,25 +604,35 @@ function HeroBlockEditor({
       stats: data.stats.filter((_, statIndex) => statIndex !== index),
     });
 
-  const applyAccent = () => {
-    const activeElement = document.activeElement;
-    const selection = window.getSelection()?.toString().trim() ?? "";
+  const applyAccentFromSelection = () => {
+    const headlineEl = headlineRef.current;
+    if (!headlineEl) return;
 
-    // Only colour text selected inside the headline field.
-    if (
-      !(activeElement instanceof HTMLElement) ||
-      activeElement.getAttribute("aria-label") !== "Headline" ||
-      !selection ||
-      !data.headline.includes(selection)
-    ) {
-      return;
+    const selectedText = readHeadlineSelectedText();
+    if (!selectedText) return;
+
+    const headlineText = headlineEl.innerText.replace(/\n/g, " ");
+    if (!headlineText.includes(selectedText)) return;
+
+    const currentAccent = data.highlight.trim();
+    const nextHighlight =
+      selectedText === currentAccent ? "" : selectedText;
+
+    headlineEl.blur();
+    headlineSelectionRef.current = null;
+    update({
+      headline: headlineText,
+      highlight: nextHighlight,
+    });
+  };
+
+  const onHeadlineChange = (value: string) => {
+    const patch: Partial<HeroData> = { headline: value };
+    const accent = data.highlight.trim();
+    if (accent && !value.includes(accent)) {
+      patch.highlight = "";
     }
-
-    const nextHighlight = selection === data.highlight.trim() ? "" : selection;
-
-    // Blur first so the headline repaints with the new accent styling.
-    activeElement.blur();
-    update({ highlight: nextHighlight });
+    update(patch);
   };
 
   const remove = () => {
@@ -552,6 +680,7 @@ function HeroBlockEditor({
     });
 
   const buttonOrder = heroButtonsInDisplayOrder(data);
+  const showPanel = data.showPanel !== false;
 
   return (
     <div
@@ -560,28 +689,30 @@ function HeroBlockEditor({
       className="group/block text-sc-ink relative"
     >
       <BlockDecoratorToolbar label="Hero" onRemove={remove}>
-        <ToolbarIconButton
-          label="Accent selected headline text"
-          icon={Highlighter}
-          onClick={applyAccent}
-        />
-        {data.highlight ? (
-          <ToolbarIconButton
-            label="Clear headline accent"
-            icon={X}
-            onClick={() => update({ highlight: "" })}
+        <div className="flex max-w-[min(72vw,540px)] flex-wrap items-center gap-1">
+          <HeroBlockToolbarOptions
+            data={data}
+            onApplyAccentFromSelection={applyAccentFromSelection}
+            onClearAccent={() => update({ highlight: "" })}
+            onSurfaceChange={(surface) => update({ surface })}
+            onShowPanelChange={(showPanel) => update({ showPanel })}
           />
-        ) : null}
+        </div>
       </BlockDecoratorToolbar>
 
       <section
         className={cn(
           "relative overflow-hidden border-b border-[#15130f]/10",
-          appHeroBand,
+          heroSectionSurfaceClass(data.surface),
         )}
       >
         <div className={cn(appHeroContainer, "px-6 py-14 lg:py-20")}>
-          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+          <div
+            className={cn(
+              "grid items-center gap-12",
+              showPanel && "lg:grid-cols-[1.1fr_0.9fr] lg:gap-16",
+            )}
+          >
             <div>
               <div
                 className={cn(
@@ -603,9 +734,11 @@ function HeroBlockEditor({
               </div>
 
               <InlineHeadline
+                ref={headlineRef}
                 headline={data.headline}
                 highlight={data.highlight}
-                onChange={(value) => update({ headline: value })}
+                onChange={onHeadlineChange}
+                onSelectionCapture={captureHeadlineSelection}
                 className="mt-7 max-w-[26ch] text-[clamp(2.1rem,4vw,3.35rem)] leading-[1.06] font-black tracking-[-0.03em] uppercase"
               />
 
@@ -684,6 +817,7 @@ function HeroBlockEditor({
               />
             </div>
 
+            {showPanel ? (
             <div className="relative overflow-hidden rounded-lg bg-[#15130f] p-7 text-white shadow-[0_8px_32px_rgba(21,19,15,0.18)] lg:p-9">
               <div
                 aria-hidden
@@ -731,6 +865,7 @@ function HeroBlockEditor({
                 </button>
               </div>
             </div>
+            ) : null}
           </div>
         </div>
       </section>

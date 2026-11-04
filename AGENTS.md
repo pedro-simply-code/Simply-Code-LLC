@@ -61,7 +61,7 @@ Update `package.json` name, `.env.example` / `DB_TABLE_PREFIX`, and `NEXT_PUBLIC
 - Multi-select fields use the shadcn Popover + Command component in `src/components/studio/multi-select.tsx`. It renders hidden inputs so server actions read values with `formData.getAll(name)`.
 - Client-submitted reviews are inserted as `pending`; approve them in `/studio/reviews` before they appear publicly.
 - Any role can enable TOTP 2FA from their own profile (`/studio/profile` or `/portal/profile`); after login a valid signed `sc_2fa` / `__Host-sc_2fa` cookie is required for `/studio` and `/portal`.
-- Public work/review pages read the DB but fall back to bundled static content when the DB is empty or unavailable.
+- Public CMS pages and posts are served from the database (`/{slug}`, `/`, `/blog/{slug}`). Project case studies stay at `/work/{slug}` from Studio projects. Homepage and other pages require a published CMS entry (no bundled marketing fallback).
 - Projects use `draft`, `published`, or `completed`. Published and completed projects are public. Only completed projects unlock the client review form and accept review submissions.
 - Client requests can be marked `completed` or `rejected` by the project lead/founder. Rejection requires a reason; clients see the outcome and reason in the portal, and both outcomes create a client notification.
 - Notifications use 10-second client polling via `/api/notifications` (not SSE/websockets) in both studio and portal. Contact form submissions create founder notifications and persist to `contact_messages`.

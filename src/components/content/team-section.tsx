@@ -1,5 +1,5 @@
 import { TeamGrid } from "~/components/team-grid";
-import { TEAM, type TeamMember } from "~/content/team";
+import type { TeamMember } from "~/content/team";
 import type { TeamSectionData } from "~/lib/site-page-sections";
 import {
   appPanelMuted,
@@ -69,5 +69,5 @@ export function TeamSection({
 }
 
 export function teamSectionFallbackMembers(): TeamMember[] {
-  return TEAM;
+  return [];
 }
