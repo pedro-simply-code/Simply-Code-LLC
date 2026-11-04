@@ -1,6 +1,6 @@
 "use server";
 
-import { and, desc, eq, ne, or } from "drizzle-orm";
+import { and, asc, desc, eq, ne, or } from "drizzle-orm";
 import { db } from "~/server/db";
 import {
   contentEntries,
@@ -148,16 +148,55 @@ export async function listPublishedNavPages(): Promise<CmsNavLink[]> {
         PUBLISHED,
         eq(contentEntries.kind, "page"),
         eq(contentEntries.showInNav, true),
-        eq(contentEntries.isHomepage, false),
       ),
     )
-    .orderBy(desc(contentEntries.updatedAt));
+    .orderBy(
+      asc(contentEntries.navSortOrder),
+      asc(contentEntries.title),
+    );
 
   return rows.map((row) => ({
     id: row.id,
     label: row.navLabel?.trim() || row.title,
-    href: `/${row.slug}`,
+    href: row.isHomepage ? "/" : `/${row.slug}`,
   }));
+}
+
+export type StudioNavMenuRow = {
+  id: string;
+  title: string;
+  navLabel: string | null;
+  slug: string;
+  isHomepage: boolean;
+  status: ContentEntry["status"];
+  navSortOrder: number;
+};
+
+/** Pages marked for the header menu (any status), for Studio ordering UI. */
+export async function listNavMenuEditorPages(): Promise<StudioNavMenuRow[]> {
+  const rows = await db
+    .select({
+      id: contentEntries.id,
+      title: contentEntries.title,
+      navLabel: contentEntries.navLabel,
+      slug: contentEntries.slug,
+      isHomepage: contentEntries.isHomepage,
+      status: contentEntries.status,
+      navSortOrder: contentEntries.navSortOrder,
+    })
+    .from(contentEntries)
+    .where(
+      and(
+        eq(contentEntries.kind, "page"),
+        eq(contentEntries.showInNav, true),
+      ),
+    )
+    .orderBy(
+      asc(contentEntries.navSortOrder),
+      asc(contentEntries.title),
+    );
+
+  return rows;
 }
 
 export async function listPublishedEntries(

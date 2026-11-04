@@ -1,5 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { FaqPageSection } from "~/components/content/faq-page-section";
+import { LegalDocumentSection } from "~/components/content/legal-document-section";
+import { BlogPostsSection } from "~/components/content/blog-posts-section";
 import { ContactSection } from "~/components/content/contact-section";
 import { CtaMarketingSection } from "~/components/content/cta-marketing-section";
 import { FeatureGridSection } from "~/components/content/feature-grid-section";
@@ -34,11 +37,17 @@ import {
   normalizePageIntroSectionData,
   normalizeFeatureGridSectionData,
   normalizeStepsSectionData,
+  normalizeBlogSectionData,
+  normalizeFaqSectionData,
+  normalizeLegalDocumentSectionData,
   normalizeTeamSectionData,
+  FAQ_SECTION_NODE_TYPE,
+  LEGAL_DOCUMENT_SECTION_NODE_TYPE,
   PAGE_HEADER_SECTION_NODE_TYPE,
   PAGE_INTRO_SECTION_NODE_TYPE,
   FEATURE_GRID_SECTION_NODE_TYPE,
   SERVICE_OFFERINGS_SECTION_NODE_TYPE,
+  BLOG_SECTION_NODE_TYPE,
   ENGAGEMENT_MODELS_SECTION_NODE_TYPE,
   STEPS_SECTION_NODE_TYPE,
   TEAM_SECTION_NODE_TYPE,
@@ -64,16 +73,20 @@ const FORMAT_SUBSCRIPT = 32;
 const FORMAT_SUPERSCRIPT = 64;
 const FORMAT_HIGHLIGHT = 128;
 
+import type { PublicContentSummary } from "~/server/content/queries";
+
 type RenderContext = {
   teamMembers: TeamMember[];
   teamFromStudio: boolean;
   workProjects: Project[];
+  blogPosts: PublicContentSummary[];
 };
 
 const EMPTY_RENDER_CONTEXT: RenderContext = {
   teamMembers: [],
   teamFromStudio: false,
   workProjects: [],
+  blogPosts: [],
 };
 
 function renderText(node: ContentNode, key: string): ReactNode {
@@ -355,7 +368,29 @@ function renderNode(
   keyName: string,
   context: RenderContext = EMPTY_RENDER_CONTEXT,
 ): ReactNode {
-  const { teamMembers, teamFromStudio, workProjects } = context;
+  const { teamMembers, teamFromStudio, workProjects, blogPosts } = context;
+
+  // Site-page decorators added after the original switch — render before the
+  // main switch so they are not dropped by over-eager bundler switch lowering.
+  if (node.type === FAQ_SECTION_NODE_TYPE || node.type === "faq-section") {
+    return (
+      <FaqPageSection
+        key={keyName}
+        data={normalizeFaqSectionData(node.data)}
+      />
+    );
+  }
+  if (
+    node.type === LEGAL_DOCUMENT_SECTION_NODE_TYPE ||
+    node.type === "legal-document-section"
+  ) {
+    return (
+      <LegalDocumentSection
+        key={keyName}
+        data={normalizeLegalDocumentSectionData(node.data)}
+      />
+    );
+  }
 
   switch (node.type) {
     case "text":
@@ -499,6 +534,14 @@ function renderNode(
           teamFromStudio={teamFromStudio}
         />
       );
+    case BLOG_SECTION_NODE_TYPE:
+      return (
+        <BlogPostsSection
+          key={keyName}
+          data={normalizeBlogSectionData(node.data)}
+          posts={blogPosts}
+        />
+      );
     default:
       return node.children ? (
         <div key={keyName}>
@@ -515,17 +558,20 @@ export function ContentRenderer({
   teamMembers = [],
   teamFromStudio = false,
   workProjects = [],
+  blogPosts = [],
 }: {
   document: ContentDocument;
   className?: string;
   teamMembers?: TeamMember[];
   teamFromStudio?: boolean;
   workProjects?: Project[];
+  blogPosts?: PublicContentSummary[];
 }) {
   const context: RenderContext = {
     teamMembers,
     teamFromStudio,
     workProjects,
+    blogPosts,
   };
   return (
     <div className={cn("content-body", className)}>

@@ -384,7 +384,22 @@ export function normalizeWhySectionData(value: unknown): WhySectionData {
 
 /* --- Contact --- */
 
+export type ContactSectionLayout = "band" | "page";
+
+export type ContactDetailValueType = "text" | "link";
+
+export type ContactDetailItem = {
+  label: string;
+  value: string;
+  href: string;
+  icon: string;
+  /** Plain text line vs clickable link (chosen when adding the row). */
+  valueType: ContactDetailValueType;
+};
+
 export type ContactSectionData = {
+  /** Homepage band vs full `/contact` page layout. */
+  layout: ContactSectionLayout;
   eyebrow: string;
   headline: string;
   description: string;
@@ -392,9 +407,40 @@ export type ContactSectionData = {
   faqHref: string;
   faqNewTab: boolean;
   showForm: boolean;
+  showContactDetails: boolean;
+  contactDetails: ContactDetailItem[];
+  showNextSteps: boolean;
+  nextStepsTitle: string;
+  nextSteps: string[];
+  faqLeadIn: string;
 };
 
+const DEFAULT_CONTACT_DETAILS: ContactDetailItem[] = [
+  {
+    label: "Email",
+    value: "hello@simplycode.io",
+    href: "mailto:hello@simplycode.io",
+    icon: "mail",
+    valueType: "link",
+  },
+  {
+    label: "Response time",
+    value: "Within one business day",
+    href: "",
+    icon: "clock",
+    valueType: "text",
+  },
+  {
+    label: "Location",
+    value: "1235 S 2200 W, Syracuse, UT 84075, USA",
+    href: "",
+    icon: "map-pin",
+    valueType: "text",
+  },
+];
+
 export const DEFAULT_CONTACT_SECTION: ContactSectionData = {
+  layout: "band",
   eyebrow: "Contact Us",
   headline: "Let's Talk About\nYour Project",
   description:
@@ -403,17 +449,153 @@ export const DEFAULT_CONTACT_SECTION: ContactSectionData = {
   faqHref: "/faq",
   faqNewTab: false,
   showForm: true,
+  showContactDetails: false,
+  contactDetails: DEFAULT_CONTACT_DETAILS.map((item) => ({ ...item })),
+  showNextSteps: false,
+  nextStepsTitle: "What happens next",
+  nextSteps: [
+    "1. We read your brief and reply with questions or a call invite.",
+    "2. A short discovery call to understand scope, timeline and budget.",
+    "3. A written proposal with stages, a timeline and a fixed quote.",
+  ],
+  faqLeadIn: "Questions about how we work?",
 };
+
+/** Defaults matching the static `/contact` page. */
+export const DEFAULT_CONTACT_PAGE_SECTION: ContactSectionData = {
+  ...DEFAULT_CONTACT_SECTION,
+  layout: "page",
+  eyebrow: "Contact",
+  headline: "Let's Talk\nAbout Your Project",
+  description:
+    "Tell us what you are building, what is getting in the way and when you need it. You'll get a straight answer from the developer who would do the work — not a sales pitch.",
+  faqLabel: "Read the FAQ",
+  faqHref: "/faq",
+  showContactDetails: true,
+  showNextSteps: true,
+  faqLeadIn: "Questions about how we work?",
+  contactDetails: DEFAULT_CONTACT_DETAILS.map((item) => ({ ...item })),
+};
+
+const CONTACT_DETAIL_ICON_KEYS = [
+  "mail",
+  "clock",
+  "map-pin",
+  "phone",
+  "globe",
+  "none",
+] as const;
+
+function normalizeContactDetailIcon(value: unknown): string {
+  if (
+    typeof value === "string" &&
+    (CONTACT_DETAIL_ICON_KEYS as readonly string[]).includes(value)
+  ) {
+    return value;
+  }
+  return "none";
+}
+
+function normalizeContactDetailItem(value: unknown): ContactDetailItem {
+  const row =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  const valueText = str(row.value, "");
+  const href = str(row.href, "");
+  const explicitType = row.valueType;
+  const valueType: ContactDetailValueType =
+    explicitType === "link" || explicitType === "text"
+      ? explicitType
+      : href.trim()
+        ? "link"
+        : "text";
+  return {
+    label: str(row.label, "Detail"),
+    value: valueText,
+    href: valueType === "link" ? href : "",
+    icon: normalizeContactDetailIcon(row.icon),
+    valueType,
+  };
+}
+
+function normalizeContactDetails(
+  value: unknown,
+  legacySource?: Record<string, unknown>,
+): ContactDetailItem[] {
+  if (Array.isArray(value)) {
+    return value.slice(0, 12).map(normalizeContactDetailItem);
+  }
+
+  if (legacySource && !Array.isArray(value)) {
+    const email = str(legacySource.email, DEFAULT_CONTACT_DETAILS[0]!.value);
+    const responseTime = str(
+      legacySource.responseTime,
+      DEFAULT_CONTACT_DETAILS[1]!.value,
+    );
+    const location = str(
+      legacySource.location,
+      DEFAULT_CONTACT_DETAILS[2]!.value,
+    );
+    if (
+      legacySource.email !== undefined ||
+      legacySource.responseTime !== undefined ||
+      legacySource.location !== undefined
+    ) {
+      return [
+        {
+          label: "Email",
+          value: email,
+          href: email.includes("@")
+            ? `mailto:${email.replace(/^mailto:/i, "")}`
+            : "",
+          icon: "mail",
+          valueType: "link",
+        },
+        {
+          label: "Response time",
+          value: responseTime,
+          href: "",
+          icon: "clock",
+          valueType: "text",
+        },
+        {
+          label: "Location",
+          value: location,
+          href: "",
+          icon: "map-pin",
+          valueType: "text",
+        },
+      ];
+    }
+  }
+
+  return DEFAULT_CONTACT_DETAILS.map((item) => ({ ...item }));
+}
+
+function normalizeNextStepsList(value: unknown): string[] {
+  const fallback = DEFAULT_CONTACT_SECTION.nextSteps;
+  if (Array.isArray(value)) {
+    return value.slice(0, 12).map((step, index) => str(step, fallback[index] ?? ""));
+  }
+  return [...fallback];
+}
 
 export function normalizeContactSectionData(
   value: unknown,
 ): ContactSectionData {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return { ...DEFAULT_CONTACT_SECTION };
+    return {
+      ...DEFAULT_CONTACT_SECTION,
+      contactDetails: DEFAULT_CONTACT_DETAILS.map((item) => ({ ...item })),
+      nextSteps: [...DEFAULT_CONTACT_SECTION.nextSteps],
+    };
   }
   const source = value as Record<string, unknown>;
   const faqHref = str(source.faqHref, DEFAULT_CONTACT_SECTION.faqHref);
+  const layout = source.layout === "page" ? "page" : "band";
   return {
+    layout,
     eyebrow: str(source.eyebrow, DEFAULT_CONTACT_SECTION.eyebrow),
     headline: str(source.headline, DEFAULT_CONTACT_SECTION.headline),
     description: str(source.description, DEFAULT_CONTACT_SECTION.description),
@@ -421,6 +603,18 @@ export function normalizeContactSectionData(
     faqHref,
     faqNewTab: bool(source.faqNewTab, isExternalHref(faqHref)),
     showForm: bool(source.showForm, DEFAULT_CONTACT_SECTION.showForm),
+    showContactDetails: bool(
+      source.showContactDetails,
+      layout === "page",
+    ),
+    contactDetails: normalizeContactDetails(source.contactDetails, source),
+    showNextSteps: bool(source.showNextSteps, layout === "page"),
+    nextStepsTitle: str(
+      source.nextStepsTitle,
+      DEFAULT_CONTACT_SECTION.nextStepsTitle,
+    ),
+    nextSteps: normalizeNextStepsList(source.nextSteps),
+    faqLeadIn: str(source.faqLeadIn, DEFAULT_CONTACT_SECTION.faqLeadIn),
   };
 }
 

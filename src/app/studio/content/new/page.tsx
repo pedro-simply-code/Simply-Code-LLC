@@ -7,7 +7,7 @@ import { StudioHeader } from "~/components/studio/ui";
 import { contentErrorMessage, contentPublicPath } from "~/lib/content";
 import { requireContentManager } from "~/server/authz";
 import { createContentEntry } from "~/server/content/actions";
-import { getPublishedHomepageEntrySafe } from "~/server/content/queries";
+import { getPublishedHomepageEntrySafe, listPublishedEntriesSafe } from "~/server/content/queries";
 import { getPublicProjectsSafe } from "~/server/studio/queries";
 
 export const metadata: Metadata = {
@@ -25,6 +25,7 @@ export default async function NewContentPage({
 
   const publishedHomepage = await getPublishedHomepageEntrySafe();
   const previewProjects = (await getPublicProjectsSafe()) ?? [];
+  const previewPosts = (await listPublishedEntriesSafe("post")) ?? [];
   const currentHomepage = publishedHomepage
     ? {
         id: publishedHomepage.id,
@@ -61,7 +62,12 @@ export default async function NewContentPage({
         <ContentEditorWorkspace
           header={{}}
           sidebar={{ currentHomepage }}
-          editor={<ContentEditor previewProjects={previewProjects} />}
+          editor={
+            <ContentEditor
+              previewProjects={previewProjects}
+              previewPosts={previewPosts}
+            />
+          }
           submitLabel="Save content"
           cancelHref="/studio/content"
         />

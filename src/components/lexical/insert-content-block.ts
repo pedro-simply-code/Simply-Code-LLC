@@ -20,12 +20,19 @@ import {
   $isServiceOfferingsSectionNode,
 } from "~/components/lexical/service-offerings-node";
 import { $createEngagementModelsSectionNode } from "~/components/lexical/engagement-models-node";
+import { $createBlogSectionNode } from "~/components/lexical/blog-node";
+import { $createFaqSectionNode } from "~/components/lexical/faq-node";
+import { $createLegalDocumentSectionNode } from "~/components/lexical/legal-document-node";
 import {
   $insertDecoratorBlock,
   $insertProseBlock,
 } from "~/components/lexical/insert-decorator-block";
 import {
   createServiceOfferingsSectionData,
+  DEFAULT_BLOG_SECTION,
+  DEFAULT_FAQ_SECTION,
+  DEFAULT_PRIVACY_DOCUMENT_SECTION,
+  DEFAULT_TERMS_DOCUMENT_SECTION,
   DEFAULT_CONTACT_SECTION,
   DEFAULT_CTA_SECTION,
   DEFAULT_ENGAGEMENT_MODELS_SECTION,
@@ -62,7 +69,10 @@ export type InsertContentBlockId =
   | "steps"
   | "team"
   | "service-offerings"
-  | "engagement-models";
+  | "engagement-models"
+  | "blog"
+  | "faq"
+  | "legal-document";
 
 export function insertContentBlock(
   editor: LexicalEditor,
@@ -179,6 +189,22 @@ export function insertContentBlock(
       if (value === "engagement-models") {
         $insertDecoratorBlock(() =>
           $createEngagementModelsSectionNode(DEFAULT_ENGAGEMENT_MODELS_SECTION),
+        );
+        return;
+      }
+      if (value === "blog") {
+        $insertDecoratorBlock(() =>
+          $createBlogSectionNode(DEFAULT_BLOG_SECTION),
+        );
+        return;
+      }
+      if (value === "faq") {
+        $insertDecoratorBlock(() => $createFaqSectionNode(DEFAULT_FAQ_SECTION));
+        return;
+      }
+      if (value === "legal-document") {
+        $insertDecoratorBlock(() =>
+          $createLegalDocumentSectionNode(DEFAULT_TERMS_DOCUMENT_SECTION),
         );
         return;
       }

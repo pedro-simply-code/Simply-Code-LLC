@@ -1,6 +1,9 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { FaqPageSection } from "~/components/content/faq-page-section";
+import { LegalDocumentSection } from "~/components/content/legal-document-section";
+import { BlogPostsSection } from "~/components/content/blog-posts-section";
 import { ContactSection } from "~/components/content/contact-section";
 import { CtaMarketingSection } from "~/components/content/cta-marketing-section";
 import { FeatureGridSection } from "~/components/content/feature-grid-section";
@@ -16,10 +19,15 @@ import { TeamSection } from "~/components/content/team-section";
 import { WhySection } from "~/components/content/why-section";
 import { WorkSection } from "~/components/content/work-section";
 import type { Project } from "~/content/projects";
+import type { PublicContentSummary } from "~/server/content/queries";
 import { TEAM } from "~/content/team";
+import { useContentEditorPosts } from "~/components/lexical/content-editor-posts-context";
 import { useContentEditorProjects } from "~/components/lexical/content-editor-projects-context";
 import type { InsertContentBlockId } from "~/components/lexical/insert-content-block";
 import {
+  DEFAULT_BLOG_SECTION,
+  DEFAULT_FAQ_SECTION,
+  DEFAULT_TERMS_DOCUMENT_SECTION,
   DEFAULT_CONTACT_SECTION,
   DEFAULT_CTA_SECTION,
   DEFAULT_ENGAGEMENT_MODELS_SECTION,
@@ -145,9 +153,11 @@ function TextBlockPreview({ blockId }: { blockId: InsertContentBlockId }) {
 function SectionPreview({
   blockId,
   catalogProjects,
+  catalogPosts,
 }: {
   blockId: InsertContentBlockId;
   catalogProjects: Project[];
+  catalogPosts: PublicContentSummary[];
 }) {
   switch (blockId) {
     case "hero":
@@ -162,6 +172,17 @@ function SectionPreview({
       return (
         <EngagementModelsSection data={DEFAULT_ENGAGEMENT_MODELS_SECTION} />
       );
+    case "blog":
+      return (
+        <BlogPostsSection
+          data={DEFAULT_BLOG_SECTION}
+          posts={catalogPosts}
+        />
+      );
+    case "faq":
+      return <FaqPageSection data={DEFAULT_FAQ_SECTION} />;
+    case "legal-document":
+      return <LegalDocumentSection data={DEFAULT_TERMS_DOCUMENT_SECTION} />;
     case "work":
       return (
         <WorkSection
@@ -211,6 +232,7 @@ export function ContentBlockPreview({
   blockId: InsertContentBlockId;
 }) {
   const catalogProjects = useContentEditorProjects();
+  const catalogPosts = useContentEditorPosts();
 
   if (
     blockId === "paragraph" ||
@@ -224,7 +246,11 @@ export function ContentBlockPreview({
 
   return (
     <ScaledPreviewFrame>
-      <SectionPreview blockId={blockId} catalogProjects={catalogProjects} />
+      <SectionPreview
+        blockId={blockId}
+        catalogProjects={catalogProjects}
+        catalogPosts={catalogPosts}
+      />
     </ScaledPreviewFrame>
   );
 }

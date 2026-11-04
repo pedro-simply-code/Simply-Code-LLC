@@ -116,7 +116,8 @@ export function ContentPublishingOptions({
               Show in main navigation
             </span>
             <span className="text-xs leading-relaxed text-[#57524a]">
-              Adds a link to the public header (alongside Work, Services, etc.).
+              Adds a link to the public header. If no pages use this, the menu
+              shows Home (<span className="font-mono">/</span>) only.
             </span>
           </span>
         </label>

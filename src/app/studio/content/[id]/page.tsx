@@ -17,6 +17,7 @@ import { deleteContentEntry, saveContentEntry } from "~/server/content/actions";
 import {
   getContentEntry,
   getPublishedHomepageEntrySafe,
+  listPublishedEntriesSafe,
 } from "~/server/content/queries";
 import { getPublicProjectsSafe } from "~/server/studio/queries";
 
@@ -68,6 +69,7 @@ export default async function EditContentPage({
   );
 
   const previewProjects = (await getPublicProjectsSafe()) ?? [];
+  const previewPosts = (await listPublishedEntriesSafe("post")) ?? [];
 
   return (
     <div>
@@ -131,6 +133,7 @@ export default async function EditContentPage({
               initialDocument={entry.body as ContentDocument}
               namespace={`content-${entry.id}`}
               previewProjects={previewProjects}
+              previewPosts={previewPosts}
             />
           }
           submitLabel="Save changes"

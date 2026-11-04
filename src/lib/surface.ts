@@ -58,6 +58,9 @@ export const appPrimaryButton =
 export const appPrimaryButtonStudio =
   "inline-flex items-center justify-center site-radius-md bg-[#15130f] px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-white uppercase transition-colors hover:bg-sc-accent";
 
+export const appOutlineButtonStudio =
+  "inline-flex items-center justify-center gap-1.5 site-outline-cta site-radius-md bg-sc-section px-4 py-2 text-[10px] font-bold tracking-[0.14em] text-sc-ink uppercase transition-colors hover:bg-sc-section-alt";
+
 export const appPrimaryButtonStudioSm =
   "inline-flex items-center gap-1.5 site-radius-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase hover:bg-sc-accent";
 

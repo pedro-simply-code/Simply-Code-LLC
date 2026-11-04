@@ -10,6 +10,9 @@ export const CMS_OVERRIDABLE_STATIC_SLUGS = [
   "about",
   "contact",
   "faq",
+  "blog",
+  "terms",
+  "privacy",
 ] as const;
 
 export type CmsOverridableStaticSlug =

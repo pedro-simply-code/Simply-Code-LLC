@@ -2,6 +2,14 @@
  * Site marketing page blocks (About, Services headers, etc.) — Lexical decorators.
  */
 
+import { FAQ } from "~/content/faq";
+import {
+  PRIVACY_LAST_UPDATED,
+  PRIVACY_SECTIONS,
+  TERMS_LAST_UPDATED,
+  TERMS_SECTIONS,
+  type LegalSectionBlock,
+} from "~/content/legal-defaults";
 import { ENGAGEMENT_MODELS, SERVICES } from "~/content/services";
 import { SITE } from "~/content/site";
 
@@ -12,6 +20,9 @@ export const STEPS_SECTION_NODE_TYPE = "steps-section";
 export const TEAM_SECTION_NODE_TYPE = "team-section";
 export const SERVICE_OFFERINGS_SECTION_NODE_TYPE = "service-offerings-section";
 export const ENGAGEMENT_MODELS_SECTION_NODE_TYPE = "engagement-models-section";
+export const BLOG_SECTION_NODE_TYPE = "blog-section";
+export const FAQ_SECTION_NODE_TYPE = "faq-section";
+export const LEGAL_DOCUMENT_SECTION_NODE_TYPE = "legal-document-section";
 
 export const SITE_PAGE_BLOCK_NODE_TYPES = [
   PAGE_HEADER_SECTION_NODE_TYPE,
@@ -21,6 +32,9 @@ export const SITE_PAGE_BLOCK_NODE_TYPES = [
   TEAM_SECTION_NODE_TYPE,
   SERVICE_OFFERINGS_SECTION_NODE_TYPE,
   ENGAGEMENT_MODELS_SECTION_NODE_TYPE,
+  BLOG_SECTION_NODE_TYPE,
+  FAQ_SECTION_NODE_TYPE,
+  LEGAL_DOCUMENT_SECTION_NODE_TYPE,
 ] as const;
 
 function str(value: unknown, fallback: string): string {
@@ -49,6 +63,16 @@ export const DEFAULT_PAGE_HEADER_SECTION: PageHeaderSectionData = {
   headline: "Design, Build\nAnd Everything Between",
   description:
     "We are a small, senior team. The people who scope your project are the people who design and build it — from the first flow to the final deploy.",
+  surface: "alt",
+  tags: [],
+};
+
+/** Suggested defaults when building the `/blog` index in the CMS. */
+export const DEFAULT_BLOG_PAGE_HEADER_SECTION: PageHeaderSectionData = {
+  eyebrow: "Blog",
+  headline: "Notes from the build",
+  description:
+    "Engineering decisions, design details and lessons from shipping production web products.",
   surface: "alt",
   tags: [],
 };
@@ -722,5 +746,152 @@ export function normalizeTeamSectionData(value: unknown): TeamSectionData {
     description: str(source.description, DEFAULT_TEAM_SECTION.description),
     anchorId: str(source.anchorId, DEFAULT_TEAM_SECTION.anchorId),
     surface: source.surface === "alt" ? "alt" : "default",
+  };
+}
+
+/* --- Blog index (published posts grid) --- */
+
+export type BlogSectionData = {
+  emptyMessage: string;
+  /** Posts per page (portfolio-style grid, same layout as the Projects block). */
+  pageSize: number;
+};
+
+export const DEFAULT_BLOG_SECTION: BlogSectionData = {
+  emptyMessage: "No posts published yet. Check back soon.",
+  pageSize: 9,
+};
+
+export function normalizeBlogSectionData(value: unknown): BlogSectionData {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { ...DEFAULT_BLOG_SECTION };
+  }
+  const source = value as Record<string, unknown>;
+  const size = Number(source.pageSize);
+  return {
+    emptyMessage: str(source.emptyMessage, DEFAULT_BLOG_SECTION.emptyMessage),
+    pageSize:
+      size >= 3 && size <= 24 ? Math.floor(size) : DEFAULT_BLOG_SECTION.pageSize,
+  };
+}
+
+/* --- FAQ page --- */
+
+export type FaqItemBlock = {
+  question: string;
+  answer: string;
+};
+
+export type FaqSectionData = {
+  eyebrow: string;
+  headline: string;
+  description: string;
+  ctaLabel: string;
+  ctaHref: string;
+  emailNote: string;
+  items: FaqItemBlock[];
+};
+
+export const DEFAULT_FAQ_SECTION: FaqSectionData = {
+  eyebrow: "FAQ",
+  headline: "Questions,\nAnswered",
+  description:
+    "The things clients ask before starting. If yours is not here, send it over — we answer every message.",
+  ctaLabel: "Ask us directly",
+  ctaHref: "/contact",
+  emailNote: `Or email ${SITE.email}`,
+  items: FAQ.map((item) => ({ ...item })),
+};
+
+function normalizeFaqItems(value: unknown): FaqItemBlock[] {
+  if (!Array.isArray(value)) {
+    return DEFAULT_FAQ_SECTION.items.map((item) => ({ ...item }));
+  }
+  return value.slice(0, 24).map((row, index) => {
+    const item =
+      row && typeof row === "object" && !Array.isArray(row)
+        ? (row as Record<string, unknown>)
+        : {};
+    const fallback = DEFAULT_FAQ_SECTION.items[index];
+    return {
+      question: str(item.question, fallback?.question ?? "New question?"),
+      answer: str(item.answer, fallback?.answer ?? "Your answer here."),
+    };
+  });
+}
+
+export function normalizeFaqSectionData(value: unknown): FaqSectionData {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {
+      ...DEFAULT_FAQ_SECTION,
+      items: DEFAULT_FAQ_SECTION.items.map((item) => ({ ...item })),
+    };
+  }
+  const source = value as Record<string, unknown>;
+  return {
+    eyebrow: str(source.eyebrow, DEFAULT_FAQ_SECTION.eyebrow),
+    headline: str(source.headline, DEFAULT_FAQ_SECTION.headline),
+    description: str(source.description, DEFAULT_FAQ_SECTION.description),
+    ctaLabel: str(source.ctaLabel, DEFAULT_FAQ_SECTION.ctaLabel),
+    ctaHref: str(source.ctaHref, DEFAULT_FAQ_SECTION.ctaHref),
+    emailNote: str(source.emailNote, DEFAULT_FAQ_SECTION.emailNote),
+    items: normalizeFaqItems(source.items),
+  };
+}
+
+/* --- Legal document (terms / privacy) --- */
+
+export type LegalDocumentSectionData = {
+  eyebrow: string;
+  headline: string;
+  lastUpdated: string;
+  sections: LegalSectionBlock[];
+};
+
+export const DEFAULT_TERMS_DOCUMENT_SECTION: LegalDocumentSectionData = {
+  eyebrow: "Legal",
+  headline: "Terms of Service",
+  lastUpdated: TERMS_LAST_UPDATED,
+  sections: TERMS_SECTIONS.map((section) => ({ ...section })),
+};
+
+export const DEFAULT_PRIVACY_DOCUMENT_SECTION: LegalDocumentSectionData = {
+  eyebrow: "Legal",
+  headline: "Privacy Policy",
+  lastUpdated: PRIVACY_LAST_UPDATED,
+  sections: PRIVACY_SECTIONS.map((section) => ({ ...section })),
+};
+
+function normalizeLegalSections(value: unknown): LegalSectionBlock[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    return [{ title: "Section title", body: "Section body text." }];
+  }
+  return value.slice(0, 24).map((row, index) => {
+    const item =
+      row && typeof row === "object" && !Array.isArray(row)
+        ? (row as Record<string, unknown>)
+        : {};
+    return {
+      title: str(item.title, `${index + 1}. Section title`),
+      body: str(item.body, "Section body text."),
+    };
+  });
+}
+
+export function normalizeLegalDocumentSectionData(
+  value: unknown,
+): LegalDocumentSectionData {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { ...DEFAULT_TERMS_DOCUMENT_SECTION };
+  }
+  const source = value as Record<string, unknown>;
+  return {
+    eyebrow: str(source.eyebrow, DEFAULT_TERMS_DOCUMENT_SECTION.eyebrow),
+    headline: str(source.headline, DEFAULT_TERMS_DOCUMENT_SECTION.headline),
+    lastUpdated: str(
+      source.lastUpdated,
+      DEFAULT_TERMS_DOCUMENT_SECTION.lastUpdated,
+    ),
+    sections: normalizeLegalSections(source.sections),
   };
 }

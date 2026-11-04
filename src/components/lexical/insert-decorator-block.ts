@@ -23,6 +23,9 @@ import { StepsSectionNode } from "~/components/lexical/steps-node";
 import { TeamSectionNode } from "~/components/lexical/team-node";
 import { ServiceOfferingsSectionNode } from "~/components/lexical/service-offerings-node";
 import { EngagementModelsSectionNode } from "~/components/lexical/engagement-models-node";
+import { BlogSectionNode } from "~/components/lexical/blog-node";
+import { FaqSectionNode } from "~/components/lexical/faq-node";
+import { LegalDocumentSectionNode } from "~/components/lexical/legal-document-node";
 
 const BLOCK_DECORATOR_TYPES = new Set<string>([
   HeroNode.getType(),
@@ -39,6 +42,9 @@ const BLOCK_DECORATOR_TYPES = new Set<string>([
   TeamSectionNode.getType(),
   ServiceOfferingsSectionNode.getType(),
   EngagementModelsSectionNode.getType(),
+  BlogSectionNode.getType(),
+  FaqSectionNode.getType(),
+  LegalDocumentSectionNode.getType(),
 ]);
 
 export function registerBlockDecoratorType(type: string) {

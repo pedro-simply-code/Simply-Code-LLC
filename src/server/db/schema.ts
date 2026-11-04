@@ -701,6 +701,8 @@ export const contentEntries = createTable(
     showInNav: boolean("show_in_nav").notNull().default(false),
     /** Optional nav label; defaults to title when empty. */
     navLabel: text("nav_label"),
+    /** Order in the public header (lower first). Only pages with showInNav. */
+    navSortOrder: integer("nav_sort_order").notNull().default(0),
     body: jsonb("body").$type<ContentDocument>().notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     authorId: uuid("author_id").references(() => users.id, {

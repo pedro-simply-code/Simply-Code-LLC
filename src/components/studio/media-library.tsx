@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useId, useState } from "react";
-import { Check, ImagePlus, Loader2, Upload } from "lucide-react";
+import { Check, Copy, ImagePlus, Loader2, Upload } from "lucide-react";
 import { appToast } from "~/lib/app-toast";
 import {
   CONTENT_MEDIA_ACCEPT,
   contentMediaFileError,
 } from "~/lib/media-library";
+import { userProfileImageUnoptimized } from "~/lib/project-image";
 import { listStudioMedia, type StudioMediaItem } from "~/server/studio/media";
 import { cn } from "~/lib/utils";
 import { appGhostButtonLg } from "~/lib/surface";
@@ -20,7 +21,13 @@ type MediaLibraryProps = {
   isUploading?: boolean;
   /** When true, the last uploaded file becomes the current selection (does not apply the cover). */
   selectOnUpload?: boolean;
+  /** Increment to reload the grid after deletes elsewhere. */
+  refreshSignal?: number;
   variant?: "default" | "overlay";
+  /** Denser grid on the full-page media library. */
+  thumbnailGrid?: "default" | "compact";
+  /** Fill parent height; grid scrolls inside (studio media page). */
+  fillHeight?: boolean;
   className?: string;
 };
 
@@ -34,10 +41,15 @@ export function MediaLibrary({
   uploadFile,
   isUploading = false,
   selectOnUpload = true,
+  refreshSignal = 0,
   variant = "default",
+  thumbnailGrid = "default",
+  fillHeight = false,
   className,
 }: MediaLibraryProps) {
   const isOverlay = variant === "overlay";
+  const compactThumbs = !isOverlay && thumbnailGrid === "compact";
+  const useFillLayout = fillHeight && !isOverlay;
   const inputId = useId();
   const [items, setItems] = useState<StudioMediaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,7 +134,7 @@ export function MediaLibrary({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshSignal]);
 
   const dropZone = (
     <div
@@ -217,10 +229,15 @@ export function MediaLibrary({
   ) : (
     <ul
       className={cn(
-        "grid gap-2",
-        isOverlay
-          ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
-          : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5",
+        "grid",
+        compactThumbs
+          ? "grid-cols-6 gap-1.5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12"
+          : cn(
+              "gap-2",
+              isOverlay
+                ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
+                : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5",
+            ),
       )}
     >
       {items.map((item) => {
@@ -234,18 +251,35 @@ export function MediaLibrary({
                 "group relative aspect-square w-full overflow-hidden rounded-sm bg-[#f0f0f1] ring-1 ring-[#15130f]/10 transition-shadow hover:ring-[#15130f]/25",
                 active &&
                   "ring-sc-accent ring-2 ring-offset-1 ring-offset-white",
+                compactThumbs && active && "ring-offset-0",
               )}
             >
               <Image
                 src={item.url}
                 alt=""
                 fill
-                sizes="96px"
+                unoptimized={userProfileImageUnoptimized(item.url)}
+                sizes={
+                  compactThumbs
+                    ? "(max-width: 640px) 15vw, (max-width: 1024px) 10vw, 120px"
+                    : "(max-width: 768px) 25vw, 160px"
+                }
+                quality={90}
                 className="object-cover"
               />
               {active ? (
-                <span className="bg-sc-accent absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full text-white shadow-sm">
-                  <Check className="size-3" strokeWidth={3} />
+                <span
+                  className={cn(
+                    "bg-sc-accent absolute flex items-center justify-center rounded-full text-white shadow-sm",
+                    compactThumbs
+                      ? "top-0.5 right-0.5 size-3.5"
+                      : "top-1.5 right-1.5 size-5",
+                  )}
+                >
+                  <Check
+                    className={compactThumbs ? "size-2" : "size-3"}
+                    strokeWidth={3}
+                  />
                 </span>
               ) : null}
             </button>
@@ -258,7 +292,11 @@ export function MediaLibrary({
   return (
     <div
       className={cn(
-        isOverlay ? "flex h-full min-h-[240px] flex-col gap-3" : "space-y-4",
+        isOverlay
+          ? "flex h-full min-h-[240px] flex-col gap-3"
+          : useFillLayout
+            ? "flex h-full min-h-0 flex-col gap-4"
+            : "space-y-4",
         className,
       )}
       onDragEnter={(event) => {
@@ -298,10 +336,12 @@ export function MediaLibrary({
       />
 
       {dropZone}
-      {toolbar}
+      <div className={cn(useFillLayout && "shrink-0")}>{toolbar}</div>
 
       {isOverlay ? (
         <div className="min-h-0 flex-1 overflow-y-auto p-1">{grid}</div>
+      ) : useFillLayout ? (
+        <div className="min-h-0 flex-1 overflow-y-auto">{grid}</div>
       ) : (
         grid
       )}

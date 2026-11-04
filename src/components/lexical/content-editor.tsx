@@ -63,6 +63,10 @@ import { StepsSectionNode } from "~/components/lexical/steps-node";
 import { TeamSectionNode } from "~/components/lexical/team-node";
 import { ServiceOfferingsSectionNode } from "~/components/lexical/service-offerings-node";
 import { EngagementModelsSectionNode } from "~/components/lexical/engagement-models-node";
+import { FaqSectionNode } from "~/components/lexical/faq-node";
+import { LegalDocumentSectionNode } from "~/components/lexical/legal-document-node";
+import { BlogSectionNode } from "~/components/lexical/blog-node";
+import { ContentEditorPostsProvider } from "~/components/lexical/content-editor-posts-context";
 import { ContentBlockInserter } from "~/components/lexical/content-block-inserter";
 import { ContentDraggableBlockPlugin } from "~/components/lexical/content-draggable-block-plugin";
 import { ContentEditorProjectsProvider } from "~/components/lexical/content-editor-projects-context";
@@ -83,6 +87,7 @@ import {
   type ContentDocument,
 } from "~/lib/content";
 import type { Project } from "~/content/projects";
+import type { PublicContentSummary } from "~/server/content/queries";
 import { appQuoteInner, appQuoteOuter } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -366,11 +371,14 @@ export function ContentEditor({
   initialDocument,
   namespace = "simplycode-content",
   previewProjects = [],
+  previewPosts = [],
 }: {
   initialDocument?: ContentDocument | null;
   namespace?: string;
   /** Published projects from studio (work / portfolio blocks in the canvas). */
   previewProjects?: Project[];
+  /** Published posts for the blog section block in the canvas. */
+  previewPosts?: PublicContentSummary[];
 }) {
   const [document] = useState<ContentDocument>(
     () => parseContentDocument(initialDocument) ?? emptyContentDocument(),
@@ -401,6 +409,9 @@ export function ContentEditor({
         TeamSectionNode,
         ServiceOfferingsSectionNode,
         EngagementModelsSectionNode,
+        BlogSectionNode,
+        FaqSectionNode,
+        LegalDocumentSectionNode,
         QuoteInnerNode,
       ],
       theme: EDITOR_THEME,
@@ -427,7 +438,8 @@ export function ContentEditor({
     <div className="min-w-0">
       <input type="hidden" name="body" value={serialized} readOnly />
       <ContentEditorProjectsProvider projects={previewProjects}>
-        <LexicalComposer initialConfig={initialConfig}>
+        <ContentEditorPostsProvider posts={previewPosts}>
+          <LexicalComposer initialConfig={initialConfig}>
           <Toolbar />
           <div ref={editorBodyRef} className="content-editor-body relative">
             <RichTextPlugin
@@ -449,6 +461,7 @@ export function ContentEditor({
             <OnChangePlugin onChange={handleChange} />
           </div>
         </LexicalComposer>
+        </ContentEditorPostsProvider>
       </ContentEditorProjectsProvider>
     </div>
   );

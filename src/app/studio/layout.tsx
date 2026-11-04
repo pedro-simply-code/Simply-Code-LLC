@@ -71,6 +71,18 @@ export default async function StudioLayout({
             icon: "content" as const,
             section: "Manage",
           },
+          {
+            href: "/studio/content/navigation",
+            label: "Navigation",
+            icon: "navigation" as const,
+            section: "Manage",
+          },
+          {
+            href: "/studio/content/media",
+            label: "Media library",
+            icon: "media" as const,
+            section: "Manage",
+          },
         ]
       : []),
     ...(reviewer

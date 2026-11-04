@@ -78,16 +78,18 @@ export function ContentFormSidebar({
           className="min-h-24"
         />
       </Field>
-      <ContentPublishingOptions
-        key={`${entryId ?? "new"}-${kind}-${isHomepage}-${showInNav}`}
-        kind={kind}
-        entryId={entryId}
-        defaultIsHomepage={isHomepage}
-        defaultShowInNav={showInNav}
-        defaultNavLabel={navLabel}
-        currentHomepage={currentHomepage}
-        onHomepageChange={onHomepageChange}
-      />
+      {kind === "page" ? (
+        <ContentPublishingOptions
+          key={`${entryId ?? "new"}-${kind}-${isHomepage}-${showInNav}`}
+          kind={kind}
+          entryId={entryId}
+          defaultIsHomepage={isHomepage}
+          defaultShowInNav={showInNav}
+          defaultNavLabel={navLabel}
+          currentHomepage={currentHomepage}
+          onHomepageChange={onHomepageChange}
+        />
+      ) : null}
     </div>
   );
 }

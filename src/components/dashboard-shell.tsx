@@ -11,7 +11,9 @@ import {
   FileText,
   FolderKanban,
   Globe,
+  Image,
   LayoutDashboard,
+  ListOrdered,
   Mail,
   Menu,
   PanelLeftClose,
@@ -39,7 +41,9 @@ export type DashboardIcon =
   | "clients"
   | "settings"
   | "profile"
-  | "content";
+  | "content"
+  | "navigation"
+  | "media";
 
 export type DashboardNavItem = {
   href: string;
@@ -60,6 +64,8 @@ const ICONS: Record<DashboardIcon, LucideIcon> = {
   settings: Settings,
   profile: User,
   content: FileText,
+  navigation: ListOrdered,
+  media: Image,
 };
 
 type DashboardShellProps = {
@@ -134,15 +140,20 @@ export function DashboardShell({
     return Array.from(grouped.entries());
   }, [nav]);
 
-  const isActive = (href: string) =>
-    href === rootHref
-      ? pathname === rootHref
-      : pathname === href || pathname.startsWith(`${href}/`);
+  const activeHref = useMemo(() => {
+    const matches = nav.filter((item) =>
+      item.href === rootHref
+        ? pathname === rootHref
+        : pathname === item.href || pathname.startsWith(`${item.href}/`),
+    );
+    matches.sort((a, b) => b.href.length - a.href.length);
+    return matches[0]?.href;
+  }, [nav, pathname, rootHref]);
+
+  const isActive = (href: string) => activeHref === href;
 
   const currentLabel =
-    [...nav]
-      .sort((a, b) => b.href.length - a.href.length)
-      .find((item) => isActive(item.href))?.label ?? subtitle;
+    nav.find((item) => item.href === activeHref)?.label ?? subtitle;
 
   const displayName = user.name?.trim() || user.email || "Account";
   const initials =

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { ListOrdered, Plus } from "lucide-react";
 import { StudioContentFilters } from "~/components/studio/content-filters";
 import {
   StudioContentList,
@@ -16,7 +16,11 @@ import {
   studioPageSummary,
 } from "~/lib/studio-pagination";
 import { parseStudioView } from "~/lib/studio-view";
-import { appEmptyState, appPrimaryButtonStudioSm } from "~/lib/surface";
+import {
+  appEmptyState,
+  appOutlineButtonStudio,
+  appPrimaryButtonStudio,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 import { requireContentManager } from "~/server/authz";
 import { listContentEntries } from "~/server/content/queries";
@@ -60,6 +64,7 @@ export default async function ContentIndexPage({
     title: entry.title,
     excerpt: entry.excerpt,
     status: entry.status,
+    showInNav: entry.showInNav,
     updatedAt: entry.updatedAt,
     publishedAt: entry.publishedAt,
   }));
@@ -73,14 +78,22 @@ export default async function ContentIndexPage({
     <div>
       <StudioHeader
         title="Content"
-        description="Pages at /{slug}, posts at /blog/{slug}. Homepage and nav options are under Publishing when editing."
+        description="Pages and posts. Use Published and Menu toggles in the list, or open an entry to edit. Order header links under Navigation."
         actions={
-          <Link
-            href="/studio/content/new"
-            className={cn(appPrimaryButtonStudioSm, "gap-1.5")}
-          >
-            <Plus className="size-3.5" /> New content
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/studio/content/navigation"
+              className={appOutlineButtonStudio}
+            >
+              <ListOrdered className="size-3.5" /> Navigation
+            </Link>
+            <Link
+              href="/studio/content/new"
+              className={cn(appPrimaryButtonStudio, "gap-1.5")}
+            >
+              <Plus className="size-3.5" /> New content
+            </Link>
+          </div>
         }
       />
 

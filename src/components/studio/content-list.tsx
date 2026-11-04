@@ -1,8 +1,11 @@
 import Link from "next/link";
+import {
+  ContentNavMenuToggle,
+  ContentPublishedToggle,
+} from "~/components/studio/content-list-toggles";
 import { ArrowRight, ExternalLink, Pencil } from "lucide-react";
 import {
   CONTENT_KIND_LABEL,
-  CONTENT_STATUS_LABEL,
   contentPublicPath,
   formatContentDate,
   type ContentKindName,
@@ -24,24 +27,10 @@ export type StudioContentRow = {
   title: string;
   excerpt: string;
   status: ContentStatusName;
+  showInNav: boolean;
   updatedAt: Date;
   publishedAt: Date | null;
 };
-
-function StatusBadge({ status }: { status: ContentStatusName }) {
-  const published = status === "published";
-  return (
-    <span
-      className={
-        published
-          ? "rounded-md bg-[#e8f5e9] px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-[#2e7d32] uppercase"
-          : "bg-sc-section-alt rounded-md px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-[#6f6a60] uppercase shadow-[0_1px_2px_rgba(21,19,15,0.05)]"
-      }
-    >
-      {CONTENT_STATUS_LABEL[status]}
-    </span>
-  );
-}
 
 function ContentActions({ entry }: { entry: StudioContentRow }) {
   return (
@@ -98,7 +87,14 @@ function ContentGridCard({ entry }: { entry: StudioContentRow }) {
             )}
           </p>
         </div>
-        <StatusBadge status={entry.status} />
+        <ContentPublishedToggle id={entry.id} status={entry.status} />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <ContentNavMenuToggle
+          id={entry.id}
+          kind={entry.kind}
+          showInNav={entry.showInNav}
+        />
       </div>
       <dl className="mt-4 grid gap-2 text-[11px]">
         <div>
@@ -154,19 +150,21 @@ export function StudioContentList({
   return (
     <>
       <div className={`hidden overflow-x-auto md:block ${studioContentPanel}`}>
-        <table className="w-full min-w-[760px] table-fixed text-left text-sm">
+        <table className="w-full min-w-[920px] table-fixed text-left text-sm">
           <colgroup>
-            <col className="w-[28%]" />
+            <col className="w-[26%]" />
+            <col className="w-[8%]" />
+            <col className="w-[12%]" />
+            <col className="w-[12%]" />
             <col className="w-[10%]" />
-            <col className="w-[12%]" />
-            <col className="w-[12%]" />
-            <col className="w-[38%]" />
+            <col className="w-[32%]" />
           </colgroup>
           <thead className="bg-sc-canvas/95">
             <tr className="text-[10px] font-bold tracking-[0.14em] text-[#6f6a60] uppercase">
               <th className="px-4 py-3">Title</th>
               <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Published</th>
+              <th className="px-4 py-3">Menu</th>
               <th className="px-4 py-3">Updated</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -193,7 +191,17 @@ export function StudioContentList({
                   {CONTENT_KIND_LABEL[entry.kind]}
                 </td>
                 <td className="px-4 py-3">
-                  <StatusBadge status={entry.status} />
+                  <ContentPublishedToggle
+                    id={entry.id}
+                    status={entry.status}
+                  />
+                </td>
+                <td className="px-4 py-3">
+                  <ContentNavMenuToggle
+                    id={entry.id}
+                    kind={entry.kind}
+                    showInNav={entry.showInNav}
+                  />
                 </td>
                 <td className="px-4 py-3 text-[11px] whitespace-nowrap text-[#9a9488]">
                   {formatContentDate(entry.updatedAt)}
@@ -230,11 +238,18 @@ export function StudioContentList({
             )}
                 </p>
               </div>
-              <StatusBadge status={entry.status} />
+              <ContentPublishedToggle id={entry.id} status={entry.status} />
             </div>
             <p className="mt-2 text-[11px] text-[#57524a]">
               {CONTENT_KIND_LABEL[entry.kind]}
             </p>
+            <div className="mt-2">
+              <ContentNavMenuToggle
+                id={entry.id}
+                kind={entry.kind}
+                showInNav={entry.showInNav}
+              />
+            </div>
             <p className="mt-2 text-[10px] text-[#9a9488]">
               Updated {formatContentDate(entry.updatedAt)}
             </p>

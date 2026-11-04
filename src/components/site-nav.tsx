@@ -14,29 +14,17 @@ export type SiteNavCmsLink = {
   href: string;
 };
 
-const STATIC_MENU = [
-  { label: "Work", href: "/work" },
-  { label: "Services", href: "/services" },
-  { label: "About", href: "/about" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
-];
+const FALLBACK_NAV: SiteNavCmsLink[] = [{ label: "Home", href: "/" }];
 
-function buildMenu(cmsLinks: SiteNavCmsLink[]) {
-  const cmsByHref = new Map(cmsLinks.map((link) => [link.href, link]));
+/** Header menu comes only from published CMS pages with “Show in main navigation”. */
+function buildMenu(cmsLinks: SiteNavCmsLink[]): SiteNavCmsLink[] {
+  if (cmsLinks.length === 0) return FALLBACK_NAV;
+  return cmsLinks;
+}
 
-  const mergedStatic = STATIC_MENU.map((item) => {
-    const cms = cmsByHref.get(item.href);
-    if (cms) {
-      return { label: cms.label, href: cms.href };
-    }
-    return item;
-  });
-
-  const staticHrefs = new Set(STATIC_MENU.map((item) => item.href));
-  const extraCms = cmsLinks.filter((link) => !staticHrefs.has(link.href));
-
-  return [...mergedStatic, ...extraCms];
+function navLinkIsActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function SiteNav({ cmsLinks = [] }: { cmsLinks?: SiteNavCmsLink[] }) {
@@ -44,8 +32,7 @@ export function SiteNav({ cmsLinks = [] }: { cmsLinks?: SiteNavCmsLink[] }) {
   const pathname = usePathname();
   const menu = buildMenu(cmsLinks);
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => navLinkIsActive(pathname, href);
 
   return (
     <header className="bg-sc-canvas/95 sticky top-0 z-50 border-b border-[#15130f]/10 backdrop-blur-md">
