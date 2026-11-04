@@ -77,18 +77,34 @@ export function BlockDecoratorToolbar({
   children?: ReactNode;
 }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-end p-3 opacity-0 transition-opacity group-hover/block:opacity-100 focus-within:opacity-100">
-      <div className="pointer-events-auto flex items-center gap-1 rounded-md bg-[#15130f]/90 px-1.5 py-1 text-white shadow-lg backdrop-blur">
-        <span className="px-1.5 text-[9px] font-bold tracking-[0.16em] text-white/50 uppercase">
+    /**
+     * Sits in the left gutter, right after the draggable-block handle, so both
+     * controls form a single cluster at the top-left of the hovered block.
+     *
+     * The handle is 28px wide and starts at `-1rem` (see
+     * `content-draggable-block-plugin.tsx`), hence `ml-5`.
+     *
+     * Vertically it is centred on the block's first line box — the same anchor
+     * `LexicalDraggableBlockPlugin` uses (`top + lineHeight / 2`). The editor
+     * inherits `line-height: 1.5` (24px at 16px), so `top-3` + `-translate-y-1/2`
+     * puts the pill's centre at 12px from the block's top, matching the handle.
+     */
+    <div
+      style={{ top: "var(--sc-block-handle-center, 12px)" }}
+      className="pointer-events-none absolute left-0 z-20 ml-5 -translate-y-1/2 opacity-0 transition-opacity group-hover/block:opacity-100 focus-within:opacity-100"
+    >
+      <div className="pointer-events-auto flex items-center gap-1 rounded-md border border-sc-accent/20 bg-white/95 px-1.5 py-1 text-[#6f6a60] shadow-md">
+        <span className="px-1.5 text-[9px] font-bold tracking-[0.16em] text-[#9a9488] uppercase">
           {label}
         </span>
+        <span className="mx-0.5 h-4 w-px bg-sc-accent/15" aria-hidden />
         {children}
         <button
           type="button"
           onClick={onRemove}
           title={`Remove ${label} section`}
           aria-label={`Remove ${label} section`}
-          className="inline-flex size-7 items-center justify-center rounded text-white/75 transition-colors hover:bg-red-500/80 hover:text-white"
+          className="inline-flex size-7 items-center justify-center rounded text-[#9a9488] transition-colors hover:bg-red-500/10 hover:text-red-600"
         >
           <Trash2 className="size-3.5" />
         </button>
@@ -113,7 +129,7 @@ export function ToolbarIconButton({
       aria-label={label}
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
-      className="inline-flex size-7 items-center justify-center rounded text-white/75 transition-colors hover:bg-white/10 hover:text-white"
+      className="inline-flex size-7 items-center justify-center rounded text-[#6f6a60] transition-colors hover:bg-sc-accent/10 hover:text-sc-accent"
     >
       <Icon className="size-3.5" />
     </button>

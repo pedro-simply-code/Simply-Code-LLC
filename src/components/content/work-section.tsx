@@ -65,7 +65,10 @@ export function WorkSection({
   return (
     <section id={sectionId} className={cn(appSectionBand, className)}>
       <div className={appSectionContainer}>
-        <WorkSectionHeader data={data} introOverride={introOverride} />
+        {/* Portfolio starts at the filter bar; the editable intro is featured-only. */}
+        {isPortfolio ? null : (
+          <WorkSectionHeader data={data} introOverride={introOverride} />
+        )}
 
         {isPortfolio ? (
           projects.length > 0 ? (

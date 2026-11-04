@@ -24,7 +24,7 @@ import {
   DEFAULT_HERO,
   DEFAULT_PAGE_HEADER_SECTION,
   DEFAULT_PAGE_INTRO_SECTION,
-  DEFAULT_PORTFOLIO_SECTION,
+  DEFAULT_PROJECTS_SECTION,
   DEFAULT_REVIEWS_SECTION,
   DEFAULT_SERVICES_SECTION,
   DEFAULT_STEPS_SECTION,
@@ -57,10 +57,13 @@ function ScaledPreviewFrame({ children }: { children: ReactNode }) {
     return () => observer.disconnect();
   }, []);
 
+  // Previews are portaled into <body>, so they would otherwise inherit the
+  // app theme foreground (near-white in dark mode) on a white canvas. The site
+  // ink token is theme-independent, so pin the text color at the frame.
   return (
     <div
       ref={hostRef}
-      className="relative mt-2 w-full overflow-hidden rounded-md border border-[#15130f]/10 bg-white shadow-[inset_0_0_0_1px_rgba(21,19,15,0.04)]"
+      className="text-sc-ink relative mt-2 w-full overflow-hidden rounded-md border border-[#15130f]/10 bg-white shadow-[inset_0_0_0_1px_rgba(21,19,15,0.04)]"
       style={{ height: PREVIEW_VIEWPORT_HEIGHT }}
     >
       <div
@@ -77,6 +80,17 @@ function ScaledPreviewFrame({ children }: { children: ReactNode }) {
 }
 
 function TextBlockPreview({ blockId }: { blockId: InsertContentBlockId }) {
+  if (blockId === "h1") {
+    return (
+      <ScaledPreviewFrame>
+        <div className="bg-sc-section px-10 py-8">
+          <h1 className="text-[clamp(1.9rem,3.4vw,2.8rem)] font-black tracking-[-0.03em] uppercase">
+            Page title
+          </h1>
+        </div>
+      </ScaledPreviewFrame>
+    );
+  }
   if (blockId === "h2") {
     return (
       <ScaledPreviewFrame>
@@ -103,7 +117,9 @@ function TextBlockPreview({ blockId }: { blockId: InsertContentBlockId }) {
     return (
       <ScaledPreviewFrame>
         <div className="bg-sc-section px-10 py-6">
-          <blockquote className={cn(appQuoteOuter, appQuoteInner, "not-italic")}>
+          <blockquote
+            className={cn(appQuoteOuter, appQuoteInner, "not-italic")}
+          >
             A pull quote that highlights an important idea from the page.
           </blockquote>
         </div>
@@ -114,8 +130,8 @@ function TextBlockPreview({ blockId }: { blockId: InsertContentBlockId }) {
     <ScaledPreviewFrame>
       <div className="bg-sc-section px-10 py-6">
         <p className="text-[16px] leading-[1.8] text-[#3f3b34]">
-          Body copy for a paragraph block. Use this for long-form content between
-          sections.
+          Body copy for a paragraph block. Use this for long-form content
+          between sections.
         </p>
       </div>
     </ScaledPreviewFrame>
@@ -141,10 +157,10 @@ function SectionPreview({
           projects={catalogProjects.slice(0, DEFAULT_WORK_SECTION.projectCount)}
         />
       );
-    case "portfolio":
+    case "projects":
       return (
         <WorkSection
-          data={{ ...DEFAULT_PORTFOLIO_SECTION, showTagFilter: false }}
+          data={{ ...DEFAULT_PROJECTS_SECTION, showTagFilter: false }}
           projects={catalogProjects}
         />
       );
@@ -186,6 +202,7 @@ export function ContentBlockPreview({
 
   if (
     blockId === "paragraph" ||
+    blockId === "h1" ||
     blockId === "h2" ||
     blockId === "h3" ||
     blockId === "quote"

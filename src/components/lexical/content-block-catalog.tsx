@@ -3,6 +3,7 @@ import {
   Contact,
   FileText,
   Grid3X3,
+  Heading,
   Heading2,
   Heading3,
   LayoutGrid,
@@ -51,8 +52,8 @@ export const CONTENT_BLOCK_CATALOG: ContentBlockDefinition[] = [
     icon: Briefcase,
   },
   {
-    id: "portfolio",
-    label: "Portfolio",
+    id: "projects",
+    label: "Projects",
     description: "Full project listing with optional tag filter",
     category: "sections",
     icon: LayoutGrid,
@@ -126,6 +127,13 @@ export const CONTENT_BLOCK_CATALOG: ContentBlockDefinition[] = [
     description: "Body text block",
     category: "text",
     icon: FileText,
+  },
+  {
+    id: "h1",
+    label: "Heading 1",
+    description: "Page title or hero headline",
+    category: "text",
+    icon: Heading,
   },
   {
     id: "h2",

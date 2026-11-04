@@ -603,7 +603,7 @@ html[data-site-surface="flat"] {
     margin-top: 0;
   }
 
-  .content-editor-body .content-hero-node .group\/hero {
+  .content-editor-body .content-hero-node .group\/block {
     margin-top: 0;
   }
 
@@ -617,6 +617,15 @@ html[data-site-surface="flat"] {
     opacity: 1 !important;
     transform: none !important;
     animation: none !important;
+  }
+
+  /* Lexical draggable block handle + drop indicator (playground-style). */
+  .content-editor-body .draggable-block-menu {
+    will-change: transform;
+  }
+
+  .content-editor-body .draggable-block-target-line {
+    will-change: transform, width, opacity;
   }
 
   .site-radius-lg {

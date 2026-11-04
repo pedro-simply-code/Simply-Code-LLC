@@ -151,8 +151,8 @@ export const DEFAULT_WORK_SECTION: WorkSectionData = {
   showTagFilter: false,
 };
 
-export const DEFAULT_PORTFOLIO_SECTION: WorkSectionData = {
-  eyebrow: "Portfolio",
+export const DEFAULT_PROJECTS_SECTION: WorkSectionData = {
+  eyebrow: "Projects",
   headline: "Work That Speaks\nFor Itself",
   description:
     "Platform rebuilds, custom WordPress themes and long-term partnerships. Every project below was designed, built or led by our team.",
@@ -162,6 +162,10 @@ export const DEFAULT_PORTFOLIO_SECTION: WorkSectionData = {
   showCta: false,
   projectCount: 6,
   emptyMessage: "No projects published yet.",
+  /**
+   * Persisted JSON value stays `"portfolio"` so existing CMS documents keep
+   * working; the editor labels this block "Projects".
+   */
   variant: "portfolio",
   showTagFilter: true,
 };
@@ -189,7 +193,7 @@ export function normalizeWorkSectionData(value: unknown): WorkSectionData {
     showTagFilter: bool(
       source.showTagFilter,
       variant === "portfolio"
-        ? DEFAULT_PORTFOLIO_SECTION.showTagFilter
+        ? DEFAULT_PROJECTS_SECTION.showTagFilter
         : false,
     ),
   };

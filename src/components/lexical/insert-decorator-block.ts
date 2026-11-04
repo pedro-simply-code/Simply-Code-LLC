@@ -180,3 +180,60 @@ export function $insertDecoratorBlock(createNode: () => LexicalNode) {
   $finalizeDecoratorDocument();
   $ensureTrailingEmptyParagraph();
 }
+
+/** Insert paragraph, heading, or quote at the current block — no split mid-paragraph. */
+export function $insertProseBlock(createNode: () => LexicalNode) {
+  const block = createNode();
+  const selection = $getSelection();
+  const root = $getRoot();
+
+  if ($isRangeSelection(selection)) {
+    const rootBlock = $getRootChildBlock(selection.anchor.getNode());
+
+    if (rootBlock !== null && $isParagraphNode(rootBlock)) {
+      if ($isEmptyParagraph(rootBlock)) {
+        rootBlock.replace(block);
+      } else {
+        rootBlock.insertAfter(block);
+      }
+    } else if (rootBlock !== null && $isElementNode(rootBlock)) {
+      rootBlock.insertAfter(block);
+    } else {
+      root.append(block);
+    }
+  } else {
+    const first = root.getFirstChild();
+    if (
+      first !== null &&
+      $isEmptyParagraph(first) &&
+      first.getNextSibling() === null
+    ) {
+      first.replace(block);
+    } else {
+      const last = root.getLastChild();
+      if (last !== null && $isEmptyParagraph(last)) {
+        last.replace(block);
+      } else {
+        root.append(block);
+      }
+    }
+  }
+
+  $stripLeadingEmptyRootParagraphs();
+  $removeEmptyParagraph(block.getPreviousSibling());
+  $removeDuplicateEmptyParagraphAfter(block);
+  $ensureTrailingEmptyParagraph();
+
+  if ($isElementNode(block)) {
+    block.selectStart();
+  }
+}
+
+function $removeDuplicateEmptyParagraphAfter(block: LexicalNode) {
+  const next = block.getNextSibling();
+  if (next === null || !$isEmptyParagraph(next)) return;
+  const afterNext = next.getNextSibling();
+  if (afterNext !== null && $isEmptyParagraph(afterNext)) {
+    afterNext.remove();
+  }
+}

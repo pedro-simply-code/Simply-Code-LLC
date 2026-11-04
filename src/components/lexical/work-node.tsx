@@ -123,7 +123,7 @@ function WorkSectionEditor({
   const [previewEmpty, setPreviewEmpty] = useState(false);
   const catalogProjects = useContentEditorProjects();
   const isPortfolio = data.variant === "portfolio";
-  const blockLabel = isPortfolio ? "Portfolio" : "Work";
+  const blockLabel = isPortfolio ? "Projects" : "Work";
 
   const projects = previewEmpty
     ? []
@@ -205,10 +205,10 @@ function WorkSectionEditor({
         <SectionOptionsDialog
           triggerLabel="Section options"
           icon={Settings2}
-          title={isPortfolio ? "Portfolio" : "Featured work"}
+          title={isPortfolio ? "Projects" : "Featured work"}
           description={
             isPortfolio
-              ? "Shows published projects from the studio catalog. Toggle the tag filter to match the /work page."
+              ? "Shows every published project from the studio catalog. Toggle the tag filter to match the /work page."
               : "Projects load from the site catalog when published. Edit headings and copy on the canvas."
           }
         >
@@ -256,7 +256,8 @@ function WorkSectionEditor({
       <WorkSection
         data={data}
         projects={projects}
-        introOverride={introFields}
+        // Portfolio has no intro block — it starts at the filter bar.
+        introOverride={isPortfolio ? undefined : introFields}
         ctaSlot={ctaSlot}
         emptyMessageOverride={
           <InlineText

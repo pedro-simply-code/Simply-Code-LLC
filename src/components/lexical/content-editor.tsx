@@ -35,7 +35,7 @@ import {
   type InitialEditorStateType,
   type TextFormatType,
 } from "lexical";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Bold,
   Code,
@@ -62,6 +62,7 @@ import { FeatureGridSectionNode } from "~/components/lexical/feature-grid-node";
 import { StepsSectionNode } from "~/components/lexical/steps-node";
 import { TeamSectionNode } from "~/components/lexical/team-node";
 import { ContentBlockInserter } from "~/components/lexical/content-block-inserter";
+import { ContentDraggableBlockPlugin } from "~/components/lexical/content-draggable-block-plugin";
 import { ContentEditorProjectsProvider } from "~/components/lexical/content-editor-projects-context";
 import { BlockDecoratorRootPlugin } from "~/components/lexical/block-decorator-root-plugin";
 import { LinkUrlPopover } from "~/components/lexical/link-url-popover";
@@ -111,7 +112,7 @@ const EDITOR_THEME = {
   },
 };
 
-type BlockType = "paragraph" | "h2" | "h3" | "quote";
+type BlockType = "paragraph" | "h1" | "h2" | "h3" | "quote";
 
 function ToolbarButton({
   label,
@@ -184,7 +185,15 @@ function Toolbar() {
 
         if (heading) {
           const tag = heading.getTag();
-          setBlock(tag === "h3" ? "h3" : tag === "h2" ? "h2" : "h2");
+          setBlock(
+            tag === "h1"
+              ? "h1"
+              : tag === "h3"
+                ? "h3"
+                : tag === "h2"
+                  ? "h2"
+                  : "h2",
+          );
         } else if (quoteNode) {
           setBlock("quote");
         } else {
@@ -249,6 +258,7 @@ function Toolbar() {
         className="focus:ring-sc-accent/40 mr-1 h-8 rounded border border-[#15130f]/15 bg-white px-2 text-[11px] font-semibold tracking-[0.06em] uppercase focus:ring-2 focus:outline-none"
       >
         <option value="paragraph">Paragraph</option>
+        <option value="h1">Heading 1</option>
         <option value="h2">Heading 2</option>
         <option value="h3">Heading 3</option>
         <option value="quote">Quote</option>
@@ -404,13 +414,20 @@ export function ContentEditor({
     setSerialized(JSON.stringify(editorState.toJSON()));
   };
 
+  const editorBodyRef = useRef<HTMLDivElement>(null);
+  const [editorAnchor, setEditorAnchor] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setEditorAnchor(editorBodyRef.current);
+  }, []);
+
   return (
     <div className="min-w-0">
       <input type="hidden" name="body" value={serialized} readOnly />
       <ContentEditorProjectsProvider projects={previewProjects}>
         <LexicalComposer initialConfig={initialConfig}>
           <Toolbar />
-          <div className="content-editor-body relative">
+          <div ref={editorBodyRef} className="content-editor-body relative">
             <RichTextPlugin
               contentEditable={
                 <ContentEditable
@@ -421,6 +438,7 @@ export function ContentEditor({
               placeholder={<Placeholder />}
               ErrorBoundary={LexicalErrorBoundary}
             />
+            <ContentDraggableBlockPlugin anchorElem={editorAnchor} />
             <HistoryPlugin />
             <ListPlugin />
             <LinkPlugin />

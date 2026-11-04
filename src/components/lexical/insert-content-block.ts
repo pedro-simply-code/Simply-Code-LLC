@@ -5,13 +5,8 @@ import {
   $createHeadingNode,
   $createQuoteNode,
 } from "@lexical/rich-text";
-import { $insertNodeToNearestRoot } from "@lexical/utils";
 import {
   $createParagraphNode,
-  $getRoot,
-  $getSelection,
-  $isElementNode,
-  $isRangeSelection,
   type LexicalEditor,
 } from "lexical";
 import { $createHeroNode } from "~/components/lexical/hero-node";
@@ -26,7 +21,7 @@ import { $createPageIntroSectionNode } from "~/components/lexical/page-intro-nod
 import { $createFeatureGridSectionNode } from "~/components/lexical/feature-grid-node";
 import { $createStepsSectionNode } from "~/components/lexical/steps-node";
 import { $createTeamSectionNode } from "~/components/lexical/team-node";
-import { $insertDecoratorBlock } from "~/components/lexical/insert-decorator-block";
+import { $insertDecoratorBlock, $insertProseBlock } from "~/components/lexical/insert-decorator-block";
 import {
   DEFAULT_CONTACT_SECTION,
   DEFAULT_CTA_SECTION,
@@ -34,7 +29,7 @@ import {
   DEFAULT_HERO,
   DEFAULT_PAGE_HEADER_SECTION,
   DEFAULT_PAGE_INTRO_SECTION,
-  DEFAULT_PORTFOLIO_SECTION,
+  DEFAULT_PROJECTS_SECTION,
   DEFAULT_REVIEWS_SECTION,
   DEFAULT_SERVICES_SECTION,
   DEFAULT_STEPS_SECTION,
@@ -45,13 +40,14 @@ import {
 
 export type InsertContentBlockId =
   | "paragraph"
+  | "h1"
   | "h2"
   | "h3"
   | "quote"
   | "hero"
   | "services"
   | "work"
-  | "portfolio"
+  | "projects"
   | "reviews"
   | "why"
   | "contact"
@@ -84,9 +80,9 @@ export function insertContentBlock(
         );
         return;
       }
-      if (value === "portfolio") {
+      if (value === "projects") {
         $insertDecoratorBlock(() =>
-          $createWorkSectionNode(DEFAULT_PORTFOLIO_SECTION),
+          $createWorkSectionNode(DEFAULT_PROJECTS_SECTION),
         );
         return;
       }
@@ -146,13 +142,7 @@ export function insertContentBlock(
             ? $createParagraphNode()
             : $createHeadingNode(value);
 
-      if ($isRangeSelection($getSelection())) {
-        $insertNodeToNearestRoot(node);
-      } else {
-        $getRoot().append(node);
-      }
-
-      if ($isElementNode(node)) node.selectStart();
+      $insertProseBlock(() => node);
     },
     { onUpdate: () => editor.focus() },
   );

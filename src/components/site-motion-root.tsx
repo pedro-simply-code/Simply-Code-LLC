@@ -9,6 +9,8 @@ function motionDisabledOnDocument(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+const PENDING_REVEAL = ".site-reveal:not(.site-reveal-visible)";
+
 /** Observes `.site-reveal` on the public marketing site when motion is enabled. */
 export function SiteMotionRoot({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -34,16 +36,39 @@ export function SiteMotionRoot({ children }: { children: React.ReactNode }) {
       { rootMargin: "0px 0px -6% 0px", threshold: 0.06 },
     );
 
+    const register = (node: Node) => {
+      if (!(node instanceof Element)) return;
+      if (node.matches(PENDING_REVEAL)) observer.observe(node);
+      node.querySelectorAll(PENDING_REVEAL).forEach((el) => observer.observe(el));
+    };
+
+    const unregister = (node: Node) => {
+      if (!(node instanceof Element)) return;
+      if (node.matches(".site-reveal")) observer.unobserve(node);
+      node.querySelectorAll(".site-reveal").forEach((el) => observer.unobserve(el));
+    };
+
     const scan = () => {
       if (motionDisabledOnDocument()) return;
-      document
-        .querySelectorAll(".site-reveal:not(.site-reveal-visible)")
-        .forEach((el) => {
-          observer.observe(el);
-        });
+      document.querySelectorAll(PENDING_REVEAL).forEach((el) => observer.observe(el));
     };
 
     scan();
+
+    /**
+     * Client-rendered reveal blocks (portfolio filters, pagination, tabs…) mount
+     * after this effect ran, so they would stay at `opacity: 0` forever. Watch
+     * the DOM and register/unregister them as they appear and disappear.
+     */
+    const mutations = new MutationObserver((records) => {
+      if (motionDisabledOnDocument()) return;
+      for (const record of records) {
+        record.removedNodes.forEach(unregister);
+        record.addedNodes.forEach(register);
+      }
+    });
+    mutations.observe(document.body, { childList: true, subtree: true });
+
     const onReducedMotion = (event: MediaQueryListEvent) => {
       if (event.matches) {
         document.querySelectorAll(".site-reveal").forEach((el) => {
@@ -56,6 +81,7 @@ export function SiteMotionRoot({ children }: { children: React.ReactNode }) {
     reduced.addEventListener("change", onReducedMotion);
 
     return () => {
+      mutations.disconnect();
       observer.disconnect();
       reduced.removeEventListener("change", onReducedMotion);
     };

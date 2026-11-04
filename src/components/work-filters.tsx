@@ -17,27 +17,24 @@ export function WorkFilters({ projects }: { projects: Project[] }) {
     const tags = projects.flatMap((project) => project.tags);
     return Array.from(new Set(tags)).sort((a, b) => a.localeCompare(b));
   }, [projects]);
-  const [activeTags, setActiveTags] = useState<string[]>([]);
+  /** Single-select filter: `null` means "all projects". */
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
-    if (activeTags.length === 0) return projects;
+    if (activeTag === null) return projects;
     return projects.filter((project) =>
-      activeTags.some((selected) =>
-        project.tags.some((tag) => tagMatches(tag, selected)),
-      ),
+      project.tags.some((tag) => tagMatches(tag, activeTag)),
     );
-  }, [activeTags, projects]);
+  }, [activeTag, projects]);
 
   function toggleTag(tag: string) {
-    setActiveTags((current) => {
-      const has = current.some((t) => tagMatches(t, tag));
-      if (has) return current.filter((t) => !tagMatches(t, tag));
-      return [...current, tag];
-    });
+    setActiveTag((current) =>
+      current !== null && tagMatches(current, tag) ? null : tag,
+    );
   }
 
   function clearTags() {
-    setActiveTags([]);
+    setActiveTag(null);
   }
 
   if (projects.length === 0) {
@@ -57,10 +54,10 @@ export function WorkFilters({ projects }: { projects: Project[] }) {
         <button
           type="button"
           onClick={clearTags}
-          aria-pressed={activeTags.length === 0}
+          aria-pressed={activeTag === null}
           className={cn(
             filterButton,
-            activeTags.length === 0
+            activeTag === null
               ? "bg-sc-accent hover:bg-sc-accent text-white shadow-[0_2px_10px_rgba(21,19,15,0.18)]"
               : "text-sc-ink bg-transparent hover:bg-white",
           )}
@@ -68,7 +65,7 @@ export function WorkFilters({ projects }: { projects: Project[] }) {
           All
         </button>
         {tagFilters.map((filter) => {
-          const selected = activeTags.some((t) => tagMatches(t, filter));
+          const selected = activeTag !== null && tagMatches(activeTag, filter);
           return (
             <button
               key={filter}
@@ -88,11 +85,6 @@ export function WorkFilters({ projects }: { projects: Project[] }) {
         })}
         <span className="ml-auto text-right text-[12px] text-[#6f6a60]">
           {filtered.length} {filtered.length === 1 ? "project" : "projects"}
-          {activeTags.length > 0 ? (
-            <span className="mt-0.5 block text-[11px] text-[#9a9488]">
-              Matches any selected tag
-            </span>
-          ) : null}
         </span>
       </div>
 
@@ -104,14 +96,14 @@ export function WorkFilters({ projects }: { projects: Project[] }) {
           <WorkCard
             key={project.slug}
             project={project}
-            activeFilterTags={activeTags}
+            activeFilterTags={activeTag === null ? [] : [activeTag]}
           />
         ))}
       </div>
 
       {filtered.length === 0 ? (
         <p className="py-16 text-center text-[15px] text-[#57524a]">
-          No projects match the selected stack tags.
+          No projects match the selected stack.
         </p>
       ) : null}
     </div>

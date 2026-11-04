@@ -17,7 +17,11 @@ import {
   type ElementType,
   type ReactElement,
 } from "react";
-import { ArrowRight, Highlighter, Link2, Plus, Trash2, X } from "lucide-react";
+import { ArrowRight, Highlighter, Link2, Plus, X } from "lucide-react";
+import {
+  BlockDecoratorToolbar,
+  ToolbarIconButton,
+} from "~/components/lexical/decorator-section-shared";
 import {
   DEFAULT_HERO,
   HERO_NODE_TYPE,
@@ -553,45 +557,22 @@ function HeroBlockEditor({
     <div
       contentEditable={false}
       data-editor-block="hero"
-      className="group/hero text-sc-ink relative"
+      className="group/block text-sc-ink relative"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-end p-3 opacity-0 transition-opacity group-hover/hero:opacity-100 focus-within:opacity-100">
-        <div className="pointer-events-auto flex items-center gap-1 rounded-md bg-[#15130f]/90 px-1.5 py-1 text-white shadow-lg backdrop-blur">
-          <span className="px-1.5 text-[9px] font-bold tracking-[0.16em] text-white/50 uppercase">
-            Hero
-          </span>
-          <button
-            type="button"
-            title="Select text in the headline, then click to colour it"
-            aria-label="Accent selected headline text"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={applyAccent}
-            className="inline-flex size-7 items-center justify-center rounded text-white/75 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <Highlighter className="size-3.5" />
-          </button>
-          {data.highlight ? (
-            <button
-              type="button"
-              title="Clear headline accent"
-              aria-label="Clear headline accent"
-              onClick={() => update({ highlight: "" })}
-              className="inline-flex size-7 items-center justify-center rounded text-white/75 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <X className="size-3.5" />
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={remove}
-            title="Remove hero block"
-            aria-label="Remove hero block"
-            className="inline-flex size-7 items-center justify-center rounded text-white/75 transition-colors hover:bg-red-500/80 hover:text-white"
-          >
-            <Trash2 className="size-3.5" />
-          </button>
-        </div>
-      </div>
+      <BlockDecoratorToolbar label="Hero" onRemove={remove}>
+        <ToolbarIconButton
+          label="Accent selected headline text"
+          icon={Highlighter}
+          onClick={applyAccent}
+        />
+        {data.highlight ? (
+          <ToolbarIconButton
+            label="Clear headline accent"
+            icon={X}
+            onClick={() => update({ highlight: "" })}
+          />
+        ) : null}
+      </BlockDecoratorToolbar>
 
       <section
         className={cn(
