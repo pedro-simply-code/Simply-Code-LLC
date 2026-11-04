@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
 import { CtaSection } from "~/components/cta-section";
+import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { FAQ } from "~/content/faq";
 import { SITE } from "~/content/site";
 import { pageMetadata } from "~/lib/seo";
+import { getPublishedCmsPageOverride } from "~/server/content/cms-site-page";
 
 export const metadata = pageMetadata({
   title: "FAQ",
@@ -24,7 +26,12 @@ const faqJsonLd = {
   })),
 };
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const cms = await getPublishedCmsPageOverride("faq");
+  if (cms) {
+    return <CmsDocumentPage entry={cms} />;
+  }
+
   return (
     <>
       <script
@@ -34,7 +41,7 @@ export default function FaqPage() {
         }}
       />
 
-      <SiteNav />
+      <SiteNavShell />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">

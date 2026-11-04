@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContentRenderer } from "~/components/content/content-renderer";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import {
   contentPlainText,
   type ContentDocument,
@@ -60,7 +60,7 @@ export default async function BlogPostPage({ params }: PostProps) {
       id="main"
       className="bg-sc-canvas text-sc-ink min-h-screen antialiased"
     >
-      <SiteNav />
+      <SiteNavShell />
 
       <article className="mx-auto w-full">
         <ContentRenderer document={body} />

@@ -13,7 +13,7 @@ import {
 import { ClientProof } from "~/components/client-proof";
 import { ContactForm } from "~/components/contact-form";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { WorkCard } from "~/components/work-card";
 import { PROJECTS } from "~/content/projects";
 import { SERVICES } from "~/content/services";
@@ -90,7 +90,7 @@ export async function StaticHomePage() {
       id="main"
       className="bg-sc-canvas text-sc-ink min-h-screen antialiased"
     >
-      <SiteNav />
+      <SiteNavShell />
 
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-[#15130f]/10">

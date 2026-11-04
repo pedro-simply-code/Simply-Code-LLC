@@ -7,9 +7,10 @@ import {
   Palette,
   PenTool,
 } from "lucide-react";
+import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { ENGAGEMENT_MODELS, SERVICES } from "~/content/services";
 import { SITE } from "~/content/site";
 import { pageMetadata } from "~/lib/seo";
@@ -20,6 +21,7 @@ import {
   appPanel,
 } from "~/lib/surface";
 import { cn } from "~/lib/utils";
+import { getPublishedCmsPageOverride } from "~/server/content/cms-site-page";
 
 export const metadata = pageMetadata({
   title: "Services",
@@ -35,10 +37,15 @@ const SERVICE_ICONS = {
   "agency-partnerships": Handshake,
 } as const;
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const cms = await getPublishedCmsPageOverride("services");
+  if (cms) {
+    return <CmsDocumentPage entry={cms} />;
+  }
+
   return (
     <>
-      <SiteNav />
+      <SiteNavShell />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">

@@ -9,7 +9,12 @@ import { PerfectScrollArea } from "~/components/perfect-scroll-area";
 import { appIconButton } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
-const MENU = [
+export type SiteNavCmsLink = {
+  label: string;
+  href: string;
+};
+
+const STATIC_MENU = [
   { label: "Work", href: "/work" },
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
@@ -17,9 +22,27 @@ const MENU = [
   { label: "Contact", href: "/contact" },
 ];
 
-export function SiteNav() {
+function buildMenu(cmsLinks: SiteNavCmsLink[]) {
+  const cmsByHref = new Map(cmsLinks.map((link) => [link.href, link]));
+
+  const mergedStatic = STATIC_MENU.map((item) => {
+    const cms = cmsByHref.get(item.href);
+    if (cms) {
+      return { label: cms.label, href: cms.href };
+    }
+    return item;
+  });
+
+  const staticHrefs = new Set(STATIC_MENU.map((item) => item.href));
+  const extraCms = cmsLinks.filter((link) => !staticHrefs.has(link.href));
+
+  return [...mergedStatic, ...extraCms];
+}
+
+export function SiteNav({ cmsLinks = [] }: { cmsLinks?: SiteNavCmsLink[] }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const menu = buildMenu(cmsLinks);
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -37,9 +60,9 @@ export function SiteNav() {
         <BrandLogo href="/" />
 
         <nav aria-label="Main" className="hidden items-center gap-7 lg:flex">
-          {MENU.map((entry) => (
+          {menu.map((entry) => (
             <Link
-              key={entry.label}
+              key={entry.href}
               href={entry.href}
               aria-current={isActive(entry.href) ? "page" : undefined}
               className={cn(
@@ -76,9 +99,9 @@ export function SiteNav() {
         <PerfectScrollArea className="max-h-[80vh] border-t border-[#15130f]/10 lg:hidden">
           <div className="bg-sc-section-alt px-6 py-6">
             <nav aria-label="Mobile" className="flex flex-col gap-4">
-            {MENU.map((entry) => (
+            {menu.map((entry) => (
               <Link
-                key={entry.label}
+                key={entry.href}
                 href={entry.href}
                 onClick={() => setMobileOpen(false)}
                 className="border-b border-[#15130f]/10 pb-4 text-sm font-bold tracking-[0.14em] text-[#15130f] uppercase"

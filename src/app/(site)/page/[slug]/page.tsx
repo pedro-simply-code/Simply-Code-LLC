@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import {
   contentPlainText,
-  isHomepageCmsSlug,
+  contentPublicPath,
   type ContentDocument,
 } from "~/lib/content";
 import { getPublishedEntrySafe } from "~/server/content/queries";
@@ -18,19 +17,24 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-
-  if (isHomepageCmsSlug(slug)) {
-    return {
-      title: "Home",
-      alternates: { canonical: "/" },
-      robots: { index: false, follow: true },
-    };
-  }
-
   const entry = await getPublishedEntrySafe("page", slug);
 
   if (!entry) {
     return { title: "Page not found", robots: { index: false, follow: false } };
+  }
+
+  const canonical = contentPublicPath(
+    "page",
+    entry.slug,
+    entry.isHomepage,
+  );
+
+  if (entry.isHomepage) {
+    return {
+      title: entry.title,
+      robots: { index: false, follow: true },
+      alternates: { canonical: "/" },
+    };
   }
 
   const description =
@@ -40,7 +44,7 @@ export async function generateMetadata({
   return {
     title: entry.title,
     description,
-    alternates: { canonical: `/page/${entry.slug}` },
+    alternates: { canonical },
     openGraph: {
       title: entry.title,
       description,
@@ -52,16 +56,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function CmsPage({ params }: PageProps) {
+/** Legacy `/page/{slug}` URLs redirect to `/{slug}`. */
+export default async function LegacyPrefixedCmsPage({ params }: PageProps) {
   const { slug } = await params;
-
-  if (isHomepageCmsSlug(slug)) {
-    permanentRedirect("/");
-  }
-
   const entry = await getPublishedEntrySafe("page", slug);
 
   if (!entry) notFound();
 
-  return <CmsDocumentPage entry={entry} />;
+  permanentRedirect(
+    contentPublicPath("page", entry.slug, entry.isHomepage),
+  );
 }

@@ -1,5 +1,5 @@
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { SITE } from "~/content/site";
 import { pageMetadata } from "~/lib/seo";
 
@@ -15,7 +15,7 @@ const UPDATED = "October 2026";
 export default function TermsPage() {
   return (
     <>
-      <SiteNav />
+      <SiteNavShell />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt py-16 lg:py-24">

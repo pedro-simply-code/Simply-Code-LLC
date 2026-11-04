@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Clock, Mail, MapPin } from "lucide-react";
 import { ContactForm } from "~/components/contact-form";
+import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { SITE } from "~/content/site";
 import { pageMetadata } from "~/lib/seo";
 import { appPanel } from "~/lib/surface";
 import { cn } from "~/lib/utils";
+import { getPublishedCmsPageOverride } from "~/server/content/cms-site-page";
 
 export const metadata = pageMetadata({
   title: "Contact",
@@ -15,10 +17,15 @@ export const metadata = pageMetadata({
   path: "/contact",
 });
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const cms = await getPublishedCmsPageOverride("contact");
+  if (cms) {
+    return <CmsDocumentPage entry={cms} />;
+  }
+
   return (
     <>
-      <SiteNav />
+      <SiteNavShell />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">

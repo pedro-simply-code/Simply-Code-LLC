@@ -8,13 +8,17 @@ import { ContentEditor } from "~/components/lexical/content-editor";
 import { StudioHeader } from "~/components/studio/ui";
 import {
   contentErrorMessage,
-  contentHref,
+  contentPublicPath,
   formatContentDate,
   type ContentDocument,
 } from "~/lib/content";
 import { requireContentManager } from "~/server/authz";
 import { deleteContentEntry, saveContentEntry } from "~/server/content/actions";
-import { getContentEntry } from "~/server/content/queries";
+import {
+  getContentEntry,
+  getPublishedHomepageEntrySafe,
+} from "~/server/content/queries";
+import { getPublicProjectsSafe } from "~/server/studio/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +45,29 @@ export default async function EditContentPage({
   const entry = await getContentEntry(id);
   if (!entry) notFound();
 
+  const publishedHomepage = await getPublishedHomepageEntrySafe();
+  const currentHomepage =
+    publishedHomepage && publishedHomepage.id !== entry.id
+      ? {
+          id: publishedHomepage.id,
+          title: publishedHomepage.title,
+          href: contentPublicPath(
+            "page",
+            publishedHomepage.slug,
+            publishedHomepage.isHomepage,
+          ),
+        }
+      : null;
+
   const message = contentErrorMessage(error);
+
+  const publicPath = contentPublicPath(
+    entry.kind,
+    entry.slug,
+    entry.isHomepage,
+  );
+
+  const previewProjects = (await getPublicProjectsSafe()) ?? [];
 
   return (
     <div>
@@ -54,11 +80,11 @@ export default async function EditContentPage({
 
       <StudioHeader
         title="Edit content"
-        description={`${entry.kind === "post" ? "Post" : "Page"} · ${contentHref(entry.kind, entry.slug)} · updated ${formatContentDate(entry.updatedAt)}`}
+        description={`${entry.kind === "post" ? "Post" : "Page"} · ${publicPath} · updated ${formatContentDate(entry.updatedAt)}`}
         actions={
           entry.status === "published" ? (
             <Link
-              href={contentHref(entry.kind, entry.slug)}
+              href={publicPath}
               target="_blank"
               className="hover:bg-sc-accent inline-flex items-center gap-1.5 site-radius-md bg-[#15130f] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white uppercase"
             >
@@ -94,11 +120,17 @@ export default async function EditContentPage({
             status: entry.status,
             excerpt: entry.excerpt,
             coverImageUrl: entry.coverImageUrl ?? "",
+            entryId: entry.id,
+            isHomepage: entry.isHomepage,
+            showInNav: entry.showInNav,
+            navLabel: entry.navLabel ?? "",
+            currentHomepage,
           }}
           editor={
             <ContentEditor
               initialDocument={entry.body as ContentDocument}
               namespace={`content-${entry.id}`}
+              previewProjects={previewProjects}
             />
           }
           submitLabel="Save changes"

@@ -682,9 +682,8 @@ export const contentStatusEnum = pgEnum(
 );
 
 /**
- * Pages and posts share one table: same editor, same slug rules, same
- * publishing flow. `kind` decides the public route (`/page/{slug}` vs `/blog/{slug}`).
- * `body` is the serialized Lexical editor state.
+ * Pages and posts share one table. Pages publish at `/{slug}` (homepage at `/`);
+ * posts at `/blog/{slug}`. `body` is serialized Lexical editor state.
  */
 export const contentEntries = createTable(
   "content_entries",
@@ -696,6 +695,12 @@ export const contentEntries = createTable(
     excerpt: text("excerpt").notNull().default(""),
     coverImageUrl: text("cover_image_url"),
     status: contentStatusEnum("status").notNull().default("draft"),
+    /** When true (and published), this page is served at `/`. Only one page should be set at a time. */
+    isHomepage: boolean("is_homepage").notNull().default(false),
+    /** Show in the public site header navigation. */
+    showInNav: boolean("show_in_nav").notNull().default(false),
+    /** Optional nav label; defaults to title when empty. */
+    navLabel: text("nav_label"),
     body: jsonb("body").$type<ContentDocument>().notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     authorId: uuid("author_id").references(() => users.id, {

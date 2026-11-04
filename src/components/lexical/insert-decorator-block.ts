@@ -16,6 +16,11 @@ import { ReviewsSectionNode } from "~/components/lexical/reviews-node";
 import { WhySectionNode } from "~/components/lexical/why-node";
 import { ContactSectionNode } from "~/components/lexical/contact-node";
 import { CtaSectionNode } from "~/components/lexical/cta-node";
+import { PageHeaderSectionNode } from "~/components/lexical/page-header-node";
+import { PageIntroSectionNode } from "~/components/lexical/page-intro-node";
+import { FeatureGridSectionNode } from "~/components/lexical/feature-grid-node";
+import { StepsSectionNode } from "~/components/lexical/steps-node";
+import { TeamSectionNode } from "~/components/lexical/team-node";
 
 const BLOCK_DECORATOR_TYPES = new Set<string>([
   HeroNode.getType(),
@@ -25,6 +30,11 @@ const BLOCK_DECORATOR_TYPES = new Set<string>([
   WhySectionNode.getType(),
   ContactSectionNode.getType(),
   CtaSectionNode.getType(),
+  PageHeaderSectionNode.getType(),
+  PageIntroSectionNode.getType(),
+  FeatureGridSectionNode.getType(),
+  StepsSectionNode.getType(),
+  TeamSectionNode.getType(),
 ]);
 
 export function registerBlockDecoratorType(type: string) {

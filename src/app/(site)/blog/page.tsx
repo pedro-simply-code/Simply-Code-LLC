@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { formatContentDate } from "~/lib/content";
 import { appEmptyState, appPanel, appPanelHover } from "~/lib/surface";
 import { cn } from "~/lib/utils";
@@ -26,7 +26,7 @@ export default async function BlogIndexPage() {
       id="main"
       className="bg-sc-canvas text-sc-ink min-h-screen antialiased"
     >
-      <SiteNav />
+      <SiteNavShell />
 
       <section className="border-b border-[#15130f]/10">
         <div className="mx-auto max-w-[1400px] px-6 py-16 lg:py-24">

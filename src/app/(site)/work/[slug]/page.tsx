@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Star } from "lucide-react";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { PROJECTS, getAdjacentProjects, getProject } from "~/content/projects";
 import {
   getApprovedReviewForProjectSlugSafe,
@@ -132,7 +132,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         }}
       />
 
-      <SiteNav />
+      <SiteNavShell />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt border-b border-[#15130f]/10 pt-8 pb-16 lg:pb-20">

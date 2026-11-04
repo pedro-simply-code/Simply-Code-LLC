@@ -55,6 +55,7 @@ export default async function ContentIndexPage({
   const rows: StudioContentRow[] = entries.map((entry) => ({
     id: entry.id,
     kind: entry.kind,
+    isHomepage: entry.isHomepage,
     slug: entry.slug,
     title: entry.title,
     excerpt: entry.excerpt,
@@ -72,7 +73,7 @@ export default async function ContentIndexPage({
     <div>
       <StudioHeader
         title="Content"
-        description="Create pages and blog posts with the Lexical editor. Pages publish at /page/{slug}, posts under /blog."
+        description="Pages at /{slug}, posts at /blog/{slug}. Homepage and nav options are under Publishing when editing."
         actions={
           <Link
             href="/studio/content/new"

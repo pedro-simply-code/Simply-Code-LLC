@@ -19,10 +19,24 @@ export const CONTENT_KIND_LABEL: Record<ContentKindName, string> = {
   post: "Post",
 };
 
+/** @deprecated Prefer route template “Homepage” in Studio. */
+export const HOMEPAGE_CMS_SLUG = "home";
+
 export const CONTENT_STATUS_LABEL: Record<ContentStatusName, string> = {
   draft: "Draft",
   published: "Published",
 };
+
+export type ContentPathFields = {
+  kind: ContentKindName;
+  slug: string;
+  isHomepage?: boolean;
+};
+
+export function entryIsHomepage(entry: ContentPathFields): boolean {
+  if (entry.kind !== "page") return false;
+  return Boolean(entry.isHomepage) || entry.slug === HOMEPAGE_CMS_SLUG;
+}
 
 export function isContentKind(value: unknown): value is ContentKindName {
   return (
@@ -276,6 +290,7 @@ export {
   DEFAULT_SERVICES_SECTION,
   DEFAULT_WHY_SECTION,
   DEFAULT_WORK_SECTION,
+  DEFAULT_PORTFOLIO_SECTION,
   HOMEPAGE_BLOCK_NODE_TYPES,
   normalizeContactSectionData,
   normalizeCtaSectionData,
@@ -295,6 +310,39 @@ export {
   type WorkSectionData,
 } from "~/lib/homepage-sections";
 
+export {
+  DEFAULT_FEATURE_GRID_FEATURES,
+  DEFAULT_FEATURE_GRID_SECTION,
+  DEFAULT_PAGE_HEADER_SECTION,
+  DEFAULT_PAGE_INTRO_SECTION,
+  DEFAULT_STEPS_SECTION,
+  DEFAULT_TEAM_SECTION,
+  FEATURE_GRID_SECTION_NODE_TYPE,
+  normalizeFeatureGridSectionData,
+  normalizePageHeaderSectionData,
+  normalizePageIntroSectionData,
+  normalizeStepsSectionData,
+  normalizeTeamSectionData,
+  PAGE_HEADER_SECTION_NODE_TYPE,
+  PAGE_INTRO_SECTION_NODE_TYPE,
+  SITE_PAGE_BLOCK_NODE_TYPES,
+  STEPS_SECTION_NODE_TYPE,
+  TEAM_SECTION_NODE_TYPE,
+  type FeatureGridSectionData,
+  type PageHeaderSectionData,
+  type PageIntroSectionData,
+  type StepsSectionData,
+  type TeamSectionData,
+} from "~/lib/site-page-sections";
+
+import {
+  FEATURE_GRID_SECTION_NODE_TYPE,
+  PAGE_HEADER_SECTION_NODE_TYPE,
+  PAGE_INTRO_SECTION_NODE_TYPE,
+  STEPS_SECTION_NODE_TYPE,
+  TEAM_SECTION_NODE_TYPE,
+} from "~/lib/site-page-sections";
+
 export const CONTENT_BLOCK_DECORATOR_TYPES = [
   HERO_NODE_TYPE,
   SERVICES_SECTION_NODE_TYPE,
@@ -303,6 +351,11 @@ export const CONTENT_BLOCK_DECORATOR_TYPES = [
   WHY_SECTION_NODE_TYPE,
   CONTACT_SECTION_NODE_TYPE,
   CTA_SECTION_NODE_TYPE,
+  PAGE_HEADER_SECTION_NODE_TYPE,
+  PAGE_INTRO_SECTION_NODE_TYPE,
+  FEATURE_GRID_SECTION_NODE_TYPE,
+  STEPS_SECTION_NODE_TYPE,
+  TEAM_SECTION_NODE_TYPE,
 ] as const;
 
 /** Minimal structural shape of a serialized Lexical node. */
@@ -550,31 +603,48 @@ export function contentStartsWithHero(document: ContentDocument): boolean {
 /* Slugs & routes                                                              */
 /* -------------------------------------------------------------------------- */
 
-/** Published CMS page with this slug is served at `/` instead of `/page/home`. */
-export const HOMEPAGE_CMS_SLUG = "home";
-
+/** @deprecated Use `entryIsHomepage`. */
 export function isHomepageCmsSlug(slug: string): boolean {
   return slug === HOMEPAGE_CMS_SLUG;
 }
 
-export function contentHref(kind: ContentKindName, slug: string): string {
-  if (kind === "page" && isHomepageCmsSlug(slug)) return "/";
-  return kind === "post" ? `/blog/${slug}` : `/page/${slug}`;
+export function contentHref(
+  kind: ContentKindName,
+  slug: string,
+  isHomepage = false,
+): string {
+  return contentPublicPath(kind, slug, isHomepage);
 }
 
 /** Public URL prefix shown beside the slug field in the studio. */
-export function contentSlugPrefix(
-  kind: ContentKindName,
-  slug?: string,
-): string {
-  if (kind === "post") return "/blog/";
-  if (slug && isHomepageCmsSlug(slug)) return "/";
-  return "/page/";
+export function contentSlugPrefix(kind: ContentKindName): string {
+  return kind === "post" ? "/blog/" : "/";
 }
 
-/** Posts are collected under `/blog`; pages live under `/page`. */
-export function contentPublicPath(kind: ContentKindName, slug: string): string {
-  return contentHref(kind, slug);
+/** Pages at `/{slug}` (homepage at `/`); posts at `/blog/{slug}`. */
+export function contentPublicPath(
+  kind: ContentKindName,
+  slug: string,
+  isHomepage = false,
+): string {
+  if (kind === "post") return `/blog/${slug}`;
+  if (isHomepage) return "/";
+  return `/${slug}`;
+}
+
+export function contentDocumentUsesBlockType(
+  document: ContentDocument,
+  blockType: string,
+): boolean {
+  const walk = (nodes: ContentNode[] | undefined): boolean => {
+    if (!nodes) return false;
+    for (const node of nodes) {
+      if (node.type === blockType) return true;
+      if (node.children && walk(node.children)) return true;
+    }
+    return false;
+  };
+  return walk(document.root.children);
 }
 
 const CONTENT_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {

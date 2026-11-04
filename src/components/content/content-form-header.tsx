@@ -1,18 +1,28 @@
 import { Field, StudioInput } from "~/components/studio/ui";
-import { contentSlugPrefix, HOMEPAGE_CMS_SLUG, type ContentKindName } from "~/lib/content";
+import {
+  contentPublicPath,
+  contentSlugPrefix,
+  type ContentKindName,
+} from "~/lib/content";
 
 export function ContentFormHeader({
   title = "",
   slug = "",
   kind = "page",
+  isHomepage = false,
 }: {
   title?: string;
   slug?: string;
   kind?: ContentKindName;
+  isHomepage?: boolean;
 }) {
-  const prefix = contentSlugPrefix(kind, slug);
-  const isHomepageSlug =
-    kind === "page" && (slug === HOMEPAGE_CMS_SLUG || slug === "home");
+  const prefix = contentSlugPrefix(kind);
+  const publicPath =
+    kind === "page"
+      ? isHomepage
+        ? "/"
+        : contentPublicPath("page", slug || "your-slug", false)
+      : contentPublicPath("post", slug || "your-slug");
 
   return (
     <>
@@ -31,25 +41,33 @@ export function ContentFormHeader({
           label="Slug"
           hint={
             kind === "page"
-              ? `Use slug "${HOMEPAGE_CMS_SLUG}" to publish at / (homepage). Leave empty to generate from the title.`
-              : "Leave empty to generate from the title."
+              ? "Pages publish at /{slug}. Use “Use as homepage” in Publishing for /."
+              : "Posts publish under /blog/{slug}."
           }
         >
-          <div className="flex w-full min-w-0 items-center gap-2 text-sm text-[#6f6a60]">
-            <span className="shrink-0 font-mono text-xs">{prefix}</span>
-            <StudioInput
-              name="slug"
-              defaultValue={slug}
-              placeholder={kind === "page" ? HOMEPAGE_CMS_SLUG : "about-us"}
-              className="min-w-0 flex-1 font-mono text-sm"
-            />
-          </div>
-          {isHomepageSlug ? (
-            <p className="mt-2 text-xs leading-relaxed text-[#57524a]">
-              This page replaces the static homepage at{" "}
-              <span className="font-mono">/</span> when published.
-            </p>
-          ) : null}
+          {kind === "page" && isHomepage ? (
+            <>
+              <p className="text-sm text-[#57524a]">
+                Public URL:{" "}
+                <span className="font-mono font-semibold text-[#15130f]">/</span>
+              </p>
+              <input type="hidden" name="slug" value={slug || "home"} />
+            </>
+          ) : (
+            <div className="flex w-full min-w-0 items-center gap-2 text-sm text-[#6f6a60]">
+              <span className="shrink-0 font-mono text-xs">{prefix}</span>
+              <StudioInput
+                name="slug"
+                defaultValue={slug}
+                placeholder={kind === "page" ? "contact" : "post-slug"}
+                className="min-w-0 flex-1 font-mono text-sm"
+              />
+            </div>
+          )}
+          <p className="mt-2 text-xs text-[#6f6a60]">
+            Preview:{" "}
+            <span className="font-mono text-[#15130f]">{publicPath}</span>
+          </p>
         </Field>
       </div>
     </>

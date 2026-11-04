@@ -23,15 +23,10 @@ import {
   QuoteNode,
 } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
-import {
-  $getNearestNodeOfType,
-  $insertNodeToNearestRoot,
-} from "@lexical/utils";
+import { $getNearestNodeOfType } from "@lexical/utils";
 import {
   $createParagraphNode,
-  $getRoot,
   $getSelection,
-  $isElementNode,
   $isRangeSelection,
   FORMAT_TEXT_COMMAND,
   REDO_COMMAND,
@@ -54,32 +49,20 @@ import {
   Underline,
   Undo2,
 } from "lucide-react";
-import { $createHeroNode, HeroNode } from "~/components/lexical/hero-node";
-import {
-  $createServicesSectionNode,
-  ServicesSectionNode,
-} from "~/components/lexical/services-node";
-import {
-  $createWorkSectionNode,
-  WorkSectionNode,
-} from "~/components/lexical/work-node";
-import {
-  $createReviewsSectionNode,
-  ReviewsSectionNode,
-} from "~/components/lexical/reviews-node";
-import {
-  $createWhySectionNode,
-  WhySectionNode,
-} from "~/components/lexical/why-node";
-import {
-  $createContactSectionNode,
-  ContactSectionNode,
-} from "~/components/lexical/contact-node";
-import {
-  $createCtaSectionNode,
-  CtaSectionNode,
-} from "~/components/lexical/cta-node";
-import { $insertDecoratorBlock } from "~/components/lexical/insert-decorator-block";
+import { HeroNode } from "~/components/lexical/hero-node";
+import { ServicesSectionNode } from "~/components/lexical/services-node";
+import { WorkSectionNode } from "~/components/lexical/work-node";
+import { ReviewsSectionNode } from "~/components/lexical/reviews-node";
+import { WhySectionNode } from "~/components/lexical/why-node";
+import { ContactSectionNode } from "~/components/lexical/contact-node";
+import { CtaSectionNode } from "~/components/lexical/cta-node";
+import { PageHeaderSectionNode } from "~/components/lexical/page-header-node";
+import { PageIntroSectionNode } from "~/components/lexical/page-intro-node";
+import { FeatureGridSectionNode } from "~/components/lexical/feature-grid-node";
+import { StepsSectionNode } from "~/components/lexical/steps-node";
+import { TeamSectionNode } from "~/components/lexical/team-node";
+import { ContentBlockInserter } from "~/components/lexical/content-block-inserter";
+import { ContentEditorProjectsProvider } from "~/components/lexical/content-editor-projects-context";
 import { BlockDecoratorRootPlugin } from "~/components/lexical/block-decorator-root-plugin";
 import { LinkUrlPopover } from "~/components/lexical/link-url-popover";
 import { QuoteWrapPlugin } from "~/components/lexical/quote-wrap-plugin";
@@ -94,17 +77,11 @@ import {
   type LinkFieldValue,
 } from "~/lib/link-options";
 import {
-  DEFAULT_CONTACT_SECTION,
-  DEFAULT_CTA_SECTION,
-  DEFAULT_HERO,
-  DEFAULT_REVIEWS_SECTION,
-  DEFAULT_SERVICES_SECTION,
-  DEFAULT_WHY_SECTION,
-  DEFAULT_WORK_SECTION,
   emptyContentDocument,
   parseContentDocument,
   type ContentDocument,
 } from "~/lib/content";
+import type { Project } from "~/content/projects";
 import { appQuoteInner, appQuoteOuter } from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
@@ -135,49 +112,6 @@ const EDITOR_THEME = {
 };
 
 type BlockType = "paragraph" | "h2" | "h3" | "quote";
-type InsertBlockType =
-  | BlockType
-  | "hero"
-  | "services"
-  | "work"
-  | "reviews"
-  | "why"
-  | "contact"
-  | "cta";
-
-function $insertCtaBlock() {
-  $insertDecoratorBlock(() => $createCtaSectionNode(DEFAULT_CTA_SECTION));
-}
-
-function $insertHeroBlock() {
-  $insertDecoratorBlock(() => $createHeroNode(DEFAULT_HERO));
-}
-
-function $insertServicesBlock() {
-  $insertDecoratorBlock(() =>
-    $createServicesSectionNode(DEFAULT_SERVICES_SECTION),
-  );
-}
-
-function $insertWorkBlock() {
-  $insertDecoratorBlock(() => $createWorkSectionNode(DEFAULT_WORK_SECTION));
-}
-
-function $insertReviewsBlock() {
-  $insertDecoratorBlock(() =>
-    $createReviewsSectionNode(DEFAULT_REVIEWS_SECTION),
-  );
-}
-
-function $insertWhyBlock() {
-  $insertDecoratorBlock(() => $createWhySectionNode(DEFAULT_WHY_SECTION));
-}
-
-function $insertContactBlock() {
-  $insertDecoratorBlock(() =>
-    $createContactSectionNode(DEFAULT_CONTACT_SECTION),
-  );
-}
 
 function ToolbarButton({
   label,
@@ -306,57 +240,6 @@ function Toolbar() {
     });
   };
 
-  const insertBlock = (value: InsertBlockType) => {
-    editor.update(
-      () => {
-        if (value === "hero") {
-          $insertHeroBlock();
-          return;
-        }
-        if (value === "services") {
-          $insertServicesBlock();
-          return;
-        }
-        if (value === "work") {
-          $insertWorkBlock();
-          return;
-        }
-        if (value === "reviews") {
-          $insertReviewsBlock();
-          return;
-        }
-        if (value === "why") {
-          $insertWhyBlock();
-          return;
-        }
-        if (value === "contact") {
-          $insertContactBlock();
-          return;
-        }
-        if (value === "cta") {
-          $insertCtaBlock();
-          return;
-        }
-
-        const node =
-          value === "quote"
-            ? $createQuoteNode()
-            : value === "paragraph"
-              ? $createParagraphNode()
-              : $createHeadingNode(value);
-
-        if ($isRangeSelection($getSelection())) {
-          $insertNodeToNearestRoot(node);
-        } else {
-          $getRoot().append(node);
-        }
-
-        if ($isElementNode(node)) node.selectStart();
-      },
-      { onUpdate: () => editor.focus() },
-    );
-  };
-
   return (
     <div className="sticky top-[8.75rem] z-[9] flex flex-wrap items-center gap-1.5 border-b border-sc-accent/25 bg-sc-section-alt/95 px-5 py-2 backdrop-blur-sm">
       <select
@@ -456,33 +339,7 @@ function Toolbar() {
         <Redo2 className="size-4" />
       </ToolbarButton>
 
-      <label className="ml-auto inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-[#6f6a60] uppercase">
-        Insert
-        <select
-          aria-label="Insert block"
-          value=""
-          onChange={(event) => {
-            const value = event.currentTarget.value as InsertBlockType | "";
-            event.currentTarget.value = "";
-            if (!value) return;
-            insertBlock(value);
-          }}
-          className="focus:ring-sc-accent/40 h-8 rounded border border-[#15130f]/15 bg-white px-2 text-[11px] font-semibold tracking-[0.06em] text-sc-accent uppercase focus:ring-2 focus:outline-none"
-        >
-          <option value="">Block…</option>
-          <option value="paragraph">Paragraph</option>
-          <option value="h2">Heading 2</option>
-          <option value="h3">Heading 3</option>
-          <option value="quote">Quote</option>
-          <option value="hero">Hero section</option>
-          <option value="services">Services section</option>
-          <option value="work">Our work section</option>
-          <option value="reviews">Client proof section</option>
-          <option value="why">Why choose us section</option>
-          <option value="contact">Contact section</option>
-          <option value="cta">Marketing CTA</option>
-        </select>
-      </label>
+      <ContentBlockInserter />
     </div>
   );
 }
@@ -498,9 +355,12 @@ function Placeholder() {
 export function ContentEditor({
   initialDocument,
   namespace = "simplycode-content",
+  previewProjects = [],
 }: {
   initialDocument?: ContentDocument | null;
   namespace?: string;
+  /** Published projects from studio (work / portfolio blocks in the canvas). */
+  previewProjects?: Project[];
 }) {
   const [document] = useState<ContentDocument>(
     () => parseContentDocument(initialDocument) ?? emptyContentDocument(),
@@ -524,6 +384,11 @@ export function ContentEditor({
         WhySectionNode,
         ContactSectionNode,
         CtaSectionNode,
+        PageHeaderSectionNode,
+        PageIntroSectionNode,
+        FeatureGridSectionNode,
+        StepsSectionNode,
+        TeamSectionNode,
         QuoteInnerNode,
       ],
       theme: EDITOR_THEME,
@@ -540,29 +405,31 @@ export function ContentEditor({
   };
 
   return (
-    <div>
+    <div className="min-w-0">
       <input type="hidden" name="body" value={serialized} readOnly />
-      <LexicalComposer initialConfig={initialConfig}>
-        <Toolbar />
-        <div className="content-editor-body relative">
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                aria-label="Content"
-                className="min-h-[360px] outline-none"
-              />
-            }
-            placeholder={<Placeholder />}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <ListPlugin />
+      <ContentEditorProjectsProvider projects={previewProjects}>
+        <LexicalComposer initialConfig={initialConfig}>
+          <Toolbar />
+          <div className="content-editor-body relative">
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  aria-label="Content"
+                  className="min-h-[360px] outline-none"
+                />
+              }
+              placeholder={<Placeholder />}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <ListPlugin />
             <LinkPlugin />
             <QuoteWrapPlugin />
             <BlockDecoratorRootPlugin />
             <OnChangePlugin onChange={handleChange} />
-        </div>
-      </LexicalComposer>
+          </div>
+        </LexicalComposer>
+      </ContentEditorProjectsProvider>
     </div>
   );
 }

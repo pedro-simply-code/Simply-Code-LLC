@@ -4,6 +4,10 @@ import {
   StudioTextarea,
 } from "~/components/studio/ui";
 import {
+  ContentPublishingOptions,
+  type CurrentHomepagePreview,
+} from "~/components/content/content-publishing-options";
+import {
   CONTENT_KINDS,
   CONTENT_KIND_LABEL,
   CONTENT_STATUSES,
@@ -16,12 +20,24 @@ export function ContentFormSidebar({
   kind = "page",
   status = "draft",
   excerpt = "",
+  entryId,
+  isHomepage = false,
+  showInNav = false,
+  navLabel = "",
+  currentHomepage = null,
   onKindChange,
+  onHomepageChange,
 }: {
   kind?: ContentKindName;
   status?: ContentStatusName;
   excerpt?: string;
+  entryId?: string;
+  isHomepage?: boolean;
+  showInNav?: boolean;
+  navLabel?: string;
+  currentHomepage?: CurrentHomepagePreview;
   onKindChange?: (kind: ContentKindName) => void;
+  onHomepageChange?: (value: boolean) => void;
 }) {
   return (
     <div className="grid gap-4">
@@ -62,6 +78,16 @@ export function ContentFormSidebar({
           className="min-h-24"
         />
       </Field>
+      <ContentPublishingOptions
+        key={`${entryId ?? "new"}-${kind}-${isHomepage}-${showInNav}`}
+        kind={kind}
+        entryId={entryId}
+        defaultIsHomepage={isHomepage}
+        defaultShowInNav={showInNav}
+        defaultNavLabel={navLabel}
+        currentHomepage={currentHomepage}
+        onHomepageChange={onHomepageChange}
+      />
     </div>
   );
 }

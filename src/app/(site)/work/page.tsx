@@ -1,26 +1,43 @@
+import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { CtaSection } from "~/components/cta-section";
 import { WorkFilters } from "~/components/work-filters";
 import { PROJECTS } from "~/content/projects";
 import { pageMetadata } from "~/lib/seo";
+import { getPublishedCmsPageOverride } from "~/server/content/cms-site-page";
 import { getPublicProjectsSafe } from "~/server/studio/queries";
 
 export const revalidate = 300;
 
-export const metadata = pageMetadata({
-  title: "Work",
-  description:
-    "Selected projects: Next.js platform rebuilds, custom WordPress builds, event experiences and white-label agency work.",
-  path: "/work",
-});
+export async function generateMetadata() {
+  const cms = await getPublishedCmsPageOverride("work");
+  if (cms) {
+    return pageMetadata({
+      title: cms.title,
+      description: cms.excerpt || cms.title,
+      path: "/work",
+    });
+  }
+  return pageMetadata({
+    title: "Work",
+    description:
+      "Selected projects: Next.js platform rebuilds, custom WordPress builds, event experiences and white-label agency work.",
+    path: "/work",
+  });
+}
 
 export default async function WorkPage() {
+  const cms = await getPublishedCmsPageOverride("work");
+  if (cms) {
+    return <CmsDocumentPage entry={cms} />;
+  }
+
   const projects = (await getPublicProjectsSafe()) ?? PROJECTS;
 
   return (
     <>
-      <SiteNav />
+      <SiteNavShell />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">

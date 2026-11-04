@@ -4,9 +4,11 @@ import { ArrowLeft } from "lucide-react";
 import { ContentEditor } from "~/components/lexical/content-editor";
 import { ContentEditorWorkspace } from "~/components/content/content-editor-workspace";
 import { StudioHeader } from "~/components/studio/ui";
-import { contentErrorMessage } from "~/lib/content";
+import { contentErrorMessage, contentPublicPath } from "~/lib/content";
 import { requireContentManager } from "~/server/authz";
 import { createContentEntry } from "~/server/content/actions";
+import { getPublishedHomepageEntrySafe } from "~/server/content/queries";
+import { getPublicProjectsSafe } from "~/server/studio/queries";
 
 export const metadata: Metadata = {
   title: "New content",
@@ -21,6 +23,20 @@ export default async function NewContentPage({
   const { error } = await searchParams;
   const message = contentErrorMessage(error);
 
+  const publishedHomepage = await getPublishedHomepageEntrySafe();
+  const previewProjects = (await getPublicProjectsSafe()) ?? [];
+  const currentHomepage = publishedHomepage
+    ? {
+        id: publishedHomepage.id,
+        title: publishedHomepage.title,
+        href: contentPublicPath(
+          "page",
+          publishedHomepage.slug,
+          publishedHomepage.isHomepage,
+        ),
+      }
+    : null;
+
   return (
     <div>
       <Link
@@ -32,7 +48,7 @@ export default async function NewContentPage({
 
       <StudioHeader
         title="New content"
-        description="Write a page or a blog post. Use “Insert hero block” in the editor toolbar to add the homepage hero and edit it in place."
+        description="Pages publish at /{slug}; posts at /blog/{slug}. Set homepage and nav options under Publishing."
       />
 
       {message ? (
@@ -44,8 +60,8 @@ export default async function NewContentPage({
       <form action={createContentEntry} className="space-y-6">
         <ContentEditorWorkspace
           header={{}}
-          sidebar={{}}
-          editor={<ContentEditor />}
+          sidebar={{ currentHomepage }}
+          editor={<ContentEditor previewProjects={previewProjects} />}
           submitLabel="Save content"
           cancelHref="/studio/content"
         />

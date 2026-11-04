@@ -3,7 +3,7 @@ import { ArrowRight, ExternalLink, Pencil } from "lucide-react";
 import {
   CONTENT_KIND_LABEL,
   CONTENT_STATUS_LABEL,
-  contentHref,
+  contentPublicPath,
   formatContentDate,
   type ContentKindName,
   type ContentStatusName,
@@ -19,6 +19,7 @@ import { cn } from "~/lib/utils";
 export type StudioContentRow = {
   id: string;
   kind: ContentKindName;
+  isHomepage?: boolean;
   slug: string;
   title: string;
   excerpt: string;
@@ -47,7 +48,11 @@ function ContentActions({ entry }: { entry: StudioContentRow }) {
     <div className="flex flex-wrap items-center gap-2">
       {entry.status === "published" ? (
         <Link
-          href={contentHref(entry.kind, entry.slug)}
+          href={contentPublicPath(
+            entry.kind,
+            entry.slug,
+            entry.isHomepage,
+          )}
           target="_blank"
           rel="noopener noreferrer"
           className={`inline-flex items-center gap-1.5 ${studioContentGhostButton}`}
@@ -86,7 +91,11 @@ function ContentGridCard({ entry }: { entry: StudioContentRow }) {
             {entry.title}
           </Link>
           <p className="mt-0.5 truncate font-mono text-[11px] text-[#9a9488]">
-            {contentHref(entry.kind, entry.slug)}
+            {contentPublicPath(
+              entry.kind,
+              entry.slug,
+              entry.isHomepage,
+            )}
           </p>
         </div>
         <StatusBadge status={entry.status} />
@@ -173,7 +182,11 @@ export function StudioContentList({
                     {entry.title}
                   </Link>
                   <p className="mt-0.5 font-mono text-[11px] text-[#9a9488]">
-                    {contentHref(entry.kind, entry.slug)}
+                    {contentPublicPath(
+              entry.kind,
+              entry.slug,
+              entry.isHomepage,
+            )}
                   </p>
                 </td>
                 <td className="px-4 py-3 text-[#57524a]">
@@ -210,7 +223,11 @@ export function StudioContentList({
                   {entry.title}
                 </Link>
                 <p className="mt-0.5 font-mono text-[11px] text-[#9a9488]">
-                  {contentHref(entry.kind, entry.slug)}
+                  {contentPublicPath(
+              entry.kind,
+              entry.slug,
+              entry.isHomepage,
+            )}
                 </p>
               </div>
               <StatusBadge status={entry.status} />

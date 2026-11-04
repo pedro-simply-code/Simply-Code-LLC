@@ -2,11 +2,18 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ContactSection } from "~/components/content/contact-section";
 import { CtaMarketingSection } from "~/components/content/cta-marketing-section";
+import { FeatureGridSection } from "~/components/content/feature-grid-section";
 import { HeroSection } from "~/components/content/hero-section";
+import { PageHeaderSection } from "~/components/content/page-header-section";
+import { PageIntroSection } from "~/components/content/page-intro-section";
 import { ReviewsSection } from "~/components/content/reviews-section";
 import { ServicesSection } from "~/components/content/services-section";
+import { StepsSection } from "~/components/content/steps-section";
+import { TeamSection } from "~/components/content/team-section";
 import { WhySection } from "~/components/content/why-section";
 import { WorkSection } from "~/components/content/work-section";
+import type { TeamMember } from "~/content/team";
+import type { Project } from "~/content/projects";
 import {
   CONTACT_SECTION_NODE_TYPE,
   CONTENT_BLOCK_DECORATOR_TYPES,
@@ -19,6 +26,16 @@ import {
   normalizeServicesSectionData,
   normalizeWhySectionData,
   normalizeWorkSectionData,
+  normalizePageHeaderSectionData,
+  normalizePageIntroSectionData,
+  normalizeFeatureGridSectionData,
+  normalizeStepsSectionData,
+  normalizeTeamSectionData,
+  PAGE_HEADER_SECTION_NODE_TYPE,
+  PAGE_INTRO_SECTION_NODE_TYPE,
+  FEATURE_GRID_SECTION_NODE_TYPE,
+  STEPS_SECTION_NODE_TYPE,
+  TEAM_SECTION_NODE_TYPE,
   REVIEWS_SECTION_NODE_TYPE,
   SERVICES_SECTION_NODE_TYPE,
   WHY_SECTION_NODE_TYPE,
@@ -40,6 +57,18 @@ const FORMAT_CODE = 16;
 const FORMAT_SUBSCRIPT = 32;
 const FORMAT_SUPERSCRIPT = 64;
 const FORMAT_HIGHLIGHT = 128;
+
+type RenderContext = {
+  teamMembers: TeamMember[];
+  teamFromStudio: boolean;
+  workProjects: Project[];
+};
+
+const EMPTY_RENDER_CONTEXT: RenderContext = {
+  teamMembers: [],
+  teamFromStudio: false,
+  workProjects: [],
+};
 
 function renderText(node: ContentNode, key: string): ReactNode {
   const text = typeof node.text === "string" ? node.text : "";
@@ -71,10 +100,11 @@ function renderText(node: ContentNode, key: string): ReactNode {
 function renderChildren(
   children: ContentNode[] | undefined,
   prefix: string,
+  context: RenderContext = EMPTY_RENDER_CONTEXT,
 ): ReactNode[] {
   if (!children) return [];
   return children.map((child, index) =>
-    renderNode(child, `${prefix}-${index}`),
+    renderNode(child, `${prefix}-${index}`, context),
   );
 }
 
@@ -229,7 +259,10 @@ function isFullBleedBlockType(type: string | undefined): boolean {
  * Renders the root children: homepage section blocks stay full-bleed while
  * prose blocks use CONTENT_BLOCK_WRAP.
  */
-function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
+function renderRoot(
+  children: ContentNode[] | undefined,
+  context: RenderContext,
+): ReactNode[] {
   if (!children) return [];
 
   const nodes: ReactNode[] = [];
@@ -239,7 +272,7 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
     const keyName = `root-${index}`;
 
     if (isFullBleedBlockType(child.type)) {
-      nodes.push(renderNode(child, keyName));
+      nodes.push(renderNode(child, keyName, context));
       needsSpacingAfterFullBleed = true;
       return;
     }
@@ -270,14 +303,14 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
                 needsSpacingAfterFullBleed && "pt-12",
               )}
             >
-              {renderNode({ ...child, children: inline }, keyName)}
+              {renderNode({ ...child, children: inline }, keyName, context)}
             </div>,
           );
           needsSpacingAfterFullBleed = false;
         }
 
         decorators.forEach((block, blockIndex) => {
-          nodes.push(renderNode(block, `${keyName}-block-${blockIndex}`));
+          nodes.push(renderNode(block, `${keyName}-block-${blockIndex}`, context));
         });
         needsSpacingAfterFullBleed = true;
         return;
@@ -299,7 +332,7 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
           needsSpacingAfterFullBleed && "pt-12",
         )}
       >
-        {renderNode(child, keyName)}
+        {renderNode(child, keyName, context)}
       </div>,
     );
     needsSpacingAfterFullBleed = false;
@@ -308,14 +341,20 @@ function renderRoot(children: ContentNode[] | undefined): ReactNode[] {
   return nodes;
 }
 
-function renderNode(node: ContentNode, keyName: string): ReactNode {
+function renderNode(
+  node: ContentNode,
+  keyName: string,
+  context: RenderContext = EMPTY_RENDER_CONTEXT,
+): ReactNode {
+  const { teamMembers, teamFromStudio, workProjects } = context;
+
   switch (node.type) {
     case "text":
       return renderText(node, keyName);
     case "linebreak":
       return <br key={keyName} />;
     case "root":
-      return <>{renderRoot(node.children)}</>;
+      return <>{renderRoot(node.children, context)}</>;
     case "paragraph": {
       // Older saves (or pasted content) may nest the hero decorator inside a
       // paragraph, which is invalid HTML (`<section>` inside `<p>`). Render the
@@ -328,7 +367,7 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
       if (hasBlockChild) {
         return (
           <div key={keyName} className="whitespace-pre-wrap">
-            {renderChildren(node.children, keyName)}
+            {renderChildren(node.children, keyName, context)}
           </div>
         );
       }
@@ -338,7 +377,7 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
           key={keyName}
           className="mb-5 text-[16px] leading-[1.8] whitespace-pre-wrap text-[#3f3b34]"
         >
-          {renderChildren(node.children, keyName)}
+          {renderChildren(node.children, keyName, context)}
         </p>
       );
     }
@@ -349,11 +388,11 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
     case QUOTE_WRAP_NODE_TYPE:
       return renderQuoteRootBlock(node, keyName);
     case QUOTE_INNER_TYPE:
-      return <>{renderChildren(node.children, keyName)}</>;
+      return <>{renderChildren(node.children, keyName, context)}</>;
     case "list":
       return <ListBlock key={keyName} node={node} keyName={keyName} />;
     case "listitem":
-      return <li key={keyName}>{renderChildren(node.children, keyName)}</li>;
+      return <li key={keyName}>{renderChildren(node.children, keyName, context)}</li>;
     case "link":
       return <LinkBlock key={keyName} node={node} keyName={keyName} />;
     case HERO_NODE_TYPE:
@@ -370,6 +409,7 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
         <WorkSection
           key={keyName}
           data={normalizeWorkSectionData(node.data)}
+          projects={workProjects}
         />
       );
     case REVIEWS_SECTION_NODE_TYPE:
@@ -397,9 +437,46 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
           data={normalizeCtaSectionData(node.data)}
         />
       );
+    case PAGE_HEADER_SECTION_NODE_TYPE:
+      return (
+        <PageHeaderSection
+          key={keyName}
+          data={normalizePageHeaderSectionData(node.data)}
+        />
+      );
+    case PAGE_INTRO_SECTION_NODE_TYPE:
+      return (
+        <PageIntroSection
+          key={keyName}
+          data={normalizePageIntroSectionData(node.data)}
+        />
+      );
+    case FEATURE_GRID_SECTION_NODE_TYPE:
+      return (
+        <FeatureGridSection
+          key={keyName}
+          data={normalizeFeatureGridSectionData(node.data)}
+        />
+      );
+    case STEPS_SECTION_NODE_TYPE:
+      return (
+        <StepsSection
+          key={keyName}
+          data={normalizeStepsSectionData(node.data)}
+        />
+      );
+    case TEAM_SECTION_NODE_TYPE:
+      return (
+        <TeamSection
+          key={keyName}
+          data={normalizeTeamSectionData(node.data)}
+          members={teamMembers}
+          teamFromStudio={teamFromStudio}
+        />
+      );
     default:
       return node.children ? (
-        <div key={keyName}>{renderChildren(node.children, keyName)}</div>
+        <div key={keyName}>{renderChildren(node.children, keyName, context)}</div>
       ) : null;
   }
 }
@@ -408,13 +485,24 @@ function renderNode(node: ContentNode, keyName: string): ReactNode {
 export function ContentRenderer({
   document,
   className,
+  teamMembers = [],
+  teamFromStudio = false,
+  workProjects = [],
 }: {
   document: ContentDocument;
   className?: string;
+  teamMembers?: TeamMember[];
+  teamFromStudio?: boolean;
+  workProjects?: Project[];
 }) {
+  const context: RenderContext = {
+    teamMembers,
+    teamFromStudio,
+    workProjects,
+  };
   return (
     <div className={cn("content-body", className)}>
-      {renderNode(document.root, "root")}
+      {renderNode(document.root, "root", context)}
     </div>
   );
 }

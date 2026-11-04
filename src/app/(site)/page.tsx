@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import {
   contentPlainText,
-  HOMEPAGE_CMS_SLUG,
   type ContentDocument,
 } from "~/lib/content";
-import { getPublishedEntrySafe } from "~/server/content/queries";
+import { getPublishedHomepageEntrySafe } from "~/server/content/queries";
 import { StaticHomePage } from "./static-home-page";
 
 export const revalidate = 60;
@@ -18,7 +17,7 @@ const STATIC_HOME_METADATA: Metadata = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const entry = await getPublishedEntrySafe("page", HOMEPAGE_CMS_SLUG);
+  const entry = await getPublishedHomepageEntrySafe();
 
   if (!entry) {
     return STATIC_HOME_METADATA;
@@ -44,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const entry = await getPublishedEntrySafe("page", HOMEPAGE_CMS_SLUG);
+  const entry = await getPublishedHomepageEntrySafe();
 
   if (entry) {
     return <CmsDocumentPage entry={entry} />;

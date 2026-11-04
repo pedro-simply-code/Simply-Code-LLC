@@ -117,6 +117,43 @@ async function main() {
     ADD COLUMN IF NOT EXISTS session_id text
   `);
 
+  const contentEntries = `${prefix}_content_entries`;
+
+  await run(`
+    DO $$ BEGIN
+      CREATE TYPE "${prefix}_content_route_template" AS ENUM ('default', 'site', 'homepage');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$
+  `);
+
+  await run(`
+    ALTER TABLE "${contentEntries}"
+    ADD COLUMN IF NOT EXISTS route_template "${prefix}_content_route_template" NOT NULL DEFAULT 'default'
+  `);
+
+  await run(`
+    ALTER TABLE "${contentEntries}"
+    ADD COLUMN IF NOT EXISTS is_homepage boolean NOT NULL DEFAULT false
+  `);
+  await run(`
+    ALTER TABLE "${contentEntries}"
+    ADD COLUMN IF NOT EXISTS show_in_nav boolean NOT NULL DEFAULT false
+  `);
+  await run(`
+    ALTER TABLE "${contentEntries}"
+    ADD COLUMN IF NOT EXISTS nav_label text
+  `);
+
+  await run(`
+    UPDATE "${contentEntries}"
+    SET is_homepage = true
+    WHERE kind = 'page'
+      AND (
+        route_template = 'homepage'
+        OR (slug = 'home' AND route_template IN ('default', 'site'))
+      )
+  `);
+
   console.log(`Schema sync complete for prefix "${prefix}".`);
 }
 

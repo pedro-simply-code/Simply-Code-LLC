@@ -1,10 +1,11 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  contentHref,
+  contentPublicPath,
+  entryIsHomepage,
   isContentKind,
   isContentStatus,
   parseContentDocument,
@@ -23,15 +24,55 @@ function field(formData: FormData, name: string): string {
   return typeof value === "string" ? value : "";
 }
 
-function revalidateContent(slug?: string, kind?: "page" | "post") {
+function checkbox(formData: FormData, name: string): boolean {
+  return formData.get(name) === "1";
+}
+
+function revalidateContent(entry: {
+  slug: string;
+  kind: "page" | "post";
+  isHomepage?: boolean;
+}) {
   revalidatePath("/studio/content");
   revalidatePath("/blog");
   revalidatePath("/");
   revalidatePath("/sitemap.xml");
-  if (slug && kind) {
-    revalidatePath(contentHref(kind, slug));
-    if (kind === "post") revalidatePath("/blog");
+  revalidatePath(
+    contentPublicPath(entry.kind, entry.slug, entryIsHomepage(entry)),
+  );
+  if (entry.kind === "page") {
+    revalidatePath(`/${entry.slug}`);
+    revalidatePath(`/page/${entry.slug}`);
   }
+  if (entry.kind === "post") revalidatePath("/blog");
+}
+
+function parsePagePublishing(formData: FormData, kind: "page" | "post") {
+  if (kind === "post") {
+    return {
+      isHomepage: false,
+      showInNav: false,
+      navLabel: "",
+    };
+  }
+  return {
+    isHomepage: checkbox(formData, "isHomepage"),
+    showInNav: checkbox(formData, "showInNav"),
+    navLabel: field(formData, "navLabel").trim(),
+  };
+}
+
+async function clearOtherHomepages(excludeId?: string) {
+  await db
+    .update(contentEntries)
+    .set({ isHomepage: false, updatedAt: new Date() })
+    .where(
+      and(
+        eq(contentEntries.kind, "page"),
+        eq(contentEntries.isHomepage, true),
+        excludeId ? ne(contentEntries.id, excludeId) : undefined,
+      ),
+    );
 }
 
 export async function createContentEntry(formData: FormData): Promise<void> {
@@ -57,6 +98,11 @@ export async function createContentEntry(formData: FormData): Promise<void> {
     redirect("/studio/content/new?error=duplicate");
   }
 
+  const publishing = parsePagePublishing(formData, kind);
+  if (kind === "page" && publishing.isHomepage) {
+    await clearOtherHomepages();
+  }
+
   const resolvedCover = await resolveContentCoverFromForm(
     formData,
     null,
@@ -74,12 +120,19 @@ export async function createContentEntry(formData: FormData): Promise<void> {
       coverImageUrl: resolvedCover.image,
       status,
       body,
+      isHomepage: kind === "page" ? publishing.isHomepage : false,
+      showInNav: kind === "page" ? publishing.showInNav : false,
+      navLabel: kind === "page" && publishing.navLabel ? publishing.navLabel : null,
       authorId: session.user.id,
       publishedAt: status === "published" ? new Date() : null,
     })
     .returning({ id: contentEntries.id });
 
-  revalidateContent(slug, kind);
+  revalidateContent({
+    slug,
+    kind,
+    isHomepage: publishing.isHomepage,
+  });
 
   if (!row) redirect("/studio/content");
   redirect(`/studio/content/${row.id}?created=1`);
@@ -114,6 +167,11 @@ export async function saveContentEntry(formData: FormData): Promise<void> {
     redirect(`/studio/content/${id}?error=duplicate`);
   }
 
+  const publishing = parsePagePublishing(formData, kind);
+  if (kind === "page" && publishing.isHomepage) {
+    await clearOtherHomepages(id);
+  }
+
   const resolvedCover = await resolveContentCoverFromForm(
     formData,
     existing.coverImageUrl,
@@ -136,14 +194,25 @@ export async function saveContentEntry(formData: FormData): Promise<void> {
       coverImageUrl: resolvedCover.image,
       status,
       body,
+      isHomepage: kind === "page" ? publishing.isHomepage : false,
+      showInNav: kind === "page" ? publishing.showInNav : false,
+      navLabel: kind === "page" && publishing.navLabel ? publishing.navLabel : null,
       publishedAt,
       updatedAt: new Date(),
     })
     .where(eq(contentEntries.id, id));
 
-  revalidateContent(existing.slug, existing.kind);
+  revalidateContent({
+    slug: existing.slug,
+    kind: existing.kind,
+    isHomepage: existing.isHomepage,
+  });
   revalidatePath(`/studio/content/${id}`);
-  revalidateContent(slug, kind);
+  revalidateContent({
+    slug,
+    kind,
+    isHomepage: publishing.isHomepage,
+  });
 
   redirect(`/studio/content/${id}?saved=1`);
 }
@@ -159,6 +228,10 @@ export async function deleteContentEntry(formData: FormData): Promise<void> {
 
   await db.delete(contentEntries).where(eq(contentEntries.id, id));
 
-  revalidateContent(existing.slug, existing.kind);
+  revalidateContent({
+    slug: existing.slug,
+    kind: existing.kind,
+    isHomepage: existing.isHomepage,
+  });
   redirect("/studio/content?deleted=1");
 }

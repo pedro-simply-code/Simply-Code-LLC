@@ -130,6 +130,10 @@ export type WorkSectionData = {
   showCta: boolean;
   projectCount: number;
   emptyMessage: string;
+  /** Featured grid (homepage) vs full portfolio listing. */
+  variant: "featured" | "portfolio";
+  /** Portfolio only: tag filter bar like /work. */
+  showTagFilter: boolean;
 };
 
 export const DEFAULT_WORK_SECTION: WorkSectionData = {
@@ -143,6 +147,23 @@ export const DEFAULT_WORK_SECTION: WorkSectionData = {
   showCta: true,
   projectCount: 3,
   emptyMessage: "New case studies are on the way.",
+  variant: "featured",
+  showTagFilter: false,
+};
+
+export const DEFAULT_PORTFOLIO_SECTION: WorkSectionData = {
+  eyebrow: "Portfolio",
+  headline: "Work That Speaks\nFor Itself",
+  description:
+    "Platform rebuilds, custom WordPress themes and long-term partnerships. Every project below was designed, built or led by our team.",
+  ctaLabel: "",
+  ctaHref: "/work",
+  ctaNewTab: false,
+  showCta: false,
+  projectCount: 6,
+  emptyMessage: "No projects published yet.",
+  variant: "portfolio",
+  showTagFilter: true,
 };
 
 export function normalizeWorkSectionData(value: unknown): WorkSectionData {
@@ -152,6 +173,7 @@ export function normalizeWorkSectionData(value: unknown): WorkSectionData {
   const source = value as Record<string, unknown>;
   const href = str(source.ctaHref, DEFAULT_WORK_SECTION.ctaHref);
   const count = Number(source.projectCount);
+  const variant = source.variant === "portfolio" ? "portfolio" : "featured";
   return {
     eyebrow: str(source.eyebrow, DEFAULT_WORK_SECTION.eyebrow),
     headline: str(source.headline, DEFAULT_WORK_SECTION.headline),
@@ -163,6 +185,13 @@ export function normalizeWorkSectionData(value: unknown): WorkSectionData {
     projectCount:
       count >= 1 && count <= 6 ? Math.floor(count) : DEFAULT_WORK_SECTION.projectCount,
     emptyMessage: str(source.emptyMessage, DEFAULT_WORK_SECTION.emptyMessage),
+    variant,
+    showTagFilter: bool(
+      source.showTagFilter,
+      variant === "portfolio"
+        ? DEFAULT_PORTFOLIO_SECTION.showTagFilter
+        : false,
+    ),
   };
 }
 

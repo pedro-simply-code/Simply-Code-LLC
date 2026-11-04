@@ -17,13 +17,18 @@ import {
 import { StudioCard } from "~/components/studio/ui";
 import { ContentFormHeader } from "~/components/content/content-form-header";
 import { ContentFormSidebar } from "~/components/content/content-form-sidebar";
+import type { CurrentHomepagePreview } from "~/components/content/content-publishing-options";
 import { ContentCoverUpload } from "~/components/content/content-cover-field";
 import type { ContentKindName, ContentStatusName } from "~/lib/content";
 import {
   studioContentPanel,
   studioContentPanelMuted,
 } from "~/lib/studio-content-surface";
-import { appGhostButtonLg, appOutlineButton, appPrimaryButtonStudioSubmit } from "~/lib/surface";
+import {
+  appGhostButtonLg,
+  appOutlineButton,
+  appPrimaryButtonStudioSubmit,
+} from "~/lib/surface";
 import { cn } from "~/lib/utils";
 
 function remountChild(node: ReactNode, remountKey: number) {
@@ -43,11 +48,15 @@ type ContentEditorWorkspaceProps = {
     status?: ContentStatusName;
     excerpt?: string;
     coverImageUrl?: string;
+    entryId?: string;
+    isHomepage?: boolean;
+    showInNav?: boolean;
+    navLabel?: string;
+    currentHomepage?: CurrentHomepagePreview;
   };
   editor: ReactNode;
   submitLabel?: string;
   cancelHref?: string;
-  /** Edit mode: remount fields to last loaded saved values (not a server round-trip). */
   enableDiscard?: boolean;
   stickyExtra?: ReactNode;
 };
@@ -67,9 +76,11 @@ export function ContentEditorWorkspace({
   const [contentKind, setContentKind] = useState<ContentKindName>(
     sidebar.kind ?? "page",
   );
+  const [isHomepage, setIsHomepage] = useState(sidebar.isHomepage ?? false);
 
   const confirmDiscard = () => {
     setContentKind(sidebar.kind ?? "page");
+    setIsHomepage(sidebar.isHomepage ?? false);
     setRemountKey((key) => key + 1);
     setDiscardOpen(false);
   };
@@ -84,6 +95,7 @@ export function ContentEditorWorkspace({
           title={header.title}
           slug={header.slug}
           kind={contentKind}
+          isHomepage={contentKind === "page" && isHomepage}
         />
       </section>
 
@@ -161,7 +173,7 @@ export function ContentEditorWorkspace({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] lg:items-start">
         <StudioCard
           title="Body"
-          description="Write the page or post. Use the toolbar to format text and insert blocks."
+          description="Format text in the toolbar. Use Add block to insert sections."
           padded={false}
         >
           {remountChild(editor, remountKey)}
@@ -177,7 +189,7 @@ export function ContentEditorWorkspace({
 
           <StudioCard
             title="Publishing"
-            description="Type, status, and excerpt."
+            description="Type, status, homepage, and navigation."
             className={cardSurface}
           >
             <ContentFormSidebar
@@ -185,7 +197,16 @@ export function ContentEditorWorkspace({
               kind={contentKind}
               status={sidebar.status}
               excerpt={sidebar.excerpt}
-              onKindChange={setContentKind}
+              entryId={sidebar.entryId}
+              isHomepage={sidebar.isHomepage}
+              showInNav={sidebar.showInNav}
+              navLabel={sidebar.navLabel}
+              currentHomepage={sidebar.currentHomepage ?? null}
+              onKindChange={(kind) => {
+                setContentKind(kind);
+                if (kind === "post") setIsHomepage(false);
+              }}
+              onHomepageChange={setIsHomepage}
             />
           </StudioCard>
         </aside>

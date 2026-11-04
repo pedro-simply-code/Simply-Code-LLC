@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, Code2, MessageSquare, Ruler } from "lucide-react";
+import { CmsDocumentPage } from "~/components/content/cms-document-page";
 import { CtaSection } from "~/components/cta-section";
 import { SiteFooter } from "~/components/site-footer";
-import { SiteNav } from "~/components/site-nav";
+import { SiteNavShell } from "~/components/site-nav-shell";
 import { TeamGrid } from "~/components/team-grid";
 import { TEAM } from "~/content/team";
 import { SITE } from "~/content/site";
@@ -14,6 +15,7 @@ import {
   appPrimaryButtonMarketing,
 } from "~/lib/surface";
 import { cn } from "~/lib/utils";
+import { getPublishedCmsPageOverride } from "~/server/content/cms-site-page";
 import { getPublicAboutTeamSafe } from "~/server/profile/queries";
 
 export const dynamic = "force-dynamic";
@@ -70,12 +72,17 @@ const PROCESS = [
 ];
 
 export default async function AboutPage() {
+  const cms = await getPublishedCmsPageOverride("about");
+  if (cms) {
+    return <CmsDocumentPage entry={cms} />;
+  }
+
   const teamFromDb = await getPublicAboutTeamSafe();
   const teamMembers = teamFromDb ?? TEAM;
   const teamFromStudio = teamFromDb !== null;
   return (
     <>
-      <SiteNav />
+      <SiteNavShell />
 
       <main id="main" className="bg-sc-canvas text-[#15130f]">
         <section className="bg-sc-section-alt border-b border-[#15130f]/10 py-16 lg:py-24">
